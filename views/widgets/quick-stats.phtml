@@ -1,0 +1,39 @@
+<div class="row">
+    <div class="col-6 mb-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="bx bx-box"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="mb-0"><?= \number_format($widget['data']['productCount'] ?? 0) ?></h4>
+                        <small class="text-muted">Products</small>
+                    </div>
+                </div>
+                <a href="<?= $adminUrl('shop/products/') ?>" class="small">View all <i class="bx bx-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 mb-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-info">
+                            <i class="bx bx-user"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="mb-0"><?= \number_format($widget['data']['userCount'] ?? 0) ?></h4>
+                        <small class="text-muted">Users</small>
+                    </div>
+                </div>
+                <a href="<?= $adminUrl('users/') ?>" class="small">View all <i class="bx bx-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+<div class="row">
+    <div class="col-6 col-lg-3 mb-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="bx bx-cart"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="mb-0"><?= \number_format($widget['data']['active_count'] ?? 0) ?></h4>
+                        <small class="text-muted">Active Shop Baskets</small>
+                    </div>
+                </div>
+                <a href="<?= $adminUrl('shop/baskets/') ?>" class="small">View all <i class="bx bx-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3 mb-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="bx bx-pound"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">&pound;<?= \number_format($widget['data']['active_value'] ?? 0, 2) ?></h4>
+                        <small class="text-muted">Active Value</small>
+                    </div>
+                </div>
+                <a href="<?= $adminUrl('shop/baskets/') ?>" class="small">View details <i class="bx bx-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3 mb-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-info">
+                            <i class="bx bx-check-circle"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="mb-0"><?= \number_format($widget['data']['converted_24h'] ?? 0) ?></h4>
+                        <small class="text-muted">Converted (24h)</small>
+                    </div>
+                </div>
+                <a href="<?= $adminUrl('shop/baskets/') ?>" class="small">View all <i class="bx bx-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3 mb-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="bx bx-pound"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">&pound;<?= \number_format($widget['data']['converted_value'] ?? 0, 2) ?></h4>
+                        <small class="text-muted">Converted Value (24h)</small>
+                    </div>
+                </div>
+                <a href="<?= $adminUrl('shop/baskets/') ?>" class="small">View details <i class="bx bx-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
