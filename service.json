@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -32,7 +32,9 @@
   "hooks": {
     "mcp.tools": [
       "Osmium\\Modules\\Admin\\Services\\BrandMcp::tools",
-      "Osmium\\Modules\\Admin\\Services\\DiscountMcp::tools"
+      "Osmium\\Modules\\Admin\\Services\\DiscountMcp::tools",
+      "Osmium\\Modules\\Admin\\Services\\ProductMcp::tools",
+      "Osmium\\Modules\\Admin\\Services\\ShopReportsMcp::tools"
     ],
     "email.samples": [
       "Osmium\\Modules\\Checkout\\Services\\ShopEmailSamples::samples"
