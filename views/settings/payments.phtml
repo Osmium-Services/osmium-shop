@@ -1,0 +1,112 @@
+<link rel="stylesheet" href="<?= $admin['basePath'] ?>../assets/admin/css/settings.css<?= $adminAssetVersion('/assets/admin/css/settings.css') ?>">
+
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop /</span> Payments
+    </h4>
+    <button type="submit" form="settings-form" class="btn btn-primary">
+        <i class="bx bx-save me-1"></i> Save Settings
+    </button>
+</div>
+
+<?php if ($admin['settingsSaved']): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Settings saved successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($admin['settingsError'] ?? false): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= \htmlspecialchars($admin['settingsError'] ?? '') ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<?php
+$externalProviders = $admin['externalProviders'];
+$providerReadinessWarning = $admin['providerReadinessWarning'];
+$providerOptions = $admin['providerOptions'];
+?>
+
+<?php if ($providerReadinessWarning): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bx bx-error-circle me-1"></i>
+        <?= $providerReadinessWarning ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="<?= $adminUrl('settings/payments/') ?>" id="settings-form">
+    <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-credit-card me-2"></i>Payment Provider</h5>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($externalProviders) && !empty($admin['hostedPayments'])): ?>
+                        <?php foreach ($admin['hostedPayments'] as $hosted): ?>
+                            <div class="alert alert-info mb-0">
+                                <i class="bx bx-info-circle me-1"></i>
+                                Payments are taken on the <?= \htmlspecialchars($hosted['label']) ?> hosted page, so there is no provider to choose here.
+                                <?php if ($hosted['settingsRoute']): ?>
+                                    Set it up on its <a href="<?= $adminUrl(\htmlspecialchars($hosted['settingsRoute'])) ?>">settings page</a>.
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php elseif (empty($externalProviders)): ?>
+                        <div class="alert alert-info mb-0">
+                            <i class="bx bx-info-circle me-1"></i>
+                            No payment provider is installed, so checkout takes no payments. Visit the
+                            <a href="<?= $adminUrl('settings/services/store/') ?>">Osmium Store</a>
+                            to install one (for example Stripe or PayPal).
+                        </div>
+                    <?php else: ?>
+                    <div class="mb-0">
+                        <label for="payment_provider" class="form-label fw-semibold">Active Checkout Provider</label>
+                        <select class="form-select" id="payment_provider" name="payment_provider">
+                            <?php foreach ($providerOptions['choices'] as $option): ?>
+                                <option value="<?= \htmlspecialchars($option['value']) ?>"
+                                    <?= $option['selected'] ? 'selected' : '' ?>>
+                                    <?= \htmlspecialchars($option['label']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <?php foreach ($providerOptions['planned'] as $option): ?>
+                                <option value="<?= \htmlspecialchars($option['value']) ?>" disabled>
+                                    <?= \htmlspecialchars($option['label']) ?> (coming soon)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <?php foreach ($externalProviders as $provider): ?>
+            <div class="col-lg-6" data-provider-card="<?= \htmlspecialchars($provider['id']) ?>">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bx bx-credit-card-front me-2"></i><?= \htmlspecialchars($provider['label']) ?></h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">
+                            <?= \htmlspecialchars($provider['label']) ?> is provided by an installed service.
+                            <?php if ($provider['settingsRoute']): ?>
+                                Its credentials and switches are on its
+                                <a href="<?= $adminUrl(\htmlspecialchars($provider['settingsRoute'])) ?>">own settings page</a>.
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</form>
+
+<script src="<?= $admin['basePath'] ?>../assets/admin/js/settings.js<?= $adminAssetVersion('/assets/admin/js/settings.js') ?>"></script>
+<script src="<?= $admin['basePath'] ?>../assets/admin/js/payments.js<?= $adminAssetVersion('/assets/admin/js/payments.js') ?>"></script>

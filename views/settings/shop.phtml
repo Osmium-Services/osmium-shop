@@ -1,0 +1,225 @@
+<link rel="stylesheet" href="<?= $admin['basePath'] ?>../assets/admin/css/settings.css<?= $adminAssetVersion('/assets/admin/css/settings.css') ?>">
+
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop /</span> Settings
+    </h4>
+    <button type="submit" form="settings-form" class="btn btn-primary">
+        <i class="bx bx-save me-1"></i> Save Settings
+    </button>
+</div>
+
+<?php if ($admin['settingsSaved']): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Settings saved successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($admin['settingsError'] ?? false): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= \htmlspecialchars($admin['settingsError'] ?? '') ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="<?= $adminUrl('settings/shop/') ?>" id="settings-form">
+    <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-store me-2"></i>Shop Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="search_enabled" name="search_enabled"
+                                <?= ($admin['config']['shop']['searchEnabled'] ?? false) ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="search_enabled">Enable Product Search</label>
+                        </div>
+                        <div class="form-text">Show search icon in the header navigation</div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="currency" class="form-label fw-semibold">Currency Code</label>
+                            <input type="text" class="form-control" id="currency" name="currency"
+                                value="<?= \htmlspecialchars($admin['config']['shop']['currency'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="currency_sign" class="form-label fw-semibold">Currency Symbol</label>
+                            <input type="text" class="form-control" id="currency_sign" name="currency_sign"
+                                value="<?= \htmlspecialchars($admin['config']['shop']['currencySign'] ?? '') ?>">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tax_rate" class="form-label fw-semibold">Tax Rate (%)</label>
+                            <input type="text" class="form-control" id="tax_rate" name="tax_rate"
+                                value="<?= \htmlspecialchars($admin['config']['shop']['taxRatePercent'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="tax_name" class="form-label fw-semibold">Tax Name</label>
+                            <input type="text" class="form-control" id="tax_name" name="tax_name"
+                                value="<?= \htmlspecialchars($admin['config']['shop']['taxName'] ?? '') ?>">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="country" class="form-label fw-semibold">Country</label>
+                            <input type="text" class="form-control text-uppercase" id="country" name="country"
+                                maxlength="2" pattern="[A-Za-z]{2}" style="max-width: 6em;"
+                                value="<?= \htmlspecialchars($admin['config']['shop']['country'] ?? 'GB') ?>">
+                            <div class="form-text">Two-letter country code, e.g. GB</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delivery_message" class="form-label fw-semibold">Delivery Message</label>
+                        <input type="text" class="form-control" id="delivery_message" name="delivery_message"
+                            value="<?= \htmlspecialchars($admin['config']['shop']['deliveryMessage'] ?? '') ?>">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="basket_abandoned_hours" class="form-label fw-semibold">Basket Abandoned Threshold (hours)</label>
+                        <input type="number" class="form-control settings-session-timeout" id="basket_abandoned_hours" name="basket_abandoned_hours"
+                            min="1" max="168"
+                            value="<?= (int)($admin['config']['shop']['basketAbandonedHours'] ?? 2) ?>">
+                        <div class="form-text">Baskets with no activity for this many hours are marked as abandoned</div>
+                    </div>
+                </div>
+            </div>
+
+            <?php
+            $notify = $admin['notifications'];
+            $smsProvider = $notify['smsProvider'];
+            $smsReady = $notify['smsReady'];
+            ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-bell me-2"></i>Customer Notifications</h5>
+                </div>
+                <div class="card-body">
+                    <p class="form-text mt-0">Choose how customers are told about their order. Production only for texts.</p>
+                    <table class="table table-sm align-middle mb-2">
+                        <thead>
+                            <tr>
+                                <th>Message</th>
+                                <?php foreach ($notify['transports'] as $transportId => $transportLabel): ?>
+                                    <th class="text-center"><?= \htmlspecialchars($transportLabel) ?></th>
+                                <?php endforeach; ?>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($notify['events'] as $eventId => $event): ?>
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold"><?= \htmlspecialchars($event['label']) ?></div>
+                                        <div class="form-text mt-0"><?= \htmlspecialchars($event['help']) ?></div>
+                                    </td>
+                                    <?php foreach ($notify['transports'] as $transportId => $transportLabel): ?>
+                                        <?php $unavailable = $transportId === 'sms' && !$smsReady; ?>
+                                        <td class="text-center">
+                                            <div class="form-check d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox"
+                                                    id="notify_<?= $eventId ?>_<?= $transportId ?>"
+                                                    name="notify_<?= $eventId ?>_<?= $transportId ?>"
+                                                    aria-label="<?= \htmlspecialchars($event['label'] . ' by ' . $transportLabel) ?>"
+                                                    <?= ($notify['settings'][$eventId][$transportId] ?? false) ? 'checked' : '' ?>
+                                                    <?= $unavailable ? 'disabled' : '' ?>>
+                                            </div>
+                                        </td>
+                                    <?php endforeach; ?>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <?php if ($smsProvider === null): ?>
+                        <div class="form-text">No SMS service found, so texts are unavailable. Install one from the Osmium Store to switch them on.</div>
+                    <?php elseif (!$smsReady): ?>
+                        <div class="form-text">
+                            <?= \htmlspecialchars($smsProvider['label']) ?> isn't set up yet, so texts are unavailable.
+                            <?php if (!empty($smsProvider['settingsRoute'])): ?>
+                                <a href="<?= \htmlspecialchars($adminUrl(\preg_replace('#^admin/#', '', (string) $smsProvider['settingsRoute']))) ?>">Open its settings</a>.
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="form-text">Texts are sent through <?= \htmlspecialchars($smsProvider['label']) ?>, which charges for each one. Orders with no phone number are skipped.</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-category me-2"></i>Category Pages</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="category_show_counts" name="category_show_counts"
+                                <?= $admin['config']['shop']['categoryShowCounts'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="category_show_counts">Show Product/Subcategory Counts</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="category_show_summary_text" name="category_show_summary_text"
+                                <?= $admin['config']['shop']['categoryShowSummaryText'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="category_show_summary_text">Show Summary Text</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-0">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="category_show_cta" name="category_show_cta"
+                                <?= $admin['config']['shop']['categoryShowCallToAction'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="category_show_cta">Show Call to Action</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-package me-2"></i>Product Pages</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="product_show_summary" name="product_show_summary"
+                                <?= $admin['config']['shop']['productShowSummary'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="product_show_summary">Show Summary</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="product_show_price_exc_tax" name="product_show_price_exc_tax"
+                                <?= $admin['config']['shop']['productShowPriceExcTax'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="product_show_price_exc_tax">Show Price Excluding Tax</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-0">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="product_show_delivery_message" name="product_show_delivery_message"
+                                <?= $admin['config']['shop']['productShowDeliveryMessage'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-semibold" for="product_show_delivery_message">Show Delivery Message</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="<?= $admin['basePath'] ?>../assets/admin/js/settings.js<?= $adminAssetVersion('/assets/admin/js/settings.js') ?>"></script>
