@@ -1,0 +1,31 @@
+{
+    "id": "osmium-shop",
+    "name": "Osmium Shop",
+    "version": "0.1.0",
+    "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
+    "category": "shop",
+    "author": {
+        "name": "Gavin Cox"
+    },
+    "license": "proprietary",
+    "requires": {
+        "osmium": ">=1.0.0",
+        "php": ">=8.1",
+        "services": []
+    },
+    "autoload": [],
+    "migrations": "migrations/",
+    "admin": {
+        "menu": {
+            "section": "Shop",
+            "group": {
+                "id": "shop",
+                "label": "Shop",
+                "icon": "bx bx-store",
+                "color": "#dc3545",
+                "order": 30
+            },
+            "items": []
+        }
+    }
+}
