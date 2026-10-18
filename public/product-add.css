@@ -1,0 +1,67 @@
+/* Add product page: wizard steps */
+.wizard-steps {
+    gap: 0;
+}
+
+.wizard-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.wizard-step.active,
+.wizard-step.completed {
+    opacity: 1;
+}
+
+.wizard-step .step-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s;
+}
+
+.wizard-step.active .step-number {
+    background: #696cff;
+    color: white;
+}
+
+.wizard-step.completed .step-number {
+    background: #71dd37;
+    color: white;
+}
+
+.wizard-step .step-label {
+    font-size: 0.75rem;
+    color: #697a8d;
+}
+
+.wizard-connector {
+    width: 60px;
+    height: 2px;
+    background: #e9ecef;
+    margin: 0 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.wizard-pane {
+    display: none;
+}
+
+.wizard-pane.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}

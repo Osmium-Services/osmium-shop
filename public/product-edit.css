@@ -1,0 +1,123 @@
+/* Product edit page: tab strip and linked-product thumbnails, Images tab */
+/* Eight tabs do not fit a narrow screen. Wrap onto further rows rather
+   than scrolling sideways - a scroll strip hides the tabs past the edge
+   with no visible cue that there are more. */
+.product-tabs { flex-wrap: wrap; row-gap: .35rem; column-gap: .25rem; }
+.product-tabs .nav-link { white-space: nowrap; }
+
+/* Touch targets: WCAG 2.5.5 asks for 44x44 CSS px, which also matches the
+   Apple HIG minimum. Let the strip wrap onto more rows rather than
+   shrinking the targets to fit fewer. */
+@media (max-width: 767.98px) {
+    .product-tabs { row-gap: .5rem; }
+    .product-tabs .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding-left: .9rem;
+        padding-right: .9rem;
+    }
+}
+
+/* Linked-product thumbnail on an option value: small inline by default,
+   enlarged on hover so the exact product can be verified without leaving
+   the page. */
+.linked-thumb-wrap { position: relative; display: inline-block; }
+.linked-thumb-preview {
+    display: none;
+    position: absolute;
+    z-index: 20;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    padding: .5rem;
+}
+.linked-thumb-wrap:hover .linked-thumb-preview { display: block; }
+
+/* Fallback shown when the linked product has no image on disk. */
+.linked-thumb-placeholder-small {
+    display: none;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    border-radius: .25rem;
+    background: #e9ecef;
+}
+.linked-thumb-placeholder-small i { font-size: 14px; color: #6c757d; }
+.linked-thumb-wrap.linked-thumb-missing .linked-thumb-placeholder-small { display: inline-flex; }
+
+.linked-thumb-placeholder-preview {
+    display: none;
+    position: absolute;
+    z-index: 20;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 160px;
+    height: 160px;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+.linked-thumb-placeholder-preview i { font-size: 2.5rem; color: #adb5bd; }
+.linked-thumb-wrap.linked-thumb-missing:hover .linked-thumb-placeholder-preview { display: flex; }
+
+/* Images tab */
+.image-drop-zone {
+    border: 2px dashed #d9dee3;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Transparent so the card shows through. Combined with the multiply
+       blend on .preview-image below, product shots on a white background
+       sit flush against the panel instead of in a white box. */
+    background: transparent;
+}
+.image-drop-zone:hover,
+.image-drop-zone.drag-active {
+    border-color: #696cff;
+    background-color: rgba(105, 108, 255, 0.04);
+}
+.image-drop-zone.uploading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+.image-drop-zone .preview-image {
+    max-width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+    border-radius: 4px;
+    /* Same trick already used on the product list, best-sellers and trade
+       views: white pixels blend away against a lighter backdrop, so a
+       product shot with a white background loses its visible edges. */
+    mix-blend-mode: multiply;
+}
+.image-drop-zone .btn-delete-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+}
+.image-drop-zone .empty-state i {
+    font-size: 2.5rem;
+    color: #a1acb8;
+}
