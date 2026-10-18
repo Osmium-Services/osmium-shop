@@ -1,111 +1,135 @@
 {
-    "id": "osmium-shop",
-    "name": "Osmium Shop",
-    "version": "0.6.0",
-    "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
-    "category": "shop",
-    "author": {
-        "name": "Gavin Cox"
+  "id": "osmium-shop",
+  "name": "Osmium Shop",
+  "version": "0.7.0",
+  "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
+  "category": "shop",
+  "author": {
+    "name": "Gavin Cox"
+  },
+  "license": "proprietary",
+  "requires": {
+    "osmium": ">=1.0.0",
+    "php": ">=8.1",
+    "services": []
+  },
+  "autoload": [],
+  "migrations": "migrations/",
+  "modules": {
+    "checkout": "modules/checkout",
+    "shop": "modules/shop"
+  },
+  "api": {
+    "routes": {
+      "api/checkout-basket": "api/basket-action.php",
+      "api/checkout": "api/checkout-action.php",
+      "api/search": "modules/shop/controllers/search-action.php"
     },
-    "license": "proprietary",
-    "requires": {
-        "osmium": ">=1.0.0",
-        "php": ">=8.1",
-        "services": []
-    },
-    "autoload": [],
-    "migrations": "migrations/",
-    "modules": {
-        "checkout": "modules/checkout",
-        "shop": "modules/shop"
-    },
-    "api": {
-        "routes": {
-            "api/checkout-basket": "api/basket-action.php",
-            "api/checkout": "api/checkout-action.php",
-            "api/search": "modules/shop/controllers/search-action.php"
-        },
-        "patterns": {
-            "#^api/ai/products/(?<slug>[A-Za-z0-9\\-/]+)\\.(?<format>md|json)$#": "modules/shop/controllers/ai-product-spec.php"
-        }
-    },
-    "hooks": {
-        "mcp.tools": [
-            "Osmium\\Modules\\Admin\\Services\\BrandMcp::tools"
-        ]
-    },
-    "admin": {
-        "models": {
-            "status": [
-                "Osmium\\Modules\\Admin\\Models\\Status",
-                "productstatus"
-            ],
-            "brand": [
-                "Osmium\\Modules\\Admin\\Models\\Brand",
-                "productbrands"
-            ],
-            "basket": [
-                "Osmium\\Modules\\Admin\\Models\\Basket",
-                "checkout_baskets"
-            ]
-        },
-        "routes": {
-            "admin/shop/statuses": {
-                "controller": "controllers/StatusesController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
-                "method": "index",
-                "title": "Statuses"
-            },
-            "admin/shop/statuses/edit*": {
-                "controller": "controllers/StatusesController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
-                "method": "edit",
-                "title": "Edit Status"
-            },
-            "admin/shop/statuses/action": {
-                "controller": "controllers/StatusesController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
-                "method": "action"
-            },
-            "admin/shop/brands": {
-                "controller": "controllers/BrandsController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
-                "method": "index",
-                "title": "Brands"
-            },
-            "admin/shop/brands/edit*": {
-                "controller": "controllers/BrandsController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
-                "method": "edit",
-                "title": "Edit Brand"
-            },
-            "admin/shop/brands/action": {
-                "controller": "controllers/BrandsController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
-                "method": "action"
-            },
-            "admin/shop/baskets": {
-                "controller": "controllers/BasketsController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\BasketsController",
-                "method": "index",
-                "title": "Baskets"
-            },
-            "admin/shop/baskets/action": {
-                "controller": "controllers/BasketsController.php",
-                "class": "Osmium\\Modules\\Admin\\Controllers\\BasketsController",
-                "method": "action"
-            }
-        },
-        "menu": {
-            "section": "Shop",
-            "group": {
-                "id": "shop",
-                "label": "Shop",
-                "icon": "bx bx-store",
-                "color": "#dc3545",
-                "order": 30
-            },
-            "items": []
-        }
+    "patterns": {
+      "#^api/ai/products/(?<slug>[A-Za-z0-9\\-/]+)\\.(?<format>md|json)$#": "modules/shop/controllers/ai-product-spec.php"
     }
+  },
+  "hooks": {
+    "mcp.tools": [
+      "Osmium\\Modules\\Admin\\Services\\BrandMcp::tools"
+    ]
+  },
+  "admin": {
+    "models": {
+      "status": [
+        "Osmium\\Modules\\Admin\\Models\\Status",
+        "productstatus"
+      ],
+      "brand": [
+        "Osmium\\Modules\\Admin\\Models\\Brand",
+        "productbrands"
+      ],
+      "basket": [
+        "Osmium\\Modules\\Admin\\Models\\Basket",
+        "checkout_baskets"
+      ],
+      "productCategory": [
+        "Osmium\\Modules\\Admin\\Models\\ProductCategory",
+        "productcategories"
+      ],
+      "productCategoryAssignment": [
+        "Osmium\\Modules\\Admin\\Models\\ProductCategoryAssignment",
+        "products_productcategories"
+      ]
+    },
+    "routes": {
+      "admin/shop/statuses": {
+        "controller": "controllers/StatusesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+        "method": "index",
+        "title": "Statuses"
+      },
+      "admin/shop/statuses/edit*": {
+        "controller": "controllers/StatusesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+        "method": "edit",
+        "title": "Edit Status"
+      },
+      "admin/shop/statuses/action": {
+        "controller": "controllers/StatusesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+        "method": "action"
+      },
+      "admin/shop/brands": {
+        "controller": "controllers/BrandsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+        "method": "index",
+        "title": "Brands"
+      },
+      "admin/shop/brands/edit*": {
+        "controller": "controllers/BrandsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+        "method": "edit",
+        "title": "Edit Brand"
+      },
+      "admin/shop/brands/action": {
+        "controller": "controllers/BrandsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+        "method": "action"
+      },
+      "admin/shop/baskets": {
+        "controller": "controllers/BasketsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\BasketsController",
+        "method": "index",
+        "title": "Baskets"
+      },
+      "admin/shop/baskets/action": {
+        "controller": "controllers/BasketsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\BasketsController",
+        "method": "action"
+      },
+      "admin/shop/categories": {
+        "controller": "controllers/ProductCategoriesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductCategoriesController",
+        "method": "index",
+        "title": "Categories"
+      },
+      "admin/shop/categories/action": {
+        "controller": "controllers/ProductCategoriesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductCategoriesController",
+        "method": "action"
+      },
+      "admin/shop/products/categories/action": {
+        "controller": "controllers/ProductCategoryAssignmentController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductCategoryAssignmentController",
+        "method": "action"
+      }
+    },
+    "menu": {
+      "section": "Shop",
+      "group": {
+        "id": "shop",
+        "label": "Shop",
+        "icon": "bx bx-store",
+        "color": "#dc3545",
+        "order": 30
+      },
+      "items": []
+    }
+  }
 }
