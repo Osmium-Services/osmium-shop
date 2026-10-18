@@ -1,0 +1,129 @@
+<!-- Sales Tab -->
+<div class="tab-pane fade" id="sales-tab" role="tabpanel">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Pricing -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-pound me-2"></i>Pricing</h5>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-call="showPriceHistory">
+                        <i class="bx bx-history me-1"></i> History
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="price_exc_tax" class="form-label fw-semibold">Price (ex <?= $shop['taxName'] ?>)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">&pound;</span>
+                                <input type="number" step="0.01" class="form-control" id="price_exc_tax" name="price_exc_tax"
+                                       value="<?= \htmlspecialchars($admin['product']['price_exc_tax'] ?? '') ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="price_inc_tax" class="form-label fw-semibold">Price (inc <?= $shop['taxName'] ?>)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">&pound;</span>
+                                <input type="number" step="0.01" class="form-control" id="price_inc_tax"
+                                       value="<?= \number_format($admin['product']['price_exc_tax'] * (1 + ($shop['taxRate'] / 100)), 2) ?>">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="rrp_exc_tax" class="form-label fw-semibold">RRP (ex <?= $shop['taxName'] ?>)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">&pound;</span>
+                                <input type="number" step="0.01" class="form-control" id="rrp_exc_tax" name="rrp_exc_tax"
+                                       value="<?= \htmlspecialchars($admin['product']['rrp_exc_tax'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="rrp_inc_tax" class="form-label fw-semibold">RRP (inc <?= $shop['taxName'] ?>)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">&pound;</span>
+                                <input type="number" step="0.01" class="form-control" id="rrp_inc_tax"
+                                       value="<?= \number_format(($admin['product']['rrp_exc_tax'] ?: 0) * (1 + ($shop['taxRate'] / 100)), 2) ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="custom_offer" class="form-label fw-semibold">Custom Offer Text</label>
+                            <input type="text" class="form-control" id="custom_offer" name="custom_offer"
+                                   value="<?= \htmlspecialchars($admin['product']['custom_offer'] ?? '') ?>">
+                            <div class="form-text">e.g. "Buy 2 Save 10%"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Product -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-link me-2"></i>Related Product</h5>
+                </div>
+                <div class="card-body">
+                    <label for="kit_product_input" class="form-label fw-semibold">See Also</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="kit_product_input" list="kit_product_list"
+                               placeholder="Search products..." value="<?= \htmlspecialchars($edit['kitDisplayValue']) ?>">
+                        <button type="button" class="btn btn-outline-secondary" data-call="clearKitProduct" title="Clear">
+                            <i class="bx bx-x"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" id="kit_id" name="kit_id" value="<?= $admin['kitId'] ?: '' ?>">
+                    <datalist id="kit_product_list">
+                        <?php foreach ($edit['otherProducts'] as $p): ?>
+                            <option data-id="<?= $p['id'] ?>" value="<?= \htmlspecialchars(($p['brand_name'] ?? '') . ' ' . ($p['model_name'] ?? '')) ?>">
+                        <?php endforeach; ?>
+                    </datalist>
+                    <div class="form-text">Link to a related product (e.g. a kit) that will appear as "See also" on the product page.</div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-stats me-2"></i>Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="status_input" class="form-label fw-semibold">Product Status</label>
+                            <input type="text" class="form-control" id="status_input" list="status_list"
+                                   value="<?= \htmlspecialchars($admin['currentStatus']['descr_long'] ?? '') ?>" required>
+                            <input type="hidden" id="status_id" name="status_id" value="<?= $admin['product']['status_id'] ?>">
+                            <datalist id="status_list">
+                                <?php foreach ($admin['statuses'] as $status): ?>
+                                    <option data-id="<?= $status['id'] ?>" data-restocking="<?= $status['restocking'] ?>" value="<?= \htmlspecialchars($status['descr_long'] ?? '') ?>">
+                                <?php endforeach; ?>
+                            </datalist>
+                        </div>
+                        <div class="col-md-6 mb-3" id="restock_date_wrapper" style="<?= $edit['currentRestocking'] ? '' : 'display: none;' ?>">
+                            <label for="restock_at" class="form-label fw-semibold">Expected Restock Date</label>
+                            <input type="date" class="form-control" id="restock_at" name="restock_at"
+                                   value="<?= $admin['product']['restock_at'] ? \htmlspecialchars($admin['product']['restock_at'] ?? '') : '' ?>">
+                            <small class="text-muted">Shown to customers on the product page</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-package me-2"></i>Shipping</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="packed_weight" class="form-label fw-semibold">Packed Weight (kg)</label>
+                            <input type="number" step="0.01" class="form-control" id="packed_weight" name="packed_weight"
+                                   value="<?= \htmlspecialchars($admin['product']['packed_weight'] ?? '') ?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- End Sales Tab -->

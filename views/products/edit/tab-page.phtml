@@ -1,0 +1,103 @@
+<!-- Page Tab -->
+<div class="tab-pane fade" id="page-tab" role="tabpanel">
+    <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
+    <input type="hidden" name="id" value="<?= $admin['product']['id'] ?>">
+
+    <?php if (!empty($admin['productPage'])): ?>
+    <?php $productPage = $admin['productPage']; ?>
+    <input type="hidden" name="page_id" value="<?= $productPage['page_id'] ?>">
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-file me-2"></i>Page SEO Settings</h5>
+                </div>
+                <div class="card-body">
+                    <!-- URL -->
+                    <div class="mb-3">
+                        <label for="page_url" class="form-label fw-semibold">URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text">/</span>
+                            <input type="text" class="form-control" id="page_url" name="page_url"
+                                   value="<?= \htmlspecialchars($productPage['url'] ?? '') ?>">
+                            <?php if ($admin['urlTrailingSlash'] ?? false): ?>
+                                <span class="input-group-text">/</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="form-text">Changing the URL will automatically create a redirect from the old URL.</div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="page_title" class="form-label fw-semibold">Title</label>
+                        <input type="text" class="form-control" id="page_title" name="page_title"
+                               value="<?= \htmlspecialchars($productPage['title'] ?? '') ?>">
+                        <div class="form-text">The page title shown in browser tabs and search results.</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="page_description" class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="page_description" name="page_description" rows="3"><?= \htmlspecialchars($productPage['description'] ?? '') ?></textarea>
+                        <div class="form-text">Meta description for search engine results.</div>
+                    </div>
+
+                    <!-- Parent Page -->
+                    <div class="mb-3">
+                        <label for="parentPageSearch" class="form-label fw-semibold">Parent Page</label>
+                        <input type="text" class="form-control" id="parentPageSearch" list="parentPagesList"
+                               placeholder="Type to search pages...">
+                        <datalist id="parentPagesList">
+                            <?php foreach ($admin['parentPages'] as $p): ?>
+                                <option value="/<?= \htmlspecialchars($p['url'] ?? '') ?>/ - <?= \htmlspecialchars($p['title'] ?? '') ?>" data-id="<?= $p['id'] ?>">
+                            <?php endforeach; ?>
+                        </datalist>
+                        <input type="hidden" id="parentPageId" name="parent_page_id" value="<?= $productPage['parent_page_id'] ?? '' ?>">
+                        <div class="form-text">Optional: Set a parent page for breadcrumb navigation</div>
+                    </div>
+
+                    <!-- Robots -->
+                    <div class="mb-3">
+                        <label for="page_robots" class="form-label fw-semibold">Robots</label>
+                        <select class="form-select" id="page_robots" name="page_robots">
+                            <option value="index,follow" <?= $edit['pageRobots'] === 'index,follow' ? 'selected' : '' ?>>Allow indexing and follow links</option>
+                            <option value="noindex,follow" <?= $edit['pageRobots'] === 'noindex,follow' ? 'selected' : '' ?>>Block indexing, follow links</option>
+                            <option value="index,nofollow" <?= $edit['pageRobots'] === 'index,nofollow' ? 'selected' : '' ?>>Allow indexing, don't follow links</option>
+                            <option value="noindex,nofollow" <?= $edit['pageRobots'] === 'noindex,nofollow' ? 'selected' : '' ?>>Block indexing and links</option>
+                        </select>
+                        <div class="form-text">Control how search engines index and follow links on this page.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Page Info</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Live URL:</strong>
+                        <a href="/<?= \htmlspecialchars($productPage['url'] ?? '') ?>/" target="_blank">
+                            /<?= \htmlspecialchars($productPage['url'] ?? '') ?>/ <i class="bx bx-link-external"></i>
+                        </a>
+                    </p>
+                    <p class="mb-0"><strong>Page ID:</strong> <?= $productPage['page_id'] ?></p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bx bx-info-circle me-1"></i>
+                <strong>Tip:</strong> Use descriptive URLs with relevant keywords for better SEO. Keep them short and readable.
+            </div>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="alert alert-info">
+        <i class="bx bx-info-circle me-2"></i>
+        No product page is linked to this product.
+    </div>
+    <?php endif; ?>
+</div><!-- End Page Tab -->

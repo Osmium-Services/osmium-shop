@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -72,6 +72,10 @@
       "productPriceHistory": [
         "Osmium\\Modules\\Admin\\Models\\ProductPriceHistory",
         "product_price_history"
+      ],
+      "product": [
+        "Osmium\\Modules\\Admin\\Models\\Product",
+        "products"
       ]
     },
     "routes": {
@@ -185,6 +189,41 @@
         "controller": "controllers/ProductImagesController.php",
         "class": "Osmium\\Modules\\Admin\\Controllers\\ProductImagesController",
         "method": "action"
+      },
+      "admin/shop/products": {
+        "controller": "controllers/ProductsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
+        "method": "index",
+        "title": "Products"
+      },
+      "admin/shop/products/action": {
+        "controller": "controllers/ProductsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
+        "method": "action"
+      },
+      "admin/shop/products/edit*": {
+        "controller": "controllers/ProductsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
+        "method": "edit",
+        "title": "Edit Product"
+      },
+      "admin/shop/products/add": {
+        "controller": "controllers/ProductsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
+        "method": "add",
+        "title": "Add Product"
+      },
+      "admin/shop/products/export": {
+        "controller": "controllers/ProductsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
+        "method": "export",
+        "title": "Export Products"
+      },
+      "admin/shop/products/import": {
+        "controller": "controllers/ProductsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
+        "method": "import",
+        "title": "Import Products"
       }
     },
     "menu": {

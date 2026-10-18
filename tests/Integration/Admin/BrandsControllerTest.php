@@ -52,8 +52,9 @@ class BrandsControllerTest extends DatabaseTestCase
         $this->runTag = 'ZQ' . \strtoupper(\substr(\uniqid(), -6));
 
         $all = (new FileSystem())->readJSONFile('app/core/admin/config/models/models.json.php');
-        $models = (object) \array_intersect_key((array) $all, \array_flip(['changelog', 'listRows', 'product']));
+        $models = (object) \array_intersect_key((array) $all, \array_flip(['changelog', 'listRows']));
         $this->model = new OsmiumAdminModel($this->db, $models);
+        $this->model->addModel($this->db, 'product', \Osmium\Modules\Admin\Models\Product::class, 'products'); // The shop service's model
         $this->model->addModel($this->db, 'brand', \Osmium\Modules\Admin\Models\Brand::class, 'productbrands'); // The shop service's model
 
         $this->auth = new class (

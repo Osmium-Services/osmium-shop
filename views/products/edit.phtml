@@ -1,0 +1,359 @@
+<?php $edit = $admin['edit']; ?>
+<link rel="stylesheet" href="/assets/admin/css/product-edit.css<?= $adminAssetVersion('/assets/admin/css/product-edit.css') ?>">
+
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop / <a href="<?= $adminUrl('shop/products/') ?>">Products</a> /</span> Edit
+    </h4>
+    <div>
+        <a href="/<?= \htmlspecialchars($admin['productModel']->productStub) ?>/" class="btn btn-outline-secondary me-2" target="_blank">
+            <i class="bx bx-link-external me-1"></i> View on Site
+        </a>
+        <button type="submit" form="product-form" class="btn btn-primary">
+            <i class="bx bx-save me-1"></i> Save Changes
+        </button>
+    </div>
+</div>
+
+<?php if ($admin['productSaved']): ?>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    Product saved successfully!
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<?php endif; ?>
+
+<!-- Product Title -->
+<div class="d-flex align-items-center mb-3">
+    <h5 class="mb-0">
+        <i class="bx bx-package me-2 text-primary"></i>
+        <?= \htmlspecialchars(($admin['currentBrand']['name'] ?? '') . ' ' . $admin['product']['model_name']) ?>
+    </h5>
+    <span class="badge bg-label-secondary ms-3"><?= \htmlspecialchars($admin['product']['reference'] ?? '') ?></span>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4 product-tabs" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#page-tab" role="tab">
+            <i class="bx bx-file me-1"></i> Page
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#details-tab" role="tab">
+            <i class="bx bx-detail me-1"></i> Details
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#sales-tab" role="tab">
+            <i class="bx bx-pound me-1"></i> Sales
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#options-tab" role="tab">
+            <i class="bx bx-list-ul me-1"></i> Options
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#images-tab" role="tab">
+            <i class="bx bx-image me-1"></i> Images
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#description-tab" role="tab">
+            <i class="bx bx-text me-1"></i> Descriptions
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" data-bs-toggle="tab" href="#technical-tab" role="tab">
+            <i class="bx bx-cog me-1"></i> Technical
+        </a>
+    </li>
+</ul>
+
+<form method="POST" action="<?= $adminUrl('shop/products/edit/') ?>" id="product-form">
+<div class="tab-content">
+
+<?php include __DIR__ . '/edit/tab-page.phtml'; ?>
+
+<?php include __DIR__ . '/edit/tab-details.phtml'; ?>
+
+<?php include __DIR__ . '/edit/tab-sales.phtml'; ?>
+
+<?php include __DIR__ . '/edit/tab-options.phtml'; ?>
+
+<?php include __DIR__ . '/edit/tab-images.phtml'; ?>
+
+<?php include __DIR__ . '/edit/tab-description.phtml'; ?>
+
+<?php include __DIR__ . '/edit/tab-technical.phtml'; ?>
+
+</div><!-- End tab-content -->
+</form>
+
+<!-- Copy Technical Content Modal -->
+<div class="modal fade" id="copyTechnicalModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bx bx-copy me-2"></i>Copy <span id="copyTechnicalFieldName">content</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning py-2 mb-3">
+                    <i class="bx bx-info-circle me-1"></i>
+                    <strong>Warning:</strong> This will replace the current content.
+                </div>
+                <div class="mb-3">
+                    <label for="copyTechnicalSourceProduct" class="form-label">Select Source Product</label>
+                    <input type="text" class="form-control" id="copyTechnicalSourceProduct"
+                           placeholder="Search for a product...">
+                    <input type="hidden" id="copyTechnicalSourceProductId">
+                    <input type="hidden" id="copyTechnicalField">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="copyTechnicalConfirm">
+                    <i class="bx bx-copy me-1"></i> Copy Content
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Separate datalists for each field (only products with content) -->
+<datalist id="productListTechspec">
+<?php foreach ($edit['otherProductsWithTechspec'] as $prod): ?>
+    <option data-id="<?= $prod['id'] ?>" value="<?= \htmlspecialchars(($prod['brand_name'] ?? '') . ' ' . ($prod['model_name'] ?? '')) ?>">
+<?php endforeach; ?>
+</datalist>
+
+<datalist id="productListFaq">
+<?php foreach ($edit['otherProductsWithFaq'] as $prod): ?>
+    <option data-id="<?= $prod['id'] ?>" value="<?= \htmlspecialchars(($prod['brand_name'] ?? '') . ' ' . ($prod['model_name'] ?? '')) ?>">
+<?php endforeach; ?>
+</datalist>
+
+<!-- Price History Modal -->
+<div class="modal fade" id="priceHistoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bx bx-history me-2"></i>Price History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Old Price <small class="text-muted fw-normal">(ex VAT)</small></th>
+                                <th>New Price <small class="text-muted fw-normal">(ex VAT)</small></th>
+                                <th>Source</th>
+                                <th>User</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="priceHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<?= $cspNonce ?>">window.productEditConfig = <?= \json_encode($admin['editConfig'], JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
+
+<!-- JsBarcode library -->
+<script src="/assets/admin/vendor/js/JsBarcode.all.min.js<?= $adminAssetVersion('/assets/admin/vendor/js/JsBarcode.all.min.js') ?>"></script>
+
+<script src="/assets/admin/js/product-edit.js<?= $adminAssetVersion('/assets/admin/js/product-edit.js') ?>"></script>
+
+<!-- Product Images -->
+<script src="/assets/admin/js/product-images.js<?= $adminAssetVersion('/assets/admin/js/product-images.js') ?>"></script>
+<script src="/assets/admin/js/product-edit-images.js<?= $adminAssetVersion('/assets/admin/js/product-edit-images.js') ?>"></script>
+
+<!-- PDF Upload/Delete -->
+<script src="/assets/admin/js/product-edit-pdfs.js<?= $adminAssetVersion('/assets/admin/js/product-edit-pdfs.js') ?>"></script>
+
+<!-- Option Type Modal -->
+<div class="modal fade" id="optionTypeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="optionTypeModalTitle">Add Option Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="optionTypeId">
+                <div class="mb-3">
+                    <label for="optionTypeLabel" class="form-label">Label</label>
+                    <input type="text" class="form-control" id="optionTypeLabel" placeholder="e.g. Size, Colour, Units">
+                </div>
+                <div class="mb-3">
+                    <label for="optionTypeDefault" class="form-label">Default Option</label>
+                    <input type="text" class="form-control" id="optionTypeDefault" placeholder="e.g. Standard, No">
+                </div>
+                <div class="mb-3">
+                    <label for="optionTypeDefaultLinkedProduct" class="form-label">Product Behind Default Option (optional)</label>
+                    <input type="text" class="form-control" id="optionTypeDefaultLinkedProduct" list="productList" placeholder="Search for a product...">
+                    <input type="hidden" id="optionTypeDefaultLinkedProductId">
+                    <div class="form-text">The product the customer gets if they keep the default, so its stock can be checked</div>
+                </div>
+                <div class="mb-3">
+                    <label for="optionTypeLinkedProduct" class="form-label">Linked Product (optional)</label>
+                    <input type="text" class="form-control" id="optionTypeLinkedProduct" list="productList" placeholder="Search for a product...">
+                    <input type="hidden" id="optionTypeLinkedProductId">
+                    <div class="form-text">Link this option to another product (e.g. an accessory)</div>
+                </div>
+                <div class="mb-3">
+                    <label for="optionTypeLinkedDescr" class="form-label">Linked Product Description</label>
+                    <textarea class="form-control" id="optionTypeLinkedDescr" rows="3" maxlength="200" placeholder="Description shown with linked product"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="optionTypeLinkedImageSlot" class="form-label">Linked Image for Default Option (optional)</label>
+                    <select class="form-select" id="optionTypeLinkedImageSlot">
+                        <option value="">None</option>
+                        <?php foreach ($edit['optionImageSlots'] as $imageSlot): ?>
+                            <option value="<?= $imageSlot['slot'] ?>"><?= $imageSlot['label'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="form-text">Selecting the default option (above) on the product page will swap the main image to this one</div>
+                </div>
+                <div class="mb-3">
+                    <label for="optionTypeDependsOnType" class="form-label">Only show when... (optional)</label>
+                    <select class="form-select" id="optionTypeDependsOnType">
+                        <option value="">Always show</option>
+                    </select>
+                    <div id="optionTypeDependsOnValues" class="mt-2"></div>
+                    <div class="form-text">Hides this whole option until the shopper picks one of the checked values above</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="optionTypeSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product datalist for linked product selection -->
+<datalist id="productList">
+<?php foreach ($admin['allProducts'] ?? [] as $prod): ?>
+    <option data-id="<?= $prod['id'] ?>" data-thumb="<?= \htmlspecialchars($prod['thumbnail'] ?? '') ?>" value="<?= \htmlspecialchars(($prod['brand_name'] ?? '') . ' ' . ($prod['model_name'] ?? '')) ?>">
+<?php endforeach; ?>
+</datalist>
+
+<!-- Option Value Modal -->
+<div class="modal fade" id="optionValueModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="optionValueModalTitle">Add Option Value</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="optionValueId">
+                <input type="hidden" id="optionValueTypeId">
+                <div class="mb-3">
+                    <label for="optionValueDescr" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="optionValueDescr" placeholder="e.g. Large, Red, 5 Pack">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="optionValuePremium" class="form-label">Premium +/- (&pound;)</label>
+                        <input type="number" step="0.01" class="form-control" id="optionValuePremium" value="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="optionValueRrp" class="form-label">RRP (&pound;)</label>
+                        <input type="number" step="0.01" class="form-control" id="optionValueRrp" value="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="optionValueWeight" class="form-label">Weight +/- (kg)</label>
+                        <input type="number" step="0.01" class="form-control" id="optionValueWeight" value="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="optionValueRef" class="form-label">Reference / SKU</label>
+                        <input type="text" class="form-control" id="optionValueRef">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="optionValueLinkedProduct" class="form-label">Linked Product (optional)</label>
+                    <input type="text" class="form-control" id="optionValueLinkedProduct" list="productList" placeholder="Search for a product...">
+                    <input type="hidden" id="optionValueLinkedProductId">
+                    <div class="form-text">Link this value to a real product (e.g. this is a specific charge controller)</div>
+                </div>
+                <div class="mb-3">
+                    <label for="optionValueLinkedImageSlot" class="form-label">Linked Image (optional)</label>
+                    <select class="form-select" id="optionValueLinkedImageSlot">
+                        <option value="">None</option>
+                        <?php foreach ($edit['optionImageSlots'] as $imageSlot): ?>
+                            <option value="<?= $imageSlot['slot'] ?>" data-thumb="<?= \htmlspecialchars($imageSlot['thumb']) ?>"><?= $imageSlot['label'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="form-text">Selecting this value on the product page will swap the main image to this one</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="optionValueSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Copy Options Modal -->
+<div class="modal fade" id="copyOptionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bx bx-copy me-2"></i>Copy Options from Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning py-2 mb-3">
+                    <i class="bx bx-info-circle me-1"></i>
+                    <strong>Warning:</strong> This will replace all existing options.
+                </div>
+                <div class="mb-3">
+                    <label for="copySourceProduct" class="form-label">Select Source Product</label>
+                    <input type="text" class="form-control" id="copySourceProduct"
+                           list="productListCopy" placeholder="Search for a product...">
+                    <input type="hidden" id="copySourceProductId">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="copyOptionsConfirm">
+                    <i class="bx bx-copy me-1"></i> Copy Options
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<datalist id="productListCopy">
+<?php foreach ($edit['otherProductsWithOptions'] as $prod): ?>
+    <option data-id="<?= $prod['id'] ?>" value="<?= \htmlspecialchars(($prod['brand_name'] ?? '') . ' ' . ($prod['model_name'] ?? '')) ?>">
+<?php endforeach; ?>
+</datalist>
+
+<!-- Product Options Management -->
+<script src="/assets/admin/js/product-edit-options.js<?= $adminAssetVersion('/assets/admin/js/product-edit-options.js') ?>"></script>
+
+<script src="/assets/admin/js/product-edit-editors.js<?= $adminAssetVersion('/assets/admin/js/product-edit-editors.js') ?>"></script>
+
+<!-- Parent Page Datalist Handler -->
+<script src="/assets/admin/js/product-edit-page.js<?= $adminAssetVersion('/assets/admin/js/product-edit-page.js') ?>"></script>
+
+<!-- Copy Technical Content functionality -->
+<script src="/assets/admin/js/product-edit-copy.js<?= $adminAssetVersion('/assets/admin/js/product-edit-copy.js') ?>"></script>
+
+<!-- Presence Tracking -->
+<script src="/assets/admin/js/product-edit-presence.js<?= $adminAssetVersion('/assets/admin/js/product-edit-presence.js') ?>"></script>

@@ -1,0 +1,145 @@
+<!-- Description Tab -->
+<div class="tab-pane fade" id="description-tab" role="tabpanel">
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Main Description -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-text me-2"></i>Main Description</h5>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" id="descr" name="descr" rows="10"><?= \htmlspecialchars($admin['product']['descr'] ?? '') ?></textarea>
+                    <div class="d-flex align-items-center gap-2 mt-2" id="descr-image-row">
+                        <img src="/assets/images<?= \htmlspecialchars($edit['descriptionImages']['slots'][1]['path'] ?? '') ?>"
+                             alt="Description 1 image"
+                             class="img-thumbnail descr-preview-img"
+                             style="width: 64px; height: 64px; object-fit: cover;"
+                             data-img-fallback="src" data-fallback-src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22%3E%3Crect fill=%22%23f0f0f0%22 width=%2264%22 height=%2264%22/%3E%3C/svg%3E">
+                        <div class="input-group input-group-sm flex-grow-1">
+                            <select class="form-select descr-image-quick-select" style="flex: 0 0 auto; width: 110px;">
+                                <option value="">Image...</option>
+                                <?php foreach ($edit['descriptionImages']['choices'] as $path => $name): ?>
+                                <?php if (!empty($path)): ?>
+                                <option value="<?= \htmlspecialchars($path ?? '') ?>"><?= \htmlspecialchars($name ?? '') ?></option>
+                                <?php endif; ?>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="text"
+                                   class="form-control descr-image-input"
+                                   data-field="descr_image"
+                                   data-product-id="<?= $admin['product']['id'] ?>"
+                                   data-fallback="<?= \htmlspecialchars($edit['descriptionImages']['main'] ?? '') ?>"
+                                   value="<?= \htmlspecialchars($edit['descriptionImages']['slots'][1]['src'] ?? '') ?>"
+                                   placeholder="Or enter image URL...">
+                            <button type="button" class="btn btn-outline-secondary descr-image-clear" title="Clear">
+                                <i class="bx bx-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted">If no image is set, the main product image is used as default.</small>
+                </div>
+            </div>
+
+            <!-- Description 2 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-text me-2"></i>Description 2</h5>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" id="descr2" name="descr2" rows="10"><?= \htmlspecialchars($admin['product']['descr2'] ?? '') ?></textarea>
+                    <div class="d-flex align-items-center gap-2 mt-2 <?= $edit['descriptionImages']['slots'][2]['disabled'] ? 'opacity-50' : '' ?>" id="descr2-image-row">
+                        <?php if (!empty($edit['descriptionImages']['slots'][2]['src'])): ?>
+                        <img src="/assets/images<?= \htmlspecialchars($edit['descriptionImages']['slots'][2]['src'] ?? '') ?>"
+                             alt="Description 2 image"
+                             class="img-thumbnail descr-preview-img"
+                             style="width: 64px; height: 64px; object-fit: cover;"
+                             data-img-fallback="src" data-fallback-src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23f0f0f0%22 width=%2260%22 height=%2260%22/%3E%3C/svg%3E">
+                        <?php else: ?>
+                        <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="bx bx-image text-muted"></i>
+                        </div>
+                        <?php endif; ?>
+                        <div class="input-group input-group-sm flex-grow-1">
+                            <select class="form-select descr-image-quick-select" style="flex: 0 0 auto; width: 110px;" <?= $edit['descriptionImages']['slots'][2]['disabled'] ? 'disabled' : '' ?>>
+                                <option value="">Image...</option>
+                                <?php foreach ($edit['descriptionImages']['choices'] as $path => $name): ?>
+                                <?php if (!empty($path)): ?>
+                                <option value="<?= \htmlspecialchars($path ?? '') ?>"><?= \htmlspecialchars($name ?? '') ?></option>
+                                <?php endif; ?>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="text"
+                                   class="form-control descr-image-input"
+                                   data-field="descr2_image"
+                                   data-product-id="<?= $admin['product']['id'] ?>"
+                                   data-fallback=""
+                                   value="<?= \htmlspecialchars($edit['descriptionImages']['slots'][2]['src'] ?? '') ?>"
+                                   placeholder="<?= $edit['descriptionImages']['slots'][2]['disabled'] ? 'Add description text first' : 'Or enter image URL...' ?>"
+                                   <?= $edit['descriptionImages']['slots'][2]['disabled'] ? 'disabled' : '' ?>>
+                            <button type="button" class="btn btn-outline-secondary descr-image-clear" title="Clear" <?= $edit['descriptionImages']['slots'][2]['disabled'] ? 'disabled' : '' ?>>
+                                <i class="bx bx-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description 3 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-text me-2"></i>Description 3</h5>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" id="descr3" name="descr3" rows="10"><?= \htmlspecialchars($admin['product']['descr3'] ?? '') ?></textarea>
+                    <div class="d-flex align-items-center gap-2 mt-2 <?= $edit['descriptionImages']['slots'][3]['disabled'] ? 'opacity-50' : '' ?>" id="descr3-image-row">
+                        <?php if (!empty($edit['descriptionImages']['slots'][3]['src'])): ?>
+                        <img src="/assets/images<?= \htmlspecialchars($edit['descriptionImages']['slots'][3]['src'] ?? '') ?>"
+                             alt="Description 3 image"
+                             class="img-thumbnail descr-preview-img"
+                             style="width: 64px; height: 64px; object-fit: cover;"
+                             data-img-fallback="src" data-fallback-src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23f0f0f0%22 width=%2260%22 height=%2260%22/%3E%3C/svg%3E">
+                        <?php else: ?>
+                        <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="bx bx-image text-muted"></i>
+                        </div>
+                        <?php endif; ?>
+                        <div class="input-group input-group-sm flex-grow-1">
+                            <select class="form-select descr-image-quick-select" style="flex: 0 0 auto; width: 110px;" <?= $edit['descriptionImages']['slots'][3]['disabled'] ? 'disabled' : '' ?>>
+                                <option value="">Image...</option>
+                                <?php foreach ($edit['descriptionImages']['choices'] as $path => $name): ?>
+                                <?php if (!empty($path)): ?>
+                                <option value="<?= \htmlspecialchars($path ?? '') ?>"><?= \htmlspecialchars($name ?? '') ?></option>
+                                <?php endif; ?>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="text"
+                                   class="form-control descr-image-input"
+                                   data-field="descr3_image"
+                                   data-product-id="<?= $admin['product']['id'] ?>"
+                                   data-fallback=""
+                                   value="<?= \htmlspecialchars($edit['descriptionImages']['slots'][3]['src'] ?? '') ?>"
+                                   placeholder="<?= $edit['descriptionImages']['slots'][3]['disabled'] ? 'Add description text first' : 'Or enter image URL...' ?>"
+                                   <?= $edit['descriptionImages']['slots'][3]['disabled'] ? 'disabled' : '' ?>>
+                            <button type="button" class="btn btn-outline-secondary descr-image-clear" title="Clear" <?= $edit['descriptionImages']['slots'][3]['disabled'] ? 'disabled' : '' ?>>
+                                <i class="bx bx-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video URL -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-video me-2"></i>Video URL</h5>
+                </div>
+                <div class="card-body">
+                    <input type="url" class="form-control" id="video_url" name="video_url"
+                           value="<?= \htmlspecialchars($admin['product']['video_url'] ?? '') ?>"
+                           placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- End Description Tab -->

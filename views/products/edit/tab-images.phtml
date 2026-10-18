@@ -1,0 +1,103 @@
+<!-- Images Tab -->
+<div class="tab-pane fade" id="images-tab" role="tabpanel">
+    <div class="row">
+        <!-- Main Product Image -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bx bx-star me-2 text-warning"></i>Main Product Image</h6>
+                </div>
+                <div class="card-body">
+                    <div class="image-drop-zone" data-slot="main">
+                        <button type="button" class="btn btn-sm btn-icon btn-danger btn-delete-image d-none" data-slot="main">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                        <div class="empty-state d-none">
+                            <i class="bx bx-cloud-upload"></i>
+                            <p class="mb-1 mt-2 fw-medium">Drag & drop or click to upload</p>
+                            <small class="text-muted">JPG, PNG, GIF, WebP (max <?= $admin['maxUploadSize'] ?>)</small>
+                        </div>
+                        <div class="preview-state">
+                            <img src="<?= \htmlspecialchars($admin['imageUrls']['main'] ?? '') ?>"
+                                 alt="Main image"
+                                 class="preview-image"
+                                 data-img-fallback="preview">
+                        </div>
+                        <div class="uploading-state d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Uploading...</span>
+                            </div>
+                            <p class="mb-0 mt-2">Processing...</p>
+                        </div>
+                    </div>
+                    <?php $derivations = $admin['imageDerivations'] ?? []; ?>
+                    <div class="mt-3 d-flex align-items-center gap-3">
+                        <span class="text-muted small">Sizes:</span>
+                        <?php foreach (['large' => 'Large', 'medium' => 'Medium', 'thumb' => 'Thumb'] as $key => $label): ?>
+                        <span class="badge <?= !empty($derivations[$key]) ? 'bg-label-success' : 'bg-label-danger' ?>">
+                            <i class="bx <?= !empty($derivations[$key]) ? 'bx-check' : 'bx-x' ?> me-1"></i><?= $label ?>
+                        </span>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="mt-2 d-flex align-items-center gap-3">
+                        <span class="text-muted small">Formats:</span>
+                        <?php foreach (['webp' => 'WebP', 'avif' => 'AVIF'] as $key => $label): ?>
+                        <span class="badge <?= !empty($derivations[$key]) ? 'bg-label-success' : 'bg-label-warning' ?>" data-format="<?= $key ?>">
+                            <i class="bx <?= !empty($derivations[$key]) ? 'bx-check' : 'bx-x' ?> me-1"></i><?= $label ?>
+                        </span>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php if (!empty($admin['showRegenerate'])): ?>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-outline-warning btn-sm" id="btn-regenerate-images" data-call="regenerateImages">
+                            <i class="bx bx-refresh me-1"></i> Regenerate Missing Sizes
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Images -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bx bx-images me-2 text-info"></i>Gallery Images</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <?php foreach ($edit['gallerySlots'] as $slot => $label): ?>
+                        <div class="col-4">
+                            <div class="image-drop-zone" data-slot="<?= $slot ?>" style="min-height: 120px; padding: 1rem;">
+                                <button type="button" class="btn btn-xs btn-icon btn-danger btn-delete-image d-none" data-slot="<?= $slot ?>" style="padding: 0.2rem 0.4rem;">
+                                    <i class="bx bx-x" style="font-size: 0.875rem;"></i>
+                                </button>
+                                <div class="empty-state d-none">
+                                    <i class="bx bx-plus" style="font-size: 1.5rem;"></i>
+                                    <p class="mb-0 small"><?= $label ?></p>
+                                </div>
+                                <div class="preview-state">
+                                    <img src="<?= \htmlspecialchars($admin['imageUrls'][$slot]) ?>"
+                                         alt="<?= $label ?>"
+                                         class="preview-image"
+                                         style="max-height: 80px;"
+                                         data-img-fallback="preview">
+                                </div>
+                                <div class="uploading-state d-none">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="alert alert-light mt-4">
+        <i class="bx bx-info-circle me-1"></i>
+        <strong>Upload square 900×900 pixel images.</strong> They are automatically resized for large, medium, and thumbnail views, and converted to multiple formats (JPG, WebP, AVIF) for optimal performance. Max file size: <?= $admin['maxUploadSize'] ?>.
+    </div>
+</div><!-- End Images Tab -->

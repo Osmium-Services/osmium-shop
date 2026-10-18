@@ -1,0 +1,110 @@
+<?php
+$results = $admin['importResults'] ?? null;
+?>
+
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop /</span> Import Prices
+    </h4>
+    <a href="<?= $adminUrl('shop/products/') ?>" class="btn btn-outline-secondary">
+        <i class="bx bx-arrow-back me-1"></i> Back to Products
+    </a>
+</div>
+
+<?php if ($results && isset($results['error'])): ?>
+<div class="alert alert-danger">
+    <i class="bx bx-error-circle me-1"></i>
+    <?= \htmlspecialchars($results['error'] ?? '') ?>
+</div>
+<?php endif; ?>
+
+<?php if ($results && isset($results['success'])): ?>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bx bx-check-circle me-2 text-success"></i>Import Complete</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="p-3">
+                    <h2 class="text-success mb-1"><?= $results['productsUpdated'] ?? $results['updated'] ?? 0 ?></h2>
+                    <p class="text-muted mb-0">Products Updated</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3">
+                    <h2 class="text-success mb-1"><?= $results['optionsUpdated'] ?? 0 ?></h2>
+                    <p class="text-muted mb-0">Options Updated</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3">
+                    <h2 class="text-secondary mb-1"><?= $results['skipped'] ?></h2>
+                    <p class="text-muted mb-0">Skipped (No Changes)</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3">
+                    <h2 class="text-danger mb-1"><?= \count($results['errors']) ?></h2>
+                    <p class="text-muted mb-0">Errors</p>
+                </div>
+            </div>
+        </div>
+
+        <?php if (!empty($results['errors'])): ?>
+        <hr>
+        <h6 class="text-danger">Errors:</h6>
+        <ul class="mb-0">
+            <?php foreach ($results['errors'] as $error): ?>
+                <li><?= \htmlspecialchars($error ?? '') ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Upload Price CSV</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="<?= $adminUrl('shop/products/import/') ?>" enctype="multipart/form-data">
+            <input type="hidden" name="token" value="void">
+            <div class="mb-3">
+                <label for="csv_file" class="form-label fw-semibold">CSV File</label>
+                <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                <div class="form-text">
+                    Upload a CSV exported from this system with updated values. Only the <strong>Price (ex VAT)</strong>, <strong>RRP (ex VAT)</strong>, and <strong>Weight (kg)</strong> columns will be imported. Max file size: <?= $admin['maxUploadSize'] ?>.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-import me-1"></i> Import Prices
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Instructions</h5>
+    </div>
+    <div class="card-body">
+        <ol class="mb-3">
+            <li>First, <a href="<?= $adminUrl('shop/products/export/') ?>">export the current product list</a> as CSV</li>
+            <li>Open the CSV in Excel or Google Sheets</li>
+            <li>Update the <strong>Price (ex VAT)</strong>, <strong>RRP (ex VAT)</strong>, and/or <strong>Weight (kg)</strong> columns</li>
+            <li>Save as CSV and upload here</li>
+        </ol>
+        <h6 class="mt-3">CSV Format</h6>
+        <p class="mb-2">The export includes both products and their configurator options:</p>
+        <ul class="mb-0">
+            <li>The <strong>Type</strong> column indicates whether a row is a "Product" or "Option"</li>
+            <li>Options appear directly below their parent product</li>
+            <li>For products: <strong>Price</strong> = base price, for options: <strong>Price</strong> = price adjustment</li>
+            <li>For products: <strong>Weight</strong> = base packed weight, for options: <strong>Weight</strong> = weight adjustment</li>
+            <li>Items are matched by <strong>ID</strong> - do not change the ID or Type columns</li>
+            <li>Rows with unchanged values will be skipped</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,81 @@
+<!-- Technical Tab -->
+<div class="tab-pane fade" id="technical-tab" role="tabpanel">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-cog me-2"></i>Technical Specifications</h5>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-copy-technical" data-field="techspec">
+                        <i class="bx bx-copy me-1"></i> Copy from...
+                    </button>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" id="techspec" name="techspec" rows="16"><?= \htmlspecialchars($admin['product']['techspec'] ?? '') ?></textarea>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-help-circle me-2"></i>FAQ</h5>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-copy-technical" data-field="faq">
+                        <i class="bx bx-copy me-1"></i> Copy from...
+                    </button>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" id="faq" name="faq" rows="10"><?= \htmlspecialchars($admin['product']['faq'] ?? '') ?></textarea>
+                </div>
+            </div>
+
+            <!-- PDF Downloads -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-file-blank me-2"></i>PDF Downloads</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <?php foreach ($edit['pdfTypes'] as $type => $info): ?>
+                        <div class="col-md-4">
+                            <div class="pdf-drop-zone border rounded p-3 text-center" data-pdf-type="<?= $type ?>" style="min-height: 140px; cursor: pointer; transition: all 0.2s;">
+                                <?php if ($admin['pdfPaths'][$type] ?? null): ?>
+                                <!-- PDF exists -->
+                                <div class="pdf-exists">
+                                    <i class="bx bxs-file-pdf text-danger" style="font-size: 2.5rem;"></i>
+                                    <p class="mb-2 fw-medium"><?= $info['label'] ?></p>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="<?= \htmlspecialchars($admin['pdfPaths'][$type]) ?>" target="_blank" class="btn btn-outline-primary">
+                                            <i class="bx bx-show"></i> View
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger btn-delete-pdf" data-pdf-type="<?= $type ?>">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <?php else: ?>
+                                <!-- No PDF - show upload zone -->
+                                <div class="pdf-empty">
+                                    <i class="bx <?= $info['icon'] ?> text-muted" style="font-size: 2rem;"></i>
+                                    <p class="mb-1 fw-medium"><?= $info['label'] ?></p>
+                                    <small class="text-muted">Drop PDF or click to upload</small>
+                                </div>
+                                <?php endif; ?>
+                                <!-- Uploading state -->
+                                <div class="pdf-uploading d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Uploading...</span>
+                                    </div>
+                                    <p class="mb-0 mt-2">Uploading...</p>
+                                </div>
+                                <input type="file" class="pdf-file-input d-none" accept="application/pdf" data-pdf-type="<?= $type ?>">
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="alert alert-light mt-3 mb-0">
+                        <i class="bx bx-info-circle me-1"></i>
+                        PDFs will be available for download on the product's Technical Specifications tab. Max file size: <?= $admin['maxUploadSize'] ?>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- End Technical Tab -->

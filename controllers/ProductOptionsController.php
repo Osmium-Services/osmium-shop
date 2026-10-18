@@ -3,6 +3,7 @@
 namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
+use Osmium\Modules\Admin\Services\ShopAdminServices;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 
@@ -58,13 +59,13 @@ class ProductOptionsController extends AdminController
 
     private function actionGetOptions(int $productId): void
     {
-        $optionTypes = $this->admin->shopOptions->getProductOptions($productId);
+        $optionTypes = ShopAdminServices::options($this->admin)->getProductOptions($productId);
         $this->admin->jsonSuccess(['success' => true, 'optionTypes' => $optionTypes]);
     }
 
     private function actionAddType(int $productId, array $input): void
     {
-        $result = $this->admin->shopOptions->addOptionType(
+        $result = ShopAdminServices::options($this->admin)->addOptionType(
             productId: $productId,
             input: $input,
         );
@@ -74,47 +75,47 @@ class ProductOptionsController extends AdminController
     private function actionUpdateType(array $input): void
     {
         $typeId = (int)($input['type_id'] ?? 0);
-        $this->admin->shopOptions->updateOptionType(typeId: $typeId, input: $input);
+        ShopAdminServices::options($this->admin)->updateOptionType(typeId: $typeId, input: $input);
         $this->admin->jsonSuccess(['success' => true]);
     }
 
     private function actionDeleteType(array $input): void
     {
         $typeId = (int)($input['type_id'] ?? 0);
-        $this->admin->shopOptions->deleteOptionType($typeId);
+        ShopAdminServices::options($this->admin)->deleteOptionType($typeId);
         $this->admin->jsonSuccess(['success' => true]);
     }
 
     private function actionAddValue(array $input): void
     {
         $typeId = (int)($input['type_id'] ?? 0);
-        $newId = $this->admin->shopOptions->addOptionValue(typeId: $typeId, input: $input);
+        $newId = ShopAdminServices::options($this->admin)->addOptionValue(typeId: $typeId, input: $input);
         $this->admin->jsonSuccess(['success' => true, 'id' => $newId]);
     }
 
     private function actionUpdateValue(array $input): void
     {
         $valueId = (int)($input['value_id'] ?? 0);
-        $this->admin->shopOptions->updateOptionValue(valueId: $valueId, input: $input);
+        ShopAdminServices::options($this->admin)->updateOptionValue(valueId: $valueId, input: $input);
         $this->admin->jsonSuccess(['success' => true]);
     }
 
     private function actionDeleteValue(array $input): void
     {
         $valueId = (int)($input['value_id'] ?? 0);
-        $this->admin->shopOptions->deleteOptionValue($valueId);
+        ShopAdminServices::options($this->admin)->deleteOptionValue($valueId);
         $this->admin->jsonSuccess(['success' => true]);
     }
 
     private function actionReorderTypes(array $input): void
     {
-        $this->admin->shopOptions->reorderOptionTypes($input['items'] ?? []);
+        ShopAdminServices::options($this->admin)->reorderOptionTypes($input['items'] ?? []);
         $this->admin->jsonSuccess(['success' => true]);
     }
 
     private function actionReorderValues(array $input): void
     {
-        $this->admin->shopOptions->reorderOptionValues($input['items'] ?? []);
+        ShopAdminServices::options($this->admin)->reorderOptionValues($input['items'] ?? []);
         $this->admin->jsonSuccess(['success' => true]);
     }
 
@@ -123,7 +124,7 @@ class ProductOptionsController extends AdminController
         $sourceProductId = (int)($input['source_product_id'] ?? 0);
         $targetProductId = (int)($input['target_product_id'] ?? 0);
 
-        $result = $this->admin->shopOptions->copyOptionsFromProduct(
+        $result = ShopAdminServices::options($this->admin)->copyOptionsFromProduct(
             sourceProductId: $sourceProductId,
             targetProductId: $targetProductId,
         );

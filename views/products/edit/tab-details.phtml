@@ -1,0 +1,186 @@
+<!-- Details Tab -->
+<div class="tab-pane fade show active" id="details-tab" role="tabpanel">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Basic Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-info-circle me-2"></i>Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="brand_input" class="form-label fw-semibold">Brand</label>
+                            <input type="text" class="form-control" id="brand_input" list="brand_list"
+                                   value="<?= \htmlspecialchars($admin['currentBrand']['name'] ?? '') ?>" required>
+                            <input type="hidden" id="brand_id" name="brand_id" value="<?= $admin['product']['brand_id'] ?>">
+                            <datalist id="brand_list">
+                                <?php foreach ($admin['brands'] as $brand): ?>
+                                    <option data-id="<?= $brand['id'] ?>" value="<?= \htmlspecialchars($brand['name'] ?? '') ?>">
+                                <?php endforeach; ?>
+                            </datalist>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="model_name" class="form-label fw-semibold">Model Name</label>
+                            <input type="text" class="form-control" id="model_name" name="model_name"
+                                   value="<?= \htmlspecialchars($admin['product']['model_name'] ?? '') ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="barcode" class="form-label fw-semibold">Barcode</label>
+                            <input type="text" class="form-control" id="barcode" name="barcode"
+                                   value="<?= \htmlspecialchars($admin['product']['barcode'] ?? '') ?>">
+                            <div class="p-2 text-center" style="min-height: 50px;">
+                                <svg id="barcode-display"></svg>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reference" class="form-label fw-semibold">Reference / SKU</label>
+                            <input type="text" class="form-control" id="reference" name="reference"
+                                   value="<?= \htmlspecialchars($admin['product']['reference'] ?? '') ?>">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Categories</label>
+                            <div class="d-flex flex-wrap align-items-center gap-2" id="product-categories">
+                                <?php foreach ($admin['productCategories'] as $category): ?>
+                                    <span class="badge bg-label-primary d-flex align-items-center" data-category-id="<?= $category['id'] ?>">
+                                        <?= \htmlspecialchars($category['label'] ?? '') ?>
+                                        <i class="bx bx-x ms-1" style="cursor: pointer;" data-call="ProductCategories.remove" <?= $dataArgs((int) $category['id']) ?>></i>
+                                    </span>
+                                <?php endforeach; ?>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="bx bx-plus"></i> Add
+                                    </button>
+                                    <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                                        <?php foreach ($edit['categoryChoices'] as $category): ?>
+                                            <a class="dropdown-item <?= $category['isAssigned'] ? 'disabled text-muted' : '' ?>"
+                                               href="#"
+                                               data-category-id="<?= $category['id'] ?>"
+                                               data-category-label="<?= \htmlspecialchars($category['label'], ENT_QUOTES) ?>"
+                                               <?= $category['isAssigned'] ? 'data-prevent' : 'data-call="ProductCategories.add" ' . $dataArgs((int) $category['id'], $category['label']) ?>>
+                                                <?= $category['isAssigned'] ? '<i class="bx bx-check me-1"></i>' : '' ?><?= \htmlspecialchars($category['path'] ?? '') ?>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($admin['productPages'])): ?>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Product Pages</label>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <?php foreach ($admin['productPages'] as $page): ?>
+                                    <span class="badge bg-label-<?= $page['is_qr'] ? 'warning' : 'info' ?> d-flex align-items-center">
+                                        <?= $page['is_qr'] ? '<i class="bx bx-qr me-1"></i>' : '' ?>
+                                        /<?= \htmlspecialchars($page['url'] ?? '') ?>/
+                                        <a href="<?= $adminUrl('pages/product-pages/') ?>#edit=<?= $page['page_id'] ?>" class="ms-2 text-<?= $page['is_qr'] ? 'warning' : 'info' ?>" title="Edit page">
+                                            <i class="bx bx-edit-alt"></i>
+                                        </a>
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Product Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Product Info</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Product ID:</strong> <?= $admin['product']['id'] ?></p>
+                    <p class="mb-2">
+                        <strong>Page URL:</strong>
+                        <a href="/<?= \htmlspecialchars($admin['productModel']->productStub) ?>/" target="_blank">
+                            /<?= \htmlspecialchars($admin['productModel']->productStub) ?>/ <i class="bx bx-link-external"></i>
+                        </a>
+                    </p>
+                    <p class="mb-2"><strong>Created:</strong> <?= \date('d M Y H:i', \strtotime($admin['product']['created_at'])) ?></p>
+                    <?php if (!empty($admin['product']['updated_at'])): ?>
+                        <p class="mb-2"><strong>Last Updated:</strong> <?= \date('d M Y H:i', \strtotime($admin['product']['updated_at'])) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Product Images Preview -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Product Images</h6>
+                    <a href="#images-tab" class="btn btn-sm btn-outline-primary" data-click-selector="[href='#images-tab']">
+                        <i class="bx bx-edit-alt me-1"></i> Manage
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img src="<?= \htmlspecialchars($admin['productImage'] ?? '') ?>"
+                             alt="<?= \htmlspecialchars($admin['productModel']->title) ?>"
+                             class="img-fluid rounded"
+                             style="max-height: 200px; object-fit: contain;"
+                             data-img-fallback="hide-next">
+                        <div class="rounded bg-label-secondary d-none justify-content-center align-items-center mx-auto" style="width: 150px; height: 150px;">
+                            <i class="bx bx-image text-secondary" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <?php foreach ($edit['sidebarGallery'] as $slot => $data): ?>
+                        <div class="position-relative" style="width: 50px; height: 50px;" title="<?= \htmlspecialchars($data['label'] ?? '') ?>">
+                            <?php if ($data['url']): ?>
+                            <img src="<?= \htmlspecialchars($data['url'] ?? '') ?>"
+                                 alt="<?= \htmlspecialchars($data['label'] ?? '') ?>"
+                                 class="rounded border w-100 h-100"
+                                 style="object-fit: cover;"
+                                 data-img-fallback="hide-next">
+                            <div class="rounded bg-label-secondary d-none justify-content-center align-items-center w-100 h-100">
+                                <i class="bx bx-image text-secondary"></i>
+                            </div>
+                            <?php else: ?>
+                            <div class="rounded bg-label-secondary d-flex justify-content-center align-items-center w-100 h-100">
+                                <i class="bx bx-image text-secondary"></i>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="<?= $adminUrl('shop/products/') ?>" class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="bx bx-arrow-back me-1"></i> Back to Products
+                    </a>
+                    <button type="button" class="btn btn-outline-danger w-100 mb-2" data-call="productAction" <?= $dataArgs((int) $admin['product']['id'], 'delete', 'Delete this product?') ?>>
+                        <i class="bx bx-trash me-1"></i> Delete Product
+                    </button>
+                    <?php if ($admin['canDeleteCompletely']): ?>
+                    <button type="button" class="btn btn-danger w-100" data-call="deleteCompletely" <?= $dataArgs((int) $admin['product']['id']) ?>>
+                        <i class="bx bx-x-circle me-1"></i> Undo Creation
+                    </button>
+                    <small class="text-muted d-block mt-2 text-center">Removes product, page &amp; images</small>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- End Details Tab -->

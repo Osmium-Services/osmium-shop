@@ -3,6 +3,7 @@
 namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
+use Osmium\Modules\Admin\Services\ShopAdminServices;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 
@@ -65,7 +66,7 @@ class ProductImagesController extends AdminController
     private function actionUpload(int $productId, array $input): array
     {
         $file = $_FILES['image'] ?? []; // No file at all (e.g. over post_max_size) reaches upload() as an empty array, which says so
-        $result = $this->admin->shopImages->upload(
+        $result = ShopAdminServices::images($this->admin)->upload(
             productId: $productId,
             file: $file,
             input: $input,
@@ -75,13 +76,13 @@ class ProductImagesController extends AdminController
 
     private function actionDelete(int $productId, array $input): array
     {
-        $result = $this->admin->shopImages->delete(productId: $productId, input: $input);
+        $result = ShopAdminServices::images($this->admin)->delete(productId: $productId, input: $input);
         return ['success' => true] + $result;
     }
 
     private function actionUpdateDescrImage(int $productId, array $input): array
     {
-        $result = $this->admin->shopImages->updateDescrImage(
+        $result = ShopAdminServices::images($this->admin)->updateDescrImage(
             productId: $productId,
             input: $input,
         );
@@ -92,7 +93,7 @@ class ProductImagesController extends AdminController
     {
         $brandPath = $input['brand_path'] ?? '';
         $modelPath = $input['model_path'] ?? '';
-        $images = $this->admin->shopImages->getAll(
+        $images = ShopAdminServices::images($this->admin)->getAll(
             productId: $productId,
             brandPath: $brandPath,
             modelPath: $modelPath,
@@ -104,7 +105,7 @@ class ProductImagesController extends AdminController
     {
         $brandPath = $input['brand_path'] ?? '';
         $modelPath = $input['model_path'] ?? '';
-        return $this->admin->shopImages->regenerate(
+        return ShopAdminServices::images($this->admin)->regenerate(
             productId: $productId,
             brandPath: $brandPath,
             modelPath: $modelPath,

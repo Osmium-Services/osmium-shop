@@ -1,0 +1,52 @@
+<!-- Options Tab -->
+<div class="tab-pane fade" id="options-tab" role="tabpanel">
+    <div class="row">
+        <div class="col-12">
+            <!-- Advanced Options -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-list-ul me-2"></i>Product Options</h5>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-copy-options">
+                            <i class="bx bx-copy me-1"></i> Copy from...
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-add-option-type">
+                            <i class="bx bx-plus me-1"></i> Add Option Type
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="option-types-container">
+                        <div class="text-center text-muted py-4" id="no-options-message">
+                            <i class="bx bx-package mb-2" style="font-size: 2rem;"></i>
+                            <p class="mb-0">No option types defined for this product.</p>
+                            <small>Click "Add Option Type" to create options like Size, Colour, etc.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legacy Simple Options -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 text-muted"><i class="bx bx-history me-2"></i>Legacy Options (Simple)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="option_label" class="form-label fw-semibold">Option Label</label>
+                            <input type="text" class="form-control" id="option_label" name="option_label"
+                                   value="<?= \htmlspecialchars($admin['product']['option_label'] ?? '') ?>">
+                            <div class="form-text">e.g. "Size", "Colour"</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="option_default" class="form-label fw-semibold">Default Option</label>
+                            <input type="text" class="form-control" id="option_default" name="option_default"
+                                   value="<?= \htmlspecialchars($admin['product']['option_default'] ?? '') ?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- End Options Tab -->

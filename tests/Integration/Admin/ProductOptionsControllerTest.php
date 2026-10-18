@@ -14,13 +14,14 @@ use Osmium\Modules\Admin\Controllers\ProductOptionsController;
 use Osmium\Modules\Admin\Services\AdminAuth;
 use Osmium\Modules\Admin\Services\AdminShopOptions;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
+use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
 use Tests\Integration\DatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
-require_once 'app/core/admin/services/AdminShopOptions.php';
+require_once 'app/services/osmium-shop/models/AdminShopOptions.php';
 require_once 'app/services/osmium-shop/models/ProductOptionType.php';
 require_once 'app/services/osmium-shop/models/ProductOptionValue.php';
 require_once 'app/services/osmium-shop/controllers/ProductOptionsController.php';
@@ -72,7 +73,7 @@ class ProductOptionsControllerTest extends DatabaseTestCase
             {
                 $this->model = $model;
                 $this->auth = $auth;
-                $this->shopOptions = new AdminShopOptions($model->productOptionType, $model->productOptionValue);
+                ShopAdminServices::override($this, 'options', new AdminShopOptions($model->productOptionType, $model->productOptionValue));
             }
 
             public function getJsonInput(): array
@@ -151,7 +152,7 @@ class ProductOptionsControllerTest extends DatabaseTestCase
 
     private function types(): array
     {
-        return $this->admin->shopOptions->getProductOptions($this->productId);
+        return ShopAdminServices::options($this->admin)->getProductOptions($this->productId);
     }
 
     // ---- who may call it ----------------------------------------------------------

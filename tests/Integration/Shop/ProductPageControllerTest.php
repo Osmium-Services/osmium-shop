@@ -20,7 +20,7 @@ use Tests\Integration\DatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/library/Autoload.php';
-require_once 'app/core/admin/services/AdminShopOptions.php';
+require_once 'app/services/osmium-shop/models/AdminShopOptions.php';
 
 /**
  * The storefront product page's controller script (shop/controllers/product-full.php): what it hands the page for a

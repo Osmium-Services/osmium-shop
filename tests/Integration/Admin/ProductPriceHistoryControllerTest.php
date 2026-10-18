@@ -18,7 +18,7 @@ use Tests\Integration\DatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
-require_once 'app/core/admin/models/Product.php';
+require_once 'app/services/osmium-shop/models/Product.php';
 require_once 'app/services/osmium-shop/models/ProductPriceHistory.php';
 require_once 'app/services/osmium-shop/controllers/ProductPriceHistoryController.php';
 
@@ -52,8 +52,9 @@ class ProductPriceHistoryControllerTest extends DatabaseTestCase
         $this->stashed = [];
 
         $all = (new FileSystem())->readJSONFile('app/core/admin/config/models/models.json.php');
-        $wanted = ['product'];
+        $wanted = [];
         $this->model = new OsmiumAdminModel($this->db, (object) \array_intersect_key((array) $all, \array_flip($wanted)));
+        $this->model->addModel($this->db, 'product', \Osmium\Modules\Admin\Models\Product::class, 'products'); // The shop service's model
         $this->model->addModel($this->db, 'productPriceHistory', \Osmium\Modules\Admin\Models\ProductPriceHistory::class, 'product_price_history'); // The shop service's model
 
         $auth = new class (

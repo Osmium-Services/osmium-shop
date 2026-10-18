@@ -55,8 +55,9 @@ class DiscountsControllerTest extends DatabaseTestCase
         $this->runTag = 'ZQ' . \strtoupper(\substr(\uniqid(), -6));
 
         $all = (new FileSystem())->readJSONFile('app/core/admin/config/models/models.json.php');
-        $models = (object) \array_intersect_key((array) $all, \array_flip(['changelog', 'product', 'listRows']));
+        $models = (object) \array_intersect_key((array) $all, \array_flip(['changelog', 'listRows']));
         $this->model = new OsmiumAdminModel($this->db, $models);
+        $this->model->addModel($this->db, 'product', \Osmium\Modules\Admin\Models\Product::class, 'products'); // The shop service's model
         $this->model->addModel($this->db, 'discount', \Osmium\Modules\Admin\Models\Discount::class, 'discounts'); // The shop service's model
 
         $this->auth = new class (

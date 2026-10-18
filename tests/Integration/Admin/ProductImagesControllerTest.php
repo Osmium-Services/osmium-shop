@@ -15,13 +15,14 @@ use Osmium\Modules\Admin\Controllers\ProductImagesController;
 use Osmium\Modules\Admin\Services\AdminAuth;
 use Osmium\Modules\Admin\Services\AdminShopImages;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
+use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
 use Tests\Integration\DatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
-require_once 'app/core/admin/services/AdminShopImages.php';
+require_once 'app/services/osmium-shop/models/AdminShopImages.php';
 require_once 'app/services/osmium-shop/controllers/ProductImagesController.php';
 
 /**
@@ -55,7 +56,8 @@ class ProductImagesControllerTest extends DatabaseTestCase
         $this->logSize = \is_file($this->logFile) ? (int) \filesize($this->logFile) : -1;
 
         $all = (new FileSystem())->readJSONFile('app/core/admin/config/models/models.json.php');
-        $this->model = new OsmiumAdminModel($this->db, (object) \array_intersect_key((array) $all, \array_flip(['product', 'user'])));
+        $this->model = new OsmiumAdminModel($this->db, (object) \array_intersect_key((array) $all, \array_flip(['user'])));
+        $this->model->addModel($this->db, 'product', \Osmium\Modules\Admin\Models\Product::class, 'products'); // The shop service's model
 
         $auth = new AdminAuth($this->model, new RecordingAdminMailer(), new Password());
 
@@ -67,7 +69,7 @@ class ProductImagesControllerTest extends DatabaseTestCase
             {
                 $this->model = $model;
                 $this->auth = $auth;
-                $this->shopImages = new AdminShopImages($model->product);
+                ShopAdminServices::override($this, 'images', new AdminShopImages($model->product));
             }
 
             public function getJsonInput(): array
