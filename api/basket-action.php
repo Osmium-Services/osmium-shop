@@ -20,8 +20,8 @@ require_once __DIR__ . '/../models/CheckoutBasket.php';
 require_once __DIR__ . '/../models/CheckoutDiscount.php';
 require_once __DIR__ . '/../models/ShopDiscountService.php';
 require_once __DIR__ . '/../models/ShopTotalsService.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/app/modules/shop/models/ShopModel.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/app/modules/shop/models/ShopProduct.php';
+require_once __DIR__ . '/../modules/shop/models/ShopModel.php';
+require_once __DIR__ . '/../modules/shop/models/ShopProduct.php';
 
 $input = $this->osmium->getJsonInput();
 $action = $input['action'] ?? null;
