@@ -1,0 +1,189 @@
+<?php
+$importBatches = $admin['importBatches'];
+$importDetails = $admin['importDetails'];
+$manualChanges = $admin['manualChanges'];
+$filterProductId = $admin['filterProductId'];
+$filterProductName = $admin['filterProductName'];
+?>
+
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop /</span> Price History
+    </h4>
+    <a href="<?= $adminUrl('shop/products/') ?>" class="btn btn-outline-secondary">
+        <i class="bx bx-arrow-back me-1"></i> Back to Products
+    </a>
+</div>
+
+<?php if ($filterProductId): ?>
+<div class="alert alert-secondary d-flex justify-content-between align-items-center">
+    <span>
+        <i class="bx bx-filter-alt me-1"></i>
+        Showing price changes for <strong><?= \htmlspecialchars($filterProductName ?? 'Product #' . $filterProductId) ?></strong>
+    </span>
+    <a href="<?= $adminUrl('shop/products/price-history/') ?>" class="btn btn-sm btn-outline-secondary">
+        <i class="bx bx-x me-1"></i> Clear filter
+    </a>
+</div>
+<?php endif; ?>
+
+<?php if (!$admin['hasHistory']): ?>
+<div class="alert alert-info">
+    <i class="bx bx-info-circle me-1"></i>
+    <?= $filterProductId ? 'No price changes recorded for this product yet.' : 'No price changes recorded yet.' ?>
+</div>
+<?php else: ?>
+
+<?php if (!empty($importBatches)): ?>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bx bx-import me-2"></i>Import History</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 40px;"><i class="bx bx-list-ul" title="Expand Details" style="font-size: 1.1em;"></i></th>
+                    <th>Date</th>
+                    <th>Prices changed</th>
+                    <th>User</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($importBatches as $index => $batch): ?>
+                <tr>
+                    <td>
+                        <button class="btn btn-sm btn-icon p-0" type="button" data-call="toggleBatch" <?= $dataArgs($index) ?>>
+                            <i class="bx bx-chevron-right" id="chevron<?= $index ?>" style="font-size: 1.25rem;" title="Show/hide detail"></i>
+                        </button>
+                    </td>
+                    <td><?= $batch['changedAtFormatted'] ?></td>
+                    <td><?= $batch['productCount'] ?></td>
+                    <td><?= \htmlspecialchars($batch['username'] ?? 'Unknown') ?></td>
+                    <td class="text-end">
+                        <?php if ($batch['canUndo']): ?>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-call="undoBatch" <?= $dataArgs($batch['changed_at'] ?? '') ?>>
+                            <i class="bx bx-undo me-1"></i> Undo
+                        </button>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr class="batch-details" id="batch<?= $index ?>" style="display: none;">
+                    <td colspan="5" class="p-0 border-0">
+                        <div class="p-3" style="background-color: #f9f9f9;">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Old Price <small class="text-muted fw-normal">(ex VAT)</small></th>
+                                        <th>New Price <small class="text-muted fw-normal">(ex VAT)</small></th>
+                                        <th>Old RRP <small class="text-muted fw-normal">(ex VAT)</small></th>
+                                        <th>New RRP <small class="text-muted fw-normal">(ex VAT)</small></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($importDetails[$batch['changed_at']] ?? [] as $detail): ?>
+                                    <tr>
+                                        <td>
+                                            <a href="<?= $adminUrl('shop/products/price-history/') ?>?product_id=<?= (int)$detail['product_id'] ?>">
+                                                <?= $detail['productLabelHtml'] ?>
+                                            </a>
+                                        </td>
+                                        <td><?= $detail['priceOldHtml'] ?></td>
+                                        <td><?= $detail['priceNewHtml'] ?></td>
+                                        <td><?= $detail['rrpOldDisplay'] ?></td>
+                                        <td><?= $detail['rrpNewDisplay'] ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!empty($manualChanges)): ?>
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bx bx-edit me-2"></i>Manual Changes</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price <small class="text-muted fw-normal">(ex VAT)</small></th>
+                    <th>RRP <small class="text-muted fw-normal">(ex VAT)</small></th>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($manualChanges as $index => $change): ?>
+                <tr>
+                    <td>
+                        <a href="<?= $adminUrl('shop/products/price-history/') ?>?product_id=<?= (int)$change['product_id'] ?>">
+                            <strong><?= $change['productLabelHtml'] ?></strong>
+                        </a>
+                    </td>
+                    <td>
+                        <span class="text-muted"><?= $change['priceOldHtml'] ?></span>
+                        <i class="bx bx-right-arrow-alt text-muted"></i>
+                        <?= $change['priceNewHtml'] ?>
+                    </td>
+                    <td>
+                        <?php if ($change['hasRrp']): ?>
+                        <span class="text-muted"><?= $change['rrpOldHtml'] ?></span>
+                        <i class="bx bx-right-arrow-alt text-muted"></i>
+                        <?= $change['rrpNewHtml'] ?>
+                        <?php else: ?>
+                        <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= $change['changedAtFormatted'] ?></td>
+                    <td><?= \htmlspecialchars($change['username'] ?? 'Unknown') ?></td>
+                    <td class="text-end">
+                        <?php if ($change['canUndo']): ?>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-call="undoManual" <?= $dataArgs((int) $change['id']) ?>>
+                            <i class="bx bx-undo me-1"></i> Undo
+                        </button>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php endif; ?>
+
+<div class="modal fade" id="undoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Undo Import</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to undo this import? All products will be reverted to their previous prices.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmUndo">
+                    <i class="bx bx-undo me-1"></i> Undo Import
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/admin/js/price-history.js<?= $adminAssetVersion('/assets/admin/js/price-history.js') ?>"></script>

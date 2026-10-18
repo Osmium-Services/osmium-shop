@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -60,6 +60,18 @@
       "discount": [
         "Osmium\\Modules\\Admin\\Models\\Discount",
         "discounts"
+      ],
+      "productOptionType": [
+        "Osmium\\Modules\\Admin\\Models\\ProductOptionType",
+        "productoptiontypes"
+      ],
+      "productOptionValue": [
+        "Osmium\\Modules\\Admin\\Models\\ProductOptionValue",
+        "productoptionvalues"
+      ],
+      "productPriceHistory": [
+        "Osmium\\Modules\\Admin\\Models\\ProductPriceHistory",
+        "product_price_history"
       ]
     },
     "routes": {
@@ -139,6 +151,39 @@
       "admin/shop/discounts/action": {
         "controller": "controllers/DiscountsController.php",
         "class": "Osmium\\Modules\\Admin\\Controllers\\DiscountsController",
+        "method": "action"
+      },
+      "admin/shop/products/price-history": {
+        "controller": "controllers/ProductPriceHistoryController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductPriceHistoryController",
+        "method": "index",
+        "title": "Price History"
+      },
+      "admin/shop/products/price-history/action": {
+        "controller": "controllers/ProductPriceHistoryController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductPriceHistoryController",
+        "method": "action"
+      },
+      "admin/shop/products/options": {
+        "controller": "controllers/ProductOptionsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductOptionsController",
+        "method": "index",
+        "title": "Product Options"
+      },
+      "admin/shop/products/options/action": {
+        "controller": "controllers/ProductOptionsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductOptionsController",
+        "method": "action"
+      },
+      "admin/shop/products/images": {
+        "controller": "controllers/ProductImagesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductImagesController",
+        "method": "index",
+        "title": "Product Images"
+      },
+      "admin/shop/products/images/action": {
+        "controller": "controllers/ProductImagesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\ProductImagesController",
         "method": "action"
       }
     },
