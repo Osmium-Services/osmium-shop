@@ -1,0 +1,19 @@
+Great choice, {{customerName}} - your order's confirmed!
+
+Thank you for your order. We're already getting it ready and will email you as soon as it ships.
+
+Order {{orderRef}} - Invoice {{invoiceNumber}}
+
+{{itemRows}}
+
+Subtotal: {{subtotal}}
+Delivery: {{delivery}}
+{{taxName}}: {{tax}}
+Total: {{total}}
+
+Delivering to:
+{{deliveryAddress}}
+
+We'll email you again as soon as your order is on its way. If you have any questions in the meantime, just reply to this email.
+
+(c) {{siteName}} - This is an automated message.

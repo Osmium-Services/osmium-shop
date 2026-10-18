@@ -1,7 +1,7 @@
 {
     "id": "osmium-shop",
     "name": "Osmium Shop",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
     "category": "shop",
     "author": {
@@ -15,6 +15,15 @@
     },
     "autoload": [],
     "migrations": "migrations/",
+    "modules": {
+        "checkout": "modules/checkout"
+    },
+    "api": {
+        "routes": {
+            "api/checkout-basket": "api/basket-action.php",
+            "api/checkout": "api/checkout-action.php"
+        }
+    },
     "admin": {
         "menu": {
             "section": "Shop",
