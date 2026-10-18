@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -31,7 +31,8 @@
   },
   "hooks": {
     "mcp.tools": [
-      "Osmium\\Modules\\Admin\\Services\\BrandMcp::tools"
+      "Osmium\\Modules\\Admin\\Services\\BrandMcp::tools",
+      "Osmium\\Modules\\Admin\\Services\\DiscountMcp::tools"
     ]
   },
   "admin": {
@@ -55,6 +56,10 @@
       "productCategoryAssignment": [
         "Osmium\\Modules\\Admin\\Models\\ProductCategoryAssignment",
         "products_productcategories"
+      ],
+      "discount": [
+        "Osmium\\Modules\\Admin\\Models\\Discount",
+        "discounts"
       ]
     },
     "routes": {
@@ -117,6 +122,23 @@
       "admin/shop/products/categories/action": {
         "controller": "controllers/ProductCategoryAssignmentController.php",
         "class": "Osmium\\Modules\\Admin\\Controllers\\ProductCategoryAssignmentController",
+        "method": "action"
+      },
+      "admin/shop/discounts": {
+        "controller": "controllers/DiscountsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\DiscountsController",
+        "method": "index",
+        "title": "Discounts"
+      },
+      "admin/shop/discounts/edit*": {
+        "controller": "controllers/DiscountsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\DiscountsController",
+        "method": "edit",
+        "title": "Edit Discount"
+      },
+      "admin/shop/discounts/action": {
+        "controller": "controllers/DiscountsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\DiscountsController",
         "method": "action"
       }
     },

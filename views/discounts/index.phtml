@@ -1,0 +1,40 @@
+<?php
+
+use Osmium\Modules\Admin\Core\ListView;
+
+require_once __DIR__ . '/../../core/ListView.php';
+
+$listContext = [
+    'adminUrl' => $adminUrl,
+    'isAdmin' => $admin['isAdmin'],
+    'editors' => $admin['activeEditors'] ?? [],
+    'avatarUrl' => $admin['avatarUrl'] ?? '',
+];
+$lists = $admin['lists'];
+
+$pageHeader = [
+    'trail' => 'Content / Shop /',
+    'title' => 'Discounts',
+    'action' => '<a href="' . $adminUrl('shop/discounts/edit/') . '" class="btn btn-primary">'
+        . '<i class="bx bx-plus me-1"></i> Create Discount</a>',
+];
+include __DIR__ . '/../partials/page-header.phtml';
+?>
+
+<?php if (!$admin['paymentProviderSupportsDiscounts']): ?>
+    <div class="alert alert-warning" role="alert">
+        <i class="bx bx-info-circle me-1"></i>
+        <?php if (!empty($admin['hostedPayments'])): ?>
+            Payments are taken on the <strong><?= \htmlspecialchars($admin['hostedPayments'][0]['label']) ?></strong> hosted page, not this site's own checkout, so discounts created here have no effect.
+        <?php else: ?>
+        The active checkout provider is <strong><?= \htmlspecialchars($admin['currentPaymentProviderLabel']) ?></strong>.
+        Discounts only apply on the native checkout with a payment provider service, so anything created here has no effect until
+        the payment provider is switched in Settings &rsaquo; Shop.
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
+<?= ListView::render($lists['active'], $admin['discounts'], $listContext) ?>
+<?= ListView::render($lists['deleted'], $admin['deletedDiscounts'], $listContext) ?>
+
+<script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>
