@@ -1,0 +1,85 @@
+<?php
+
+use Osmium\Modules\Admin\Core\ListView;
+
+
+include __DIR__ . '/partials/breadcrumbs.phtml';
+?>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm me-3 bg-label-primary rounded d-flex align-items-center justify-content-center">
+                        <i class="bx bx-cart" style="font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0"><?= $admin['stats']['active_count'] ?></h6>
+                        <small class="text-muted">Active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm me-3 bg-label-info rounded d-flex align-items-center justify-content-center">
+                        <i class="bx bx-pound" style="font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0"><?= $admin['stats']['active_value_formatted'] ?></h6>
+                        <small class="text-muted">Value</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm me-3 bg-label-warning rounded d-flex align-items-center justify-content-center">
+                        <i class="bx bx-time" style="font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0"><?= $admin['stats']['abandoned_now'] ?></h6>
+                        <small class="text-muted">Abandoned</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm me-3 bg-label-success rounded d-flex align-items-center justify-content-center">
+                        <i class="bx bx-check-circle" style="font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0"><?= $admin['stats']['converted_24h'] ?></h6>
+                        <small class="text-muted">Converted (24h)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+$listContext = [
+    'adminUrl' => $adminUrl,
+    'isAdmin' => $admin['isAdmin'],
+    'abandonedHours' => $admin['stats']['abandoned_hours'],
+];
+?>
+<?= ListView::render($admin['lists']['active'], $admin['activeBaskets'], $listContext) ?>
+<?= ListView::render($admin['lists']['abandoned'], $admin['abandonedBaskets'], $listContext) ?>
+<?= ListView::render($admin['lists']['converted'], $admin['convertedBaskets'], $listContext) ?>
+
+<script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>
+<script src="<?= $admin['basePath'] ?>../assets/admin/js/baskets.js<?= $adminAssetVersion('/assets/admin/js/baskets.js') ?>"></script>

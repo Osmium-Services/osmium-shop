@@ -1,7 +1,7 @@
 {
     "id": "osmium-shop",
     "name": "Osmium Shop",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
     "category": "shop",
     "author": {
@@ -43,6 +43,10 @@
             "brand": [
                 "Osmium\\Modules\\Admin\\Models\\Brand",
                 "productbrands"
+            ],
+            "basket": [
+                "Osmium\\Modules\\Admin\\Models\\Basket",
+                "checkout_baskets"
             ]
         },
         "routes": {
@@ -78,6 +82,17 @@
             "admin/shop/brands/action": {
                 "controller": "controllers/BrandsController.php",
                 "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+                "method": "action"
+            },
+            "admin/shop/baskets": {
+                "controller": "controllers/BasketsController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\BasketsController",
+                "method": "index",
+                "title": "Baskets"
+            },
+            "admin/shop/baskets/action": {
+                "controller": "controllers/BasketsController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\BasketsController",
                 "method": "action"
             }
         },
