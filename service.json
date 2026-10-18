@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -41,6 +41,12 @@
     ],
     "migrations.actions": [
       "Osmium\\Modules\\Admin\\Services\\ShopSpecRebuild::action"
+    ],
+    "dashboard.quick_links": [
+      "Osmium\\Modules\\Admin\\Services\\ShopDashboardLinks::quickLink"
+    ],
+    "setup.checklist": [
+      "Osmium\\Modules\\Admin\\Services\\ShopDashboardLinks::checklistItem"
     ],
     "email.samples": [
       "Osmium\\Modules\\Checkout\\Services\\ShopEmailSamples::samples"
