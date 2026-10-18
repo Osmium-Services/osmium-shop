@@ -1,7 +1,7 @@
 {
     "id": "osmium-shop",
     "name": "Osmium Shop",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
     "category": "shop",
     "author": {
@@ -30,6 +30,31 @@
         }
     },
     "admin": {
+        "models": {
+            "status": [
+                "Osmium\\Modules\\Admin\\Models\\Status",
+                "productstatus"
+            ]
+        },
+        "routes": {
+            "admin/shop/statuses": {
+                "controller": "controllers/StatusesController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+                "method": "index",
+                "title": "Statuses"
+            },
+            "admin/shop/statuses/edit*": {
+                "controller": "controllers/StatusesController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+                "method": "edit",
+                "title": "Edit Status"
+            },
+            "admin/shop/statuses/action": {
+                "controller": "controllers/StatusesController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+                "method": "action"
+            }
+        },
         "menu": {
             "section": "Shop",
             "group": {

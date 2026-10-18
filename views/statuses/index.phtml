@@ -1,0 +1,20 @@
+<?php
+
+use Osmium\Modules\Admin\Core\ListView;
+
+
+include __DIR__ . '/partials/breadcrumbs.phtml';
+
+$listContext = [
+    'adminUrl' => $adminUrl,
+    'isAdmin' => $admin['isAdmin'],
+    'editors' => $admin['activeEditors'] ?? [],
+    'avatarUrl' => $admin['avatarUrl'],
+];
+$lists = $admin['lists'];
+?>
+
+<?= ListView::render($lists['active'], $admin['statuses'], $listContext) ?>
+<?= ListView::render($lists['deleted'], $admin['deletedStatuses'], $listContext) ?>
+
+<script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>

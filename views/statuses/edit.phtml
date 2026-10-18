@@ -1,0 +1,113 @@
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop / <a href="<?= $adminUrl('shop/statuses/') ?>">Statuses</a> /</span>
+        <?= $admin['isNew'] ? 'Create Status' : \htmlspecialchars($admin['status']['descr_short'] ?? '') ?>
+    </h4>
+    <a href="<?= $adminUrl('shop/statuses/') ?>" class="btn btn-outline-secondary">
+        <i class="bx bx-arrow-back me-1"></i> Back to Statuses
+    </a>
+</div>
+
+<?php if ($admin['showSavedMessage']): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bx bx-check-circle me-1"></i>
+        Status saved successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($admin['error'] ?? false): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bx bx-error-circle me-1"></i>
+        <?= \htmlspecialchars($admin['error'] ?? '') ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="<?= $adminUrl('shop/statuses/edit/') ?>" id="status-form">
+    <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
+    <?php if (!$admin['isNew']): ?>
+        <input type="hidden" name="id" value="<?= $admin['status']['id'] ?>">
+    <?php endif; ?>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Status Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="descr_short" class="form-label">Short Description <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="descr_short" name="descr_short"
+                        value="<?= \htmlspecialchars($admin['status']['descr_short'] ?? '') ?>" required maxlength="20">
+                    <small class="text-muted">Brief label (max 20 chars)</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="schema_ref" class="form-label">Schema Reference</label>
+                    <input type="text" class="form-control" id="schema_ref" name="schema_ref"
+                        value="<?= \htmlspecialchars($admin['status']['schema_ref'] ?? '') ?>" maxlength="20"
+                        placeholder="e.g. InStock, OutOfStock">
+                    <small class="text-muted">Schema.org ItemAvailability value</small>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="descr_long" class="form-label">Long Description <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="descr_long" name="descr_long"
+                        value="<?= \htmlspecialchars($admin['status']['descr_long'] ?? '') ?>" required maxlength="50">
+                    <small class="text-muted">Full description shown to customers (max 50 chars)</small>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="product_available" name="product_available"
+                            <?= ($admin['status']['product_available'] ?? 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="product_available">Product Available</label>
+                    </div>
+                    <small class="text-muted">Can customers order this product?</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="restocking" name="restocking"
+                            <?= ($admin['status']['restocking'] ?? 0) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="restocking">Restocking</label>
+                    </div>
+                    <small class="text-muted">Is this item being restocked?</small>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="list" name="list"
+                            <?= ($admin['status']['list'] ?? 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="list">Show in Lists</label>
+                    </div>
+                    <small class="text-muted">Show products with this status in product lists?</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="enabled" name="enabled"
+                            <?= ($admin['status']['enabled'] ?? 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="enabled">Enabled</label>
+                    </div>
+                    <small class="text-muted">Is this status available for use?</small>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a href="<?= $adminUrl('shop/statuses/') ?>" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-save me-1"></i> <?= $admin['isNew'] ? 'Create Status' : 'Save Changes' ?>
+            </button>
+        </div>
+    </div>
+</form>
+
+<script src="<?= $admin['basePath'] ?>../assets/admin/js/statuses-edit.js<?= $adminAssetVersion('/assets/admin/js/statuses-edit.js') ?>"></script>
+
+<?php if (!$admin['isNew'] && $admin['statusId']): ?>
+    <script nonce="<?= $cspNonce ?>">
+        initStatusPresenceTracking(<?= $admin['statusId'] ?>);
+    </script>
+<?php endif; ?>
