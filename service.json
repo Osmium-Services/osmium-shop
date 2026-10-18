@@ -1,7 +1,7 @@
 {
     "id": "osmium-shop",
     "name": "Osmium Shop",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
     "category": "shop",
     "author": {
@@ -29,11 +29,20 @@
             "#^api/ai/products/(?<slug>[A-Za-z0-9\\-/]+)\\.(?<format>md|json)$#": "modules/shop/controllers/ai-product-spec.php"
         }
     },
+    "hooks": {
+        "mcp.tools": [
+            "Osmium\\Modules\\Admin\\Services\\BrandMcp::tools"
+        ]
+    },
     "admin": {
         "models": {
             "status": [
                 "Osmium\\Modules\\Admin\\Models\\Status",
                 "productstatus"
+            ],
+            "brand": [
+                "Osmium\\Modules\\Admin\\Models\\Brand",
+                "productbrands"
             ]
         },
         "routes": {
@@ -52,6 +61,23 @@
             "admin/shop/statuses/action": {
                 "controller": "controllers/StatusesController.php",
                 "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+                "method": "action"
+            },
+            "admin/shop/brands": {
+                "controller": "controllers/BrandsController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+                "method": "index",
+                "title": "Brands"
+            },
+            "admin/shop/brands/edit*": {
+                "controller": "controllers/BrandsController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+                "method": "edit",
+                "title": "Edit Brand"
+            },
+            "admin/shop/brands/action": {
+                "controller": "controllers/BrandsController.php",
+                "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
                 "method": "action"
             }
         },

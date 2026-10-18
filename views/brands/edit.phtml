@@ -1,0 +1,83 @@
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Shop / <a href="<?= $adminUrl('shop/brands/') ?>">Brands</a> /</span>
+        <?= $admin['pageTitle'] ?>
+    </h4>
+    <a href="<?= $adminUrl('shop/brands/') ?>" class="btn btn-outline-secondary">
+        <i class="bx bx-arrow-back me-1"></i> Back to Brands
+    </a>
+</div>
+
+<?php if ($admin['showSavedMessage']): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bx bx-check-circle me-1"></i>
+        Brand saved successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($admin['error']): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bx bx-error-circle me-1"></i>
+        <?= \htmlspecialchars($admin['error']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<form method="POST" action="<?= $adminUrl('shop/brands/edit/') ?>" id="brand-form">
+    <input type="hidden" name="token" value="<?= $template['formToken'] ?>">
+    <?php if (!$admin['isNew']): ?>
+        <input type="hidden" name="id" value="<?= $admin['brand']['id'] ?>">
+    <?php endif; ?>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Brand Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Brand Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name"
+                        value="<?= \htmlspecialchars($admin['brand']['name']) ?>" required maxlength="50">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="page_url" class="form-label">Page URL</label>
+                    <div class="input-group">
+                        <span class="input-group-text">/</span>
+                        <input type="text" class="form-control" id="page_url" name="page_url"
+                            value="<?= \htmlspecialchars($admin['brand']['page_url']) ?>" maxlength="100"
+                            placeholder="e.g. brands/acme">
+                        <?php if ($admin['urlTrailingSlash'] ?? false): ?>
+                            <span class="input-group-text">/</span>
+                        <?php endif; ?>
+                    </div>
+                    <small class="text-muted">Internal page URL for this brand (optional)</small>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="info_external" class="form-label">External Info URL</label>
+                    <input type="url" class="form-control" id="info_external" name="info_external"
+                        value="<?= \htmlspecialchars($admin['brand']['info_external']) ?>" maxlength="255"
+                        placeholder="https://example.com/brand-info">
+                    <small class="text-muted">External URL for brand information (optional)</small>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a href="<?= $adminUrl('shop/brands/') ?>" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-save me-1"></i> <?= $admin['isNew'] ? 'Create Brand' : 'Save Changes' ?>
+            </button>
+        </div>
+    </div>
+</form>
+
+<?php if (!$admin['isNew']): ?>
+    <script nonce="<?= $cspNonce ?>">
+        initPresenceTracking(adminBasePath + 'shop/brands/action/', <?= $admin['brandId'] ?>, {
+            formSelector: '#brand-form'
+        });
+    </script>
+<?php endif; ?>
