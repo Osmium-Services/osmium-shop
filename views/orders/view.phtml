@@ -1,0 +1,212 @@
+<?php
+$order = $admin['order'];
+$items = $admin['orderItems'];
+$orderView = $admin['orderView'];
+?>
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">
+        Content / Shop / <a href="<?= $adminUrl('shop/orders/') ?>">Orders</a> /
+    </span>
+    <?= \htmlspecialchars((string)$order['order_ref']) ?>
+    <span class="badge <?= $order['status_class'] ?> ms-2"><?= \htmlspecialchars($order['status_label']) ?></span>
+    <?php if ($order['is_test_payment']) : ?>
+        <span class="badge bg-label-secondary" title="Paid through a provider's sandbox/test mode — not real money">Test payment</span>
+    <?php endif; ?>
+    <a href="<?= $adminUrl('shop/orders/invoice/') ?>?id=<?= (int)$order['id'] ?>" target="_blank" class="btn btn-sm btn-outline-secondary float-end ms-2">Print invoice</a>
+    <?php if ($orderView['canPrintDespatchNote']) : ?>
+        <a href="<?= $adminUrl('shop/orders/despatch-note/') ?>?id=<?= (int)$order['id'] ?>" target="_blank" class="btn btn-sm btn-outline-secondary float-end">Print despatch note</a>
+    <?php endif; ?>
+</h4>
+
+<?php if ($order['is_test_payment']) : ?>
+    <div class="alert alert-secondary">
+        This order was paid through <?= \htmlspecialchars($order['provider_label']) ?>'s <strong>test mode</strong> —
+        no real money was taken. It cannot be marked dispatched.
+    </div>
+<?php endif; ?>
+
+<div id="orderFeedback">
+    <?php if ($admin['dispatchEmailSent'] === true) : ?>
+        <div class="alert alert-success">Order marked dispatched — the customer has been emailed.</div>
+    <?php elseif ($admin['dispatchEmailSent'] === false) : ?>
+        <div class="alert alert-warning">
+            Order marked dispatched, but the email to the customer failed to send<?= $admin['dispatchEmailError'] ? ': ' . \htmlspecialchars($admin['dispatchEmailError']) : '.' ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Items</h5></div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-end">Unit (exc. VAT)</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Line (exc. VAT)</th>
+                            <th class="text-end">VAT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($items as $item) : ?>
+                            <tr>
+                                <td>
+                                    <strong><?= \htmlspecialchars((string)$item['product_title']) ?></strong>
+                                    <br><span class="small text-muted"><?= \htmlspecialchars((string)$item['product_ref']) ?></span>
+                                    <?php if (!empty($item['product_options'])) : ?>
+                                        <br><span class="small text-muted"><?= \htmlspecialchars((string)$item['product_options']) ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end"><?= $item['unit_price_formatted'] ?></td>
+                                <td class="text-center"><?= (int)$item['quantity'] ?></td>
+                                <td class="text-end"><?= $item['line_total_formatted'] ?></td>
+                                <td class="text-end"><?= $item['line_tax_formatted'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-end">Subtotal (exc. VAT)</th>
+                            <th class="text-end"><?= $order['subtotal_formatted'] ?></th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Delivery (exc. VAT) — <?= \htmlspecialchars((string)$order['delivery_zone']) ?></th>
+                            <th class="text-end"><?= $order['shipping_formatted'] ?></th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">VAT</th>
+                            <th class="text-end"><?= $order['tax_formatted'] ?></th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Total paid</th>
+                            <th class="text-end"><?= $order['total_formatted'] ?></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Fulfilment</h5></div>
+            <div class="card-body">
+                <?php if ($orderView['isPaid'] && $order['is_test_payment']) : ?>
+                    <p class="mb-0 text-muted">Test-mode payment — cannot be dispatched.</p>
+                <?php elseif ($orderView['isPaid']) : ?>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label" for="tracking_carrier">Carrier</label>
+                            <input type="text" class="form-control" id="tracking_carrier" placeholder="e.g. Royal Mail">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="tracking_ref">Tracking reference</label>
+                            <input type="text" class="form-control" id="tracking_ref">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-primary w-100" id="markDispatchedBtn">Mark dispatched</button>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">
+                        Marking dispatched emails the customer their tracking details.
+                    </p>
+                <?php elseif ($orderView['isDispatched']) : ?>
+                    <p class="mb-1">Dispatched <?= $order['dispatched_at_formatted'] ?></p>
+                    <p class="mb-0 text-muted">
+                        <?= \htmlspecialchars((string)($order['tracking_carrier'] ?? '—')) ?>
+                        · <?= \htmlspecialchars((string)($order['tracking_ref'] ?? '—')) ?>
+                    </p>
+                <?php else : ?>
+                    <p class="mb-0 text-muted">Nothing to fulfil — this order is <?= \htmlspecialchars($order['status_label']) ?>.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Internal notes</h5></div>
+            <div class="card-body">
+                <pre class="small bg-light p-3 rounded" id="orderNotes"><?= $orderView['hasNotes'] ? \htmlspecialchars((string)$order['admin_notes']) : 'No notes yet.' ?></pre>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="noteInput" placeholder="Add a note — stamped with your name and the time">
+                    <button class="btn btn-outline-primary" type="button" id="addNoteBtn">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Customer</h5></div>
+            <div class="card-body">
+                <p class="mb-1"><strong><?= \htmlspecialchars((string)$order['customer_name']) ?></strong></p>
+                <p class="mb-1"><a href="mailto:<?= \htmlspecialchars((string)$order['customer_email']) ?>"><?= \htmlspecialchars((string)$order['customer_email']) ?></a></p>
+                <p class="mb-0"><?= \htmlspecialchars((string)($order['customer_phone'] ?? '—')) ?></p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Delivery address</h5></div>
+            <div class="card-body">
+                <address class="mb-0">
+                    <?= \htmlspecialchars((string)$order['delivery_name']) ?><br>
+                    <?= \htmlspecialchars((string)$order['delivery_address1']) ?><br>
+                    <?php if (!empty($order['delivery_address2'])) : ?><?= \htmlspecialchars((string)$order['delivery_address2']) ?><br><?php endif; ?>
+                    <?= \htmlspecialchars((string)$order['delivery_city']) ?><br>
+                    <?php if (!empty($order['delivery_county'])) : ?><?= \htmlspecialchars((string)$order['delivery_county']) ?><br><?php endif; ?>
+                    <strong><?= \htmlspecialchars((string)$order['delivery_postcode']) ?></strong><br>
+                    <?= \htmlspecialchars((string)$order['delivery_country']) ?>
+                </address>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Payment</h5></div>
+            <div class="card-body">
+                <dl class="row mb-0 small">
+                    <dt class="col-5">Provider</dt>
+                    <dd class="col-7"><?= \htmlspecialchars($order['provider_label']) ?></dd>
+                    <dt class="col-5">Invoice</dt>
+                    <dd class="col-7"><?= \htmlspecialchars($order['invoice_display']) ?></dd>
+                    <dt class="col-5">Paid</dt>
+                    <dd class="col-7"><?= $order['paid_at_formatted'] ?></dd>
+                    <dt class="col-5">Order id</dt>
+                    <dd class="col-7 text-break"><?= \htmlspecialchars((string)($order['payment_order_ref'] ?? '—')) ?></dd>
+                    <dt class="col-5">Capture id</dt>
+                    <dd class="col-7 text-break"><?= \htmlspecialchars((string)($order['payment_capture_ref'] ?? '—')) ?></dd>
+                    <dt class="col-5">Payer</dt>
+                    <dd class="col-7 text-break"><?= \htmlspecialchars((string)($order['payment_payer_email'] ?? '—')) ?></dd>
+                </dl>
+
+                <?php if ($orderView['canRefund']) : ?>
+                    <hr>
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100" id="recordRefundBtn">Record a refund</button>
+                    <p class="small text-muted mt-2 mb-0">
+                        Records it here only. Issue the actual refund in <?= \htmlspecialchars($orderView['refundVenue']) ?> first — admin cannot pay money out.
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <?php foreach ($admin['servicePanels'] as $servicePanel) : ?>
+            <?= $servicePanel ?>
+        <?php endforeach; ?>
+
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Record</h5></div>
+            <div class="card-body">
+                <dl class="row mb-0 small">
+                    <dt class="col-5">Placed</dt>
+                    <dd class="col-7"><?= $order['created_at_formatted'] ?></dd>
+                    <dt class="col-5">Terms accepted</dt>
+                    <dd class="col-7"><?= !empty($order['terms_accepted_at']) ? 'Yes' : 'No' ?></dd>
+                    <dt class="col-5">IP</dt>
+                    <dd class="col-7"><?= \htmlspecialchars((string)($order['ip_address'] ?? '—')) ?></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<?= $cspNonce ?>">window.orderViewConfig = <?= \json_encode($admin['orderConfig'], JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
+<script src="/assets/admin/js/order-view.js<?= $adminAssetVersion('/assets/admin/js/order-view.js') ?>"></script>

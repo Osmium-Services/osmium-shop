@@ -1,0 +1,62 @@
+<?php
+
+use Osmium\Modules\Admin\Core\ListView;
+
+
+$orders = $admin['orders'];
+$stats = $admin['orderStats'];
+$statusFilter = $admin['statusFilter'];
+?>
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">Content / Shop /</span> Orders
+</h4>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="d-block text-muted small">Awaiting dispatch</span>
+                <h3 class="mb-0 <?= $stats['awaiting_dispatch'] > 0 ? 'text-success' : '' ?>"><?= $stats['awaiting_dispatch'] ?></h3>
+                <span class="small text-muted">paid, not yet sent</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="d-block text-muted small">Paid, last 30 days</span>
+                <h3 class="mb-0"><?= $stats['paid_30d'] ?></h3>
+                <span class="small text-muted"><?= $stats['paid_30d_value'] ?></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="d-block text-muted small">Pending</span>
+                <h3 class="mb-0"><?= $stats['pending'] ?></h3>
+                <span class="small text-muted">started, never paid</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="d-block text-muted small">Refunded</span>
+                <h3 class="mb-0"><?= $stats['refunded'] ?></h3>
+                <span class="small text-muted">recorded in admin</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?= ListView::render($admin['lists']['orders'], $orders, [
+    'adminUrl' => $adminUrl,
+    'isAdmin' => $admin['isAdmin'],
+    'editors' => [],
+    'avatarUrl' => $admin['avatarUrl'] ?? '',
+    'statusFilter' => $statusFilter,
+    'statuses' => $admin['statuses'],
+]) ?>
+
+<script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>

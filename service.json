@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -76,6 +76,10 @@
       "product": [
         "Osmium\\Modules\\Admin\\Models\\Product",
         "products"
+      ],
+      "order": [
+        "Osmium\\Modules\\Admin\\Models\\Order",
+        "shop_orders"
       ]
     },
     "routes": {
@@ -224,6 +228,35 @@
         "class": "Osmium\\Modules\\Admin\\Controllers\\ProductsController",
         "method": "import",
         "title": "Import Products"
+      },
+      "admin/shop/orders": {
+        "controller": "controllers/OrdersController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\OrdersController",
+        "method": "index",
+        "title": "Orders"
+      },
+      "admin/shop/orders/view": {
+        "controller": "controllers/OrdersController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\OrdersController",
+        "method": "view",
+        "title": "Order"
+      },
+      "admin/shop/orders/despatch-note": {
+        "controller": "controllers/OrdersController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\OrdersController",
+        "method": "despatchNote",
+        "title": "Despatch Note"
+      },
+      "admin/shop/orders/invoice": {
+        "controller": "controllers/OrdersController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\OrdersController",
+        "method": "invoice",
+        "title": "Invoice"
+      },
+      "admin/shop/orders/action": {
+        "controller": "controllers/OrdersController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\OrdersController",
+        "method": "action"
       }
     },
     "menu": {
