@@ -12,33 +12,26 @@ require_once 'app/services/osmium-shop/models/ShopDashboardLinks.php';
 
 class ShopDashboardLinksTest extends TestCase
 {
-    private function osmium(bool $shop, string $delivery = ''): array
+    private function osmium(string $delivery = ''): array
     {
-        return ['osmium' => new class ($shop, $delivery) {
+        return ['osmium' => new class ($delivery) {
             public object $config;
 
-            public function __construct(private bool $shop, string $delivery)
+            public function __construct(string $delivery)
             {
                 $this->config = (object) ['shop' => (object) ['deliveryMessage' => $delivery]];
-            }
-
-            public function shopEnabled(): bool
-            {
-                return $this->shop;
             }
         }];
     }
 
-    public function test_the_products_tile_is_offered_only_on_a_shop(): void
+    public function test_the_products_tile_points_at_the_products_screen(): void
     {
-        $this->assertSame('shop/products/', ShopDashboardLinks::quickLink($this->osmium(true))['url']);
-        $this->assertNull(ShopDashboardLinks::quickLink($this->osmium(false)));
+        $this->assertSame('shop/products/', ShopDashboardLinks::quickLink($this->osmium())['url']);
     }
 
     public function test_the_delivery_message_step_is_done_once_it_is_not_a_placeholder(): void
     {
-        $this->assertFalse(ShopDashboardLinks::checklistItem($this->osmium(true, 'YOUR_DELIVERY_MESSAGE'))['done']);
-        $this->assertTrue(ShopDashboardLinks::checklistItem($this->osmium(true, 'Free delivery over £50'))['done']);
-        $this->assertNull(ShopDashboardLinks::checklistItem($this->osmium(false)));
+        $this->assertFalse(ShopDashboardLinks::checklistItem($this->osmium('YOUR_DELIVERY_MESSAGE'))['done']);
+        $this->assertTrue(ShopDashboardLinks::checklistItem($this->osmium('Free delivery over £50'))['done']);
     }
 }

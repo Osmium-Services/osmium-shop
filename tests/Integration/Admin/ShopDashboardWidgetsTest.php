@@ -13,30 +13,18 @@ require_once 'app/core/admin/services/DashboardView.php';
 require_once 'app/services/osmium-shop/models/ShopDashboardWidgets.php';
 
 /**
- * The shop's dashboard cards: what each is told, that they come only while the shop is on, and that core accepts
+ * The shop's dashboard cards: what each is told, and that core accepts
  * them as cards with their own view.
  */
 class ShopDashboardWidgetsTest extends DatabaseTestCase
 {
-    private function payload(bool $shopOn = true): array
+    private function payload(): array
     {
-        $db = $this->db;
-        $osmium = new class ($db, $shopOn) {
-            public function __construct(public object $dataSource, private bool $shop) {}
-
-            public function shopEnabled(): bool
-            {
-                return $this->shop;
-            }
+        $osmium = new class ($this->db) {
+            public function __construct(public object $dataSource) {}
         };
 
         return ['osmium' => $osmium, 'role' => 'admin'];
-    }
-
-    public function test_a_site_with_the_shop_off_gets_neither_card(): void
-    {
-        $this->assertNull(ShopDashboardWidgets::quickStats($this->payload(false)));
-        $this->assertNull(ShopDashboardWidgets::baskets($this->payload(false)));
     }
 
     public function test_the_quick_stats_count_products_and_users(): void

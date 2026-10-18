@@ -23,8 +23,6 @@ class ShopDashboardWidgets
     public static function quickStats(array $payload): ?array
     {
         $osmium = $payload['osmium'];
-        if (!$osmium->shopEnabled()) return null;
-
         $dataSource = $osmium->dataSource;
 
         return [
@@ -46,8 +44,6 @@ class ShopDashboardWidgets
     public static function baskets(array $payload): ?array
     {
         $osmium = $payload['osmium'];
-        if (!$osmium->shopEnabled()) return null;
-
         $baskets = new Basket($osmium->dataSource, 'checkout_baskets');
         $stats = $baskets->stats(abandonedHours: self::BASKET_ABANDONED_HOURS);
 

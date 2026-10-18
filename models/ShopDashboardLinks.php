@@ -18,8 +18,6 @@ class ShopDashboardLinks
      */
     public static function quickLink(array $payload): ?array
     {
-        if (!$payload['osmium']->shopEnabled()) return null;
-
         return [
             'label' => 'Products',
             'title' => 'Manage Products',
@@ -36,8 +34,6 @@ class ShopDashboardLinks
     public static function checklistItem(array $payload): ?array
     {
         $osmium = $payload['osmium'];
-        if (!$osmium->shopEnabled()) return null;
-
         $message = (string)(((array)($osmium->config->shop ?? []))['deliveryMessage'] ?? '');
 
         return [

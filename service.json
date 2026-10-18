@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -35,6 +35,21 @@
       "Osmium\\Modules\\Admin\\Services\\DiscountMcp::tools",
       "Osmium\\Modules\\Admin\\Services\\ProductMcp::tools",
       "Osmium\\Modules\\Admin\\Services\\ShopReportsMcp::tools"
+    ],
+    "service.installed": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPages::onEnabled"
+    ],
+    "service.enabled": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPages::onEnabled"
+    ],
+    "service.disabled": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPages::onDisabled"
+    ],
+    "service.removing": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPages::onDisabled"
+    ],
+    "pages.protected_urls": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPages::protectedUrls"
     ],
     "pages.product_links": [
       "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::links"
