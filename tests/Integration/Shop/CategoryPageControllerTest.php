@@ -14,7 +14,7 @@ use Tests\Integration\DatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/library/Autoload.php';
-require_once 'tests/Helpers/OsmiumShopStandIn.php';
+require_once 'app/services/osmium-shop/tests/Helpers/OsmiumShopStandIn.php';
 
 /**
  * The storefront category page's controller script (shop/controllers/category.php): the category's own text and

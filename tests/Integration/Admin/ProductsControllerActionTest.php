@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace {
-    require_once 'tests/Helpers/OsmiumShopStandIn.php'; // The controller builds the shop module's global-alias class
+    require_once 'app/services/osmium-shop/tests/Helpers/OsmiumShopStandIn.php'; // The controller builds the shop module's global-alias class
 }
 
 namespace Tests\Integration\Admin {
