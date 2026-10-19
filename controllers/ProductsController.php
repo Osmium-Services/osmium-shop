@@ -13,6 +13,7 @@ use Osmium\Modules\Admin\Services\ProductEditView;
 use Osmium\Modules\Admin\Services\ProductFormData;
 use Osmium\Modules\Admin\Services\ProductListView;
 use Osmium\Modules\Admin\Services\AdminShop;
+use Osmium\Modules\Admin\Services\ShopPaths;
 use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\ProductPriceCsv;
 use Osmium\Core\Models\Model;
@@ -249,8 +250,8 @@ class ProductsController extends AdminController
         $skipEntry = $noPage || $pageDeleted;
         if ($skipEntry) return null;
 
-        $brandPath = $this->admin->generateBrandPath($row['brand_name']);
-        $modelPath = $this->admin->generateModelPath($row['model_name']);
+        $brandPath = ShopPaths::brand($row['brand_name']);
+        $modelPath = ShopPaths::model($row['model_name']);
         $basePath = '/shop/' . $brandPath . '/' . $modelPath . '/';
         $fileName = $brandPath . '-' . $modelPath;
 
@@ -594,7 +595,7 @@ class ProductsController extends AdminController
         unset($_SESSION['product_saved']);
         $this->data['admin']['brandPath'] = $product->brandPath;
         $this->data['admin']['modelPath'] = $product->modelPath;
-        $this->data['admin']['canDeleteCompletely'] = \strtotime($productData['created_at']) > (\time() - OsmiumAdmin::PRODUCT_DELETE_GRACE_PERIOD);
+        $this->data['admin']['canDeleteCompletely'] = \strtotime($productData['created_at']) > (\time() - AdminShop::PRODUCT_DELETE_GRACE_PERIOD);
         $this->data['admin']['allProducts'] = $allProducts;
         $this->data['admin']['kitId'] = (int)($productData['kit_id'] ?? 0);
         $this->data['admin']['currentKitProduct'] = $this->formData->findById(items: $allProducts, targetId: (int)($productData['kit_id'] ?? 0));
@@ -702,7 +703,7 @@ class ProductsController extends AdminController
 
     private function deleteProductCompletely(int $productId, string $productName)
     {
-        $this->shopAdmin()->deleteCompletely(productId: $productId, generateBrandPath: [$this->admin, 'generateBrandPath'], generateModelPath: [$this->admin, 'generateModelPath']);
+        $this->shopAdmin()->deleteCompletely(productId: $productId, generateBrandPath: ShopPaths::brand(...), generateModelPath: ShopPaths::model(...));
         $this->admin->model->changelog->log(description: "Permanently deleted product: {$productName}", recordType: 'product', recordId: $productId);
         $this->dispatchProductEvent($productId, remove: true);
         $this->admin->jsonSuccess(['success' => true]);

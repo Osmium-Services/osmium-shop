@@ -66,6 +66,70 @@ class ShopOrderMailer
         return $result;
     }
 
+    /**
+     * Notify a customer their order has shipped. Returns the real error on
+     * failure rather than swallowing it, so OrdersController can tell staff
+     * the order was marked dispatched but the email itself didn't go out.
+     *
+     * @param bool $respectSettings False for the admin's sample send, which
+     *                              must go out whatever Shop settings say
+     * @return array{success: bool, error?: string, skipped?: bool}
+     */
+    public function sendOrderDispatchedEmail(
+        string $toEmail,
+        string $customerName,
+        string $orderRef,
+        ?string $carrier,
+        ?string $trackingRef,
+        bool $respectSettings = true,
+    ): array {
+        $switchedOff = $respectSettings && !CustomerNotifications::wants('order_dispatched', CustomerNotifications::EMAIL);
+        if ($switchedOff) return ['success' => true, 'skipped' => true];
+
+        $hasTracking = !empty($carrier) || !empty($trackingRef);
+        $trackingLineHtml = $hasTracking
+            ? '<table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 30px 0;">'
+                . '<tr><td style="padding: 4px 0; color: #666; font-size: 14px;">Carrier</td>'
+                . '<td style="padding: 4px 0; color: #333; font-size: 14px; text-align: right;">'
+                    . \htmlspecialchars($carrier ?: 'Not specified') . '</td></tr>'
+                . '<tr><td style="padding: 4px 0; color: #666; font-size: 14px;">Tracking reference</td>'
+                . '<td style="padding: 4px 0; color: #333; font-size: 14px; text-align: right;">'
+                    . \htmlspecialchars($trackingRef ?: 'Not specified') . '</td></tr>'
+                . '</table>'
+            : '';
+
+        $html = $this->renderTemplate(filename: 'order-dispatched.html', vars: [
+            'logoUrl' => BrandLogo::emailUrl($this->config->site->FQDN),
+            'customerName' => \htmlspecialchars($customerName),
+            'orderRef' => \htmlspecialchars($orderRef),
+            'trackingLine' => $trackingLineHtml,
+            'siteName' => $this->config->site->name,
+        ]);
+
+        $trackingLineText = $hasTracking
+            ? 'Carrier: ' . ($carrier ?: 'Not specified') . "\nTracking reference: " . ($trackingRef ?: 'Not specified')
+            : '';
+
+        $text = $this->renderTemplate(filename: 'order-dispatched.txt', vars: [
+            'customerName' => $customerName,
+            'orderRef' => $orderRef,
+            'trackingLine' => $trackingLineText,
+            'siteName' => $this->config->site->name,
+        ]);
+
+        $result = MailDelivery::send(
+            mailer: $this->mailer ?? MailerFactory::make($this->config),
+            recipients: [['email' => $toEmail, 'name' => $customerName]],
+            subject: "Your order {$orderRef} has been dispatched",
+            htmlBody: $html,
+            textBody: $text,
+        );
+
+        if (!$result['success']) \error_log('Order Dispatched Email Error: ' . $result['error']);
+
+        return $result;
+    }
+
     private function htmlVars(array $order, int $invoiceNumber): array
     {
         $itemRows = '';

@@ -17,7 +17,7 @@ namespace Osmium\Core\Library;
  * Osmium serves UK markets only for now. This class is the single place to
  * change when that stops being true, for example to resolve the currency and
  * tax for an order or a delivery country, without touching any consumer.
- * Get one from the framework with Osmium::finance().
+ * Get the site's one with StoreFinance::forOsmium($osmium): built once per request from Shop settings.
  */
 final class StoreFinance
 {
@@ -53,6 +53,30 @@ final class StoreFinance
 
         $rateValid = $taxRatePercent >= 0 && $taxRatePercent <= 100;
         if (!$rateValid) throw new \InvalidArgumentException("Shop taxRatePercent must be between 0 and 100, got {$taxRatePercent}");
+    }
+
+    /** @var \WeakMap<object, self>|null the finance built for each framework instance */
+    private static ?\WeakMap $perOsmium = null;
+
+    /**
+     * The store's currency, tax and country for this site, built once from Shop settings. Throws if a setting is
+     * missing or invalid, so a misconfigured shop fails loudly.
+     *
+     * @param object $osmium the framework instance (its config holds the 'shop' block)
+     */
+    public static function forOsmium(object $osmium): self
+    {
+        self::$perOsmium ??= new \WeakMap();
+        self::$perOsmium[$osmium] ??= self::fromConfig($osmium->config->shop ?? []);
+
+        return self::$perOsmium[$osmium];
+    }
+
+    /** For tests: the finance this framework instance hands out */
+    public static function useFor(object $osmium, self $finance): void
+    {
+        self::$perOsmium ??= new \WeakMap();
+        self::$perOsmium[$osmium] = $finance;
     }
 
     /**

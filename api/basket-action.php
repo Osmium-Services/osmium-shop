@@ -42,7 +42,7 @@ $discountService = $discountsSupported
     ? new ShopDiscountService(new CheckoutDiscount($this->osmium->dataSource, 'discounts'))
     : null;
 
-$totalsService = ShopTotalsService::fromConfig($this->osmium->config->checkout, $this->osmium->finance(), discounts: $discountService);
+$totalsService = ShopTotalsService::fromConfig($this->osmium->config->checkout, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium), discounts: $discountService);
 
 /**
  * Price the basket and attach a thumbnail to every line. Shared by every
@@ -74,7 +74,7 @@ $priceAndDecorate = function (array $lines) use ($totalsService, $discountsSuppo
     }
     unset($line);
 
-    return ['discounts_enabled' => $discountsSupported, 'currency' => $this->osmium->finance()->currencyCode()] + $totalsService->calculate(lines: $lines, couponCode: $couponCode);
+    return ['discounts_enabled' => $discountsSupported, 'currency' => \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencyCode()] + $totalsService->calculate(lines: $lines, couponCode: $couponCode);
 };
 
 try {

@@ -4,6 +4,7 @@ namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Modules\Admin\Services\AdminShopCategories;
+use Osmium\Modules\Admin\Services\ShopPaths;
 
 use const Osmium\Config\PAGES;
 
@@ -447,8 +448,8 @@ class ProductCategoriesController extends AdminController
 
         $imagesPath = $this->osmium->config->site->imagesPath;
         foreach ($products as &$product) {
-            $brandPath = $this->admin->generateBrandPath($product['brand_name'] ?? '');
-            $modelPath = $this->admin->generateModelPath($product['model_name'] ?? '');
+            $brandPath = ShopPaths::brand($product['brand_name'] ?? '');
+            $modelPath = ShopPaths::model($product['model_name'] ?? '');
             $thumbFile = $brandPath . '-' . $modelPath . '.jpg';
             $thumbPath = '/shop/' . $brandPath . '/' . $modelPath . '/thumb/' . $thumbFile;
             $product['thumbnail'] = $imagesPath . $thumbPath;

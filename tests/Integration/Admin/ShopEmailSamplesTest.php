@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Integration\Admin;
 
 use Osmium\Modules\Checkout\Services\ShopEmailSamples;
+use Osmium\Modules\Checkout\Services\ShopOrderMailer;
 use PHPUnit\Framework\TestCase;
-use Tests\Helpers\RecordingAdminMailer;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/services/osmium-shop/models/ShopEmailSamples.php';
@@ -30,14 +30,25 @@ class ShopEmailSamplesTest extends TestCase
 
     public function test_the_sample_dispatch_email_uses_dummy_order_details_and_ignores_the_notification_switches(): void
     {
-        $mailer = new RecordingAdminMailer();
+        $mailer = new class extends ShopOrderMailer {
+            public array $calls = [];
+
+            public function __construct() {}
+
+            public function sendOrderDispatchedEmail(string $toEmail, string $customerName, string $orderRef, ?string $carrier, ?string $trackingRef, bool $respectSettings = true): array
+            {
+                $this->calls[] = [$toEmail, $customerName, $orderRef, $carrier, $trackingRef, $respectSettings];
+
+                return ['success' => true];
+            }
+        };
 
         $result = ShopEmailSamples::orderDispatched(['toEmail' => 'to@example.test', 'osmium' => new \stdClass()], $mailer);
 
         $this->assertSame(['success' => true], $result);
         $this->assertSame(
             [['to@example.test', 'Jane Doe', 'SG-SAMPLE', 'Royal Mail Tracked 24', 'RM123456789GB', false]],
-            $mailer->calls['sendOrderDispatchedEmail'],
+            $mailer->calls,
         );
     }
 }

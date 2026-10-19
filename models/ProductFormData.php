@@ -87,8 +87,8 @@ class ProductFormData
 
     private function buildProductThumbnail(string $brandName, string $modelName): string
     {
-        $brandPath = $this->admin->generateBrandPath($brandName);
-        $modelPath = $this->admin->generateModelPath($modelName);
+        $brandPath = ShopPaths::brand($brandName);
+        $modelPath = ShopPaths::model($modelName);
         $basePath = '/shop/' . $brandPath . '/' . $modelPath . '/';
         $fileName = $brandPath . '-' . $modelPath;
 
@@ -164,7 +164,7 @@ class ProductFormData
     public function buildPdfPaths($product): array
     {
         $pdfPaths = [];
-        foreach (OsmiumAdmin::PDF_TYPES as $type) {
+        foreach (AdminShop::PDF_TYPES as $type) {
             $brandPath = $product->brandPath;
             $modelPath = $product->modelPath;
             $pdfDir = 'assets/images/shop/' . $brandPath . '/' . $modelPath . '/' . $type;

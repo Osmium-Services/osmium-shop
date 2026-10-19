@@ -115,7 +115,7 @@ class OsmiumShop
     {
         $config = $this->osmium->config->shop;
 
-        $boolean  = [ // Currency, tax and country are validated by StoreFinance (Osmium::finance())
+        $boolean  = [ // Currency, tax and country are validated by StoreFinance (StoreFinance::forOsmium())
             'categoryShowCounts',
             'categoryShowSummaryText',
             'categoryShowCallToAction',

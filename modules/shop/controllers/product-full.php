@@ -134,7 +134,7 @@ $this->data['product']['shopEvent'] = [
     'product_id' => (int)$product->id,
     'title' => $product->title,
     'value' => (float)$productService->schemaPriceIncTax($priceExcTax),
-    'currency' => $this->osmium->finance()->currencyCode(),
+    'currency' => \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencyCode(),
 ]; // For the osmium:shop-event view_item tag (THEME-CONTRACT.md section 7)
 
 $savings = $productService->calculateSavings(

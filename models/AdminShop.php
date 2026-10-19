@@ -23,7 +23,8 @@ require_once 'app/core/admin/services/AdminPages.php';
  */
 class AdminShop
 {
-    private const PDF_TYPES = ['brochure', 'datasheet', 'instructions'];
+    public const PDF_TYPES = ['brochure', 'datasheet', 'instructions'];
+    public const PRODUCT_DELETE_GRACE_PERIOD = 3600; // 1 hour in seconds: a product this new can be deleted for good
     private const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB
 
     private string $basePath;
@@ -384,7 +385,7 @@ class AdminShop
         if (!$product) throw new \Exception('Product not found');
 
         $createdAt = \strtotime($product['created_at']);
-        $oneHourAgo = \time() - OsmiumAdmin::PRODUCT_DELETE_GRACE_PERIOD;
+        $oneHourAgo = \time() - self::PRODUCT_DELETE_GRACE_PERIOD;
         $outsideGracePeriod = $createdAt <= $oneHourAgo;
         if ($outsideGracePeriod) throw new \Exception('Can only undo products created within the last hour'); // Check grace period
 

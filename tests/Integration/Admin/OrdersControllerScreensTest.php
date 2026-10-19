@@ -15,7 +15,7 @@ use Osmium\Core\Library\Url;
 use Osmium\Core\Osmium;
 use Osmium\Modules\Admin\Controllers\OrdersController;
 use Osmium\Modules\Admin\Services\AdminAuth;
-use Osmium\Modules\Admin\Services\AdminMailer;
+use Osmium\Modules\Checkout\Services\ShopOrderMailer;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Osmium\Core\Library\PaymentProviders;
@@ -138,6 +138,7 @@ class OrdersControllerScreensTest extends DatabaseTestCase
             public function __construct(OsmiumPDO $db, private array $stashed)
             {
                 $this->dataSource = $db;
+                StoreFinance::useFor($this, new StoreFinance('GBP', '£', 'VAT', 20.0, 'GB'));
                 $this->url = new class extends Url {
                     public function __construct() {}
 
@@ -156,11 +157,6 @@ class OrdersControllerScreensTest extends DatabaseTestCase
                 };
             }
 
-            public function finance(): StoreFinance
-            {
-                return new StoreFinance('GBP', '£', 'VAT', 20.0, 'GB');
-            }
-
             public function getStashedParam(string $key, mixed $default = null): mixed
             {
                 return $this->stashed[$key] ?? $default;
@@ -177,9 +173,9 @@ class OrdersControllerScreensTest extends DatabaseTestCase
                 parent::__construct($osmium, $admin, $data);
             }
 
-            protected function mailer(): AdminMailer
+            protected function mailer(): ShopOrderMailer
             {
-                return new class ($this->test) extends AdminMailer {
+                return new class ($this->test) extends ShopOrderMailer {
                     public function __construct(private object $test) {}
 
                     public function sendOrderDispatchedEmail(string $toEmail, string $customerName, string $orderRef, ?string $carrier, ?string $trackingRef, bool $respectSettings = true): array

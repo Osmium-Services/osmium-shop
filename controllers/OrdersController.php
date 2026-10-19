@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
-use Osmium\Modules\Admin\Services\AdminMailer;
-use Osmium\Modules\Admin\Services\AdminMailerInterface;
+use Osmium\Modules\Checkout\Services\ShopOrderMailer;
 use Osmium\Modules\Checkout\Services\ShopOrderPdfService;
 use Osmium\Core\Library\PaymentProviders;
 use Osmium\Core\Features\FeatureConfig;
@@ -16,8 +15,6 @@ use Osmium\Core\Library\ServiceLoader;
 use Osmium\Core\Models\ServiceModel;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
-require_once \Osmium\Core\Library\AdminPaths::path('services/AdminMailer.php');
-require_once \Osmium\Core\Library\AdminPaths::path('services/AdminMailerInterface.php');
 
 /**
  * Orders controller - order fulfilment.
@@ -129,7 +126,7 @@ class OrdersController extends AdminController
     {
         [$order, $items] = $this->loadOrderForDocument();
 
-        $pdfService = new ShopOrderPdfService($this->osmium->config, $this->osmium->finance());
+        $pdfService = new ShopOrderPdfService($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium));
         $pdf = $pdfService->buildDespatchNote($order, $items);
 
         $this->streamPdf($pdf, 'DespatchNote-' . $order['order_ref'] . '.pdf');
@@ -143,7 +140,7 @@ class OrdersController extends AdminController
         [$order, $items] = $this->loadOrderForDocument();
         $items = \array_map([$this, 'formatItem'], $items);
 
-        $pdfService = new ShopOrderPdfService($this->osmium->config, $this->osmium->finance());
+        $pdfService = new ShopOrderPdfService($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium));
         $pdf = $pdfService->buildInvoice($order, $items, (string)$this->osmium->config->site->name);
 
         $this->streamPdf($pdf, 'Invoice-' . $order['order_ref'] . '.pdf');
@@ -251,9 +248,9 @@ class OrdersController extends AdminController
     }
 
     /** A method so a test can stand in for the mailer instead of sending */
-    protected function mailer(): AdminMailerInterface
+    protected function mailer(): ShopOrderMailer
     {
-        return new AdminMailer($this->osmium->config);
+        return new ShopOrderMailer($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium));
     }
 
     /**
@@ -442,7 +439,7 @@ class OrdersController extends AdminController
 
     private function money(mixed $amount): string
     {
-        return $this->osmium->finance()->format((float)$amount);
+        return \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->format((float)$amount);
     }
 
     private function dateTime(?string $value): string

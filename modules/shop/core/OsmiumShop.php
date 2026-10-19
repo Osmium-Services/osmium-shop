@@ -9,7 +9,7 @@ $this->shop = new OsmiumShop($this->osmium);
 $this->data['shop']['blocksPath'] = 'app/modules/shop/views/blocks/';
 
 $config = $this->osmium->config->shop;
-$finance = $this->osmium->finance(); // Currency, tax and country: one source for every view
+$finance = \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium); // Currency, tax and country: one source for every view
 $this->data['shop']['finance']         = $finance; // $shop['finance']->format(12.5) gives "£12.50"
 $this->data['shop']['currency']        = $finance->currencyCode();
 $this->data['shop']['currencySign']    = $finance->currencySign();

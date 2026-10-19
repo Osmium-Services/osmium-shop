@@ -7,7 +7,6 @@ namespace Tests\Unit\Modules\Checkout\Services;
 use Osmium\Core\Library\MailerInterface;
 use Osmium\Core\Library\PlainTextMailer;
 use Osmium\Core\Library\StoreFinance;
-use Osmium\Modules\Admin\Services\AdminMailer;
 use Osmium\Modules\Checkout\Services\ShopOrderMailer;
 use PHPUnit\Framework\TestCase;
 
@@ -100,7 +99,7 @@ class ShopOrderMailerPlainTextTest extends TestCase
     {
         $mailer = $this->textMailer();
 
-        (new AdminMailer($this->config(), $mailer))->sendOrderDispatchedEmail(
+        (new ShopOrderMailer($this->config(), new StoreFinance('GBP', '£', 'VAT', 20.0, 'GB'), $mailer))->sendOrderDispatchedEmail(
             toEmail: 'buyer@example.com',
             customerName: "Jo O'Brien",
             orderRef: 'SG2-1001',
@@ -120,7 +119,7 @@ class ShopOrderMailerPlainTextTest extends TestCase
     {
         $mailer = $this->textMailer();
 
-        (new AdminMailer($this->config(), $mailer))->sendOrderDispatchedEmail(
+        (new ShopOrderMailer($this->config(), new StoreFinance('GBP', '£', 'VAT', 20.0, 'GB'), $mailer))->sendOrderDispatchedEmail(
             toEmail: 'buyer@example.com',
             customerName: 'Jo',
             orderRef: 'SG2-1002',

@@ -1,0 +1,9 @@
+Your order's on its way, {{customerName}}!
+
+Order {{orderRef}} has been dispatched.
+
+{{trackingLine}}
+
+If you have any questions, just reply to this email.
+
+(c) {{siteName}} - This is an automated message.

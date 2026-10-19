@@ -461,40 +461,14 @@ class AdminShopImages
         return $renamed;
     }
 
-    /**
-     * Generate URL-safe brand path from brand name.
-     * Matches OsmiumAdmin::generateBrandPath() logic.
-     */
     private function generateBrandPath(string $brandName): string
     {
-        $path = \trim($brandName);
-        $path = \mb_strtolower($path);
-
-        $path = \str_replace(search: ['/', '\\', '&'], replace: '', subject: $path); // Explicitly strip dangerous filesystem/URL characters
-
-        $path = \preg_replace(pattern: '/[^a-z0-9-]+/', replacement: '-', subject: $path); // Strip any character that isn't a-z, 0-9, or hyphen
-
-        $path = \preg_replace(pattern: '/-+/', replacement: '-', subject: $path); // Collapse consecutive hyphens
-
-        return \trim(string: $path, characters: '-'); // Trim hyphens from edges
+        return ShopPaths::brand($brandName);
     }
 
-    /**
-     * Generate URL-safe model path from model name.
-     * Matches OsmiumAdmin::generateModelPath() logic.
-     */
     private function generateModelPath(string $modelName): string
     {
-        $path = \trim($modelName);
-        $path = \mb_strtolower($path);
-
-        $path = \str_replace(search: ['/', '\\', '&'], replace: '', subject: $path); // Explicitly strip dangerous filesystem/URL characters
-
-        $path = \preg_replace(pattern: '/[^a-z0-9-]+/', replacement: '-', subject: $path); // Strip any character that isn't a-z, 0-9, or hyphen
-
-        $path = \preg_replace(pattern: '/-+/', replacement: '-', subject: $path); // Collapse consecutive hyphens
-
-        return \trim(string: $path, characters: '-'); // Trim hyphens from edges
+        return ShopPaths::model($modelName);
     }
 
     /**

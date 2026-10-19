@@ -83,7 +83,7 @@ $discountService = $discountsSupported
     : null;
 
 $basketService = new CheckoutBasketService(new CheckoutBasket($this->osmium->dataSource, 'checkout_baskets'));
-$finance = $this->osmium->finance();
+$finance = \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium);
 $totalsService = ShopTotalsService::fromConfig($this->osmium->config->checkout, $finance, discounts: $discountService);
 $orderService = new ShopOrderService(
     orders: new CheckoutOrder($this->osmium->dataSource, 'shop_orders'),

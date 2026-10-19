@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Checkout\Services;
 
-use Osmium\Modules\Admin\Services\AdminMailer;
-use Osmium\Modules\Admin\Services\AdminMailerInterface;
 
 require_once __DIR__ . '/ShopOrderMailer.php';
 
@@ -61,15 +59,15 @@ final class ShopEmailSamples
             ],
         ];
 
-        $mailer = new ShopOrderMailer($osmium->config, $osmium->finance());
+        $mailer = new ShopOrderMailer($osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($osmium));
 
         return $mailer->sendOrderConfirmation($order, 9999, respectSettings: false);
     }
 
     /** @param array{toEmail: string, osmium: object} $call @return array{success: bool, error?: string} */
-    public static function orderDispatched(array $call, ?AdminMailerInterface $mailer = null): array
+    public static function orderDispatched(array $call, ?ShopOrderMailer $mailer = null): array
     {
-        $mailer ??= new AdminMailer($call['osmium']->config);
+        $mailer ??= new ShopOrderMailer($call['osmium']->config, \Osmium\Core\Library\StoreFinance::forOsmium($call['osmium']));
 
         return $mailer->sendOrderDispatchedEmail(
             toEmail: $call['toEmail'],
