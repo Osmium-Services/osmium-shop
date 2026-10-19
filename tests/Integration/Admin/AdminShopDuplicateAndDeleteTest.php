@@ -11,7 +11,7 @@ use Osmium\Modules\Admin\Models\ProductOptionType;
 use Osmium\Modules\Admin\Models\ProductOptionValue;
 use Osmium\Modules\Admin\Services\AdminPages;
 use Osmium\Modules\Admin\Services\AdminShop;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/AdminShop.php';
 
@@ -20,7 +20,7 @@ require_once 'app/services/osmium-shop/models/AdminShop.php';
  * with the routes file faked so the real app/config/routes.php is never
  * rewritten, and the image folders made under a throwaway working directory.
  */
-class AdminShopDuplicateAndDeleteTest extends DatabaseTestCase
+class AdminShopDuplicateAndDeleteTest extends ShopDatabaseTestCase
 {
     private AdminShop $shop;
     private Product $products;

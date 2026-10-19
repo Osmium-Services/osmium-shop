@@ -7,7 +7,7 @@ namespace Tests\Integration\Admin;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Models\Discount;
 use Osmium\Modules\Admin\Services\DiscountMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The discount write tools run for real against the tables. A discount made or edited here must always be
@@ -15,7 +15,7 @@ use Tests\Integration\DatabaseTestCase;
  * reused (the bin counts), delete and restore must only move to and from the bin, and every refusal must leave
  * the database exactly as it was.
  */
-class DiscountMcpHandlersTest extends DatabaseTestCase
+class DiscountMcpHandlersTest extends ShopDatabaseTestCase
 {
     private Discount $discounts;
     private string $runTag;

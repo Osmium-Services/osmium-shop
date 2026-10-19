@@ -7,13 +7,13 @@ namespace Tests\Integration\Admin;
 use Osmium\Modules\Admin\Models\ProductOptionType;
 use Osmium\Modules\Admin\Models\ProductOptionValue;
 use Osmium\Modules\Admin\Services\AdminShopOptions;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The link from an option type's default choice to a real product: what the
  * configurator saves, clears and copies, so the default's stock can be checked.
  */
-class AdminShopOptionsDefaultLinkTest extends DatabaseTestCase
+class AdminShopOptionsDefaultLinkTest extends ShopDatabaseTestCase
 {
     private AdminShopOptions $options;
     private int $kitId;

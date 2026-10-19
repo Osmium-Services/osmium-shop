@@ -6,7 +6,7 @@ namespace Tests\Integration\Admin;
 
 use Osmium\Modules\Admin\Services\DashboardView;
 use Osmium\Modules\Admin\Services\ShopDashboardWidgets;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/DashboardView.php';
@@ -16,7 +16,7 @@ require_once 'app/services/osmium-shop/models/ShopDashboardWidgets.php';
  * The shop's dashboard cards: what each is told, and that core accepts
  * them as cards with their own view.
  */
-class ShopDashboardWidgetsTest extends DatabaseTestCase
+class ShopDashboardWidgetsTest extends ShopDatabaseTestCase
 {
     private function payload(): array
     {

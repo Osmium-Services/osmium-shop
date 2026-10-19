@@ -7,7 +7,7 @@ namespace Tests\Integration\Admin;
 use Osmium\Core\Library\Autoload;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Services\ProductMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/ProductMcp.php';
 
@@ -31,7 +31,7 @@ class RecordingProductMcp extends ProductMcp
  * wrong product, the restock date rules, the category add, the changelog entry under the client's name, and that
  * every refusal leaves the database as it was.
  */
-class ProductMcpHandlersTest extends DatabaseTestCase
+class ProductMcpHandlersTest extends ShopDatabaseTestCase
 {
     private static bool $autoloadRegistered = false;
 

@@ -25,7 +25,7 @@ use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -39,7 +39,7 @@ require_once 'app/services/osmium-shop/controllers/ProductsController.php';
  * Actions that rewrite the live routes file (duplicate) or need a real HTTP
  * upload (pdf_upload) are not driven from here.
  */
-class ProductsControllerActionTest extends DatabaseTestCase
+class ProductsControllerActionTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

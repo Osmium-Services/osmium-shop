@@ -7,7 +7,7 @@ namespace Tests\Integration\Admin;
 use Osmium\Modules\Admin\Models\ProductOptionType;
 use Osmium\Modules\Admin\Models\ProductOptionValue;
 use Osmium\Modules\Admin\Services\AdminShopOptions;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/AdminShopOptions.php';
 
@@ -16,7 +16,7 @@ require_once 'app/services/osmium-shop/models/AdminShopOptions.php';
  * cleared), the dependency links between a type and the choices that reveal it, deleting, reordering, and copying a
  * whole option set to another product, which replaces what the target had. Real models, rolled back.
  */
-class AdminShopOptionsTest extends DatabaseTestCase
+class AdminShopOptionsTest extends ShopDatabaseTestCase
 {
     private AdminShopOptions $options;
     private int $productId;

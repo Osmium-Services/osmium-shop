@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Admin;
 
 use Osmium\Modules\Admin\Models\Brand;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/Brand.php';
 
@@ -13,7 +13,7 @@ require_once 'app/services/osmium-shop/models/Brand.php';
  * The brand queries behind the MCP brand tools, run against the real tables: duplicate names are caught without
  * regard to case, and the lists count products the way the admin does.
  */
-class BrandMcpModelTest extends DatabaseTestCase
+class BrandMcpModelTest extends ShopDatabaseTestCase
 {
     private Brand $brands;
 

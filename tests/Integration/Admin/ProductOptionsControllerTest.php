@@ -17,7 +17,7 @@ use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -34,7 +34,7 @@ final class OptionsRedirectSignal extends \Error {}
  * changes data), and that each action reaches the right option rule and answers in the shape the configurator
  * reads. The rules themselves are in AdminShopOptionsTest. Real controller and models, rolled back.
  */
-class ProductOptionsControllerTest extends DatabaseTestCase
+class ProductOptionsControllerTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

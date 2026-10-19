@@ -12,7 +12,7 @@ use Osmium\Core\Models\Model;
 use Osmium\Core\Osmium;
 use Osmium\Core\OsmiumConfig;
 use Osmium\Modules\Admin\Models\Page;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/library/Autoload.php';
@@ -23,7 +23,7 @@ require_once 'app/core/library/Autoload.php';
  * tables, and the not-found answer. Runs the real script over real products (rolled back); the response methods
  * are stood in so the answer is recorded.
  */
-class AiProductSpecControllerTest extends DatabaseTestCase
+class AiProductSpecControllerTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

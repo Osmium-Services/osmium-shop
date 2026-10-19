@@ -7,10 +7,10 @@ namespace Tests\Integration\Admin;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Models\Discount;
 use Osmium\Modules\Admin\Services\DiscountMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /** discounts_list against the real tables: live rows with product counts, and the bin. */
-class DiscountMcpListTest extends DatabaseTestCase
+class DiscountMcpListTest extends ShopDatabaseTestCase
 {
     private function fields(string $name, string $type, ?string $code = null): array
     {

@@ -8,7 +8,7 @@ use Osmium\Core\Library\Autoload;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Models\Brand;
 use Osmium\Modules\Admin\Services\BrandMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/Brand.php';
 
@@ -19,7 +19,7 @@ require_once 'app/services/osmium-shop/models/BrandMcp.php';
  * fields), update (only what is given, rename counted against live products), delete (refused while products use
  * it) and restore (refused if the name was taken meanwhile), with every refusal leaving the database as it was.
  */
-class BrandMcpHandlersTest extends DatabaseTestCase
+class BrandMcpHandlersTest extends ShopDatabaseTestCase
 {
     private static bool $autoloadRegistered = false;
 

@@ -17,7 +17,7 @@ use Osmium\Modules\Admin\Services\AdminPresence;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -33,7 +33,7 @@ require_once 'app/services/osmium-shop/controllers/StatusesController.php';
  *
  * productstatus.id is a tinyint and a rolled-back insert still uses up an id, so tearDown puts the counter back.
  */
-class StatusesControllerTest extends DatabaseTestCase
+class StatusesControllerTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

@@ -6,13 +6,13 @@ namespace Tests\Integration\Shop;
 
 use Osmium\Modules\Shop\Models\ShopProductOption;
 use Osmium\Modules\Shop\Services\ShopProductService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * What the storefront learns about the product behind an option type's default
  * choice: its stock status and restock date, read from the real tables.
  */
-class ShopProductOptionDefaultLinkTest extends DatabaseTestCase
+class ShopProductOptionDefaultLinkTest extends ShopDatabaseTestCase
 {
     private ShopProductOption $options;
     private ShopProductService $service;

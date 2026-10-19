@@ -13,7 +13,7 @@ use Osmium\Core\Models\Model;
 use Osmium\Core\Osmium;
 use Osmium\Core\OsmiumConfig;
 use Osmium\Modules\Admin\Models\Page;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/library/Autoload.php';
@@ -24,7 +24,7 @@ require_once 'app/core/library/Autoload.php';
  * what is left out (binned, unavailable statuses, products with no live page), and the one-minute result cache. Runs
  * the real script over real products (rolled back); the rate-limit and result cache files it makes are removed.
  */
-class SearchActionControllerTest extends DatabaseTestCase
+class SearchActionControllerTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Tests\Integration\Checkout;
 
 use Tests\Helpers\ControllerHarness;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The basket endpoint end to end: the real controller file, the real basket
  * and totals services, a real database. What a browser can ask for, what it
  * is refused, and what it is shown afterwards.
  */
-class BasketActionTest extends DatabaseTestCase
+class BasketActionTest extends ShopDatabaseTestCase
 {
     private const TOKEN = 'session-token-123';
 

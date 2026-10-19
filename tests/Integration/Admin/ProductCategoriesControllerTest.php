@@ -19,7 +19,7 @@ use Osmium\Modules\Admin\Services\AdminShopCategories;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -53,7 +53,7 @@ class RollbackSafeProductCategory extends ProductCategory
  * real models, rolled back. The page routes file is never rewritten, and restoring a whole backup is not driven
  * from here (it opens its own transaction and wipes every category).
  */
-class ProductCategoriesControllerTest extends DatabaseTestCase
+class ProductCategoriesControllerTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

@@ -6,13 +6,13 @@ namespace Tests\Integration\Checkout;
 
 use Osmium\Modules\Checkout\Models\CheckoutBasket;
 use Osmium\Modules\Checkout\Services\CheckoutKitParts;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * Which products a kit line takes stock from: each chosen option's linked
  * product, or the type's default product when no choice was made.
  */
-class CheckoutKitPartsTest extends DatabaseTestCase
+class CheckoutKitPartsTest extends ShopDatabaseTestCase
 {
     private CheckoutKitParts $kitParts;
     private int $kitId;

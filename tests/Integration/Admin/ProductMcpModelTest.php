@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Tests\Integration\Admin;
 
 use Osmium\Modules\Admin\Models\Product;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The narrow product queries behind the MCP product tools, run against the real tables: the restock date changes
  * on its own, and the status check reads the real status flags.
  */
-class ProductMcpModelTest extends DatabaseTestCase
+class ProductMcpModelTest extends ShopDatabaseTestCase
 {
     private Product $products;
 

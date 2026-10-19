@@ -11,7 +11,7 @@ use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Osmium\Modules\Admin\Services\ProductPriceCsv;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -25,7 +25,7 @@ require_once 'app/services/osmium-shop/models/ProductPriceCsv.php';
  * an import changes, skips and refuses, row by row. Money moves here, so each outcome is pinned: the new price,
  * the history row that makes it undoable, and the rows that must be left alone. Real models, rolled back.
  */
-class ProductPriceCsvTest extends DatabaseTestCase
+class ProductPriceCsvTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

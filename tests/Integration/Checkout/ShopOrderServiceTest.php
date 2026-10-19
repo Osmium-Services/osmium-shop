@@ -10,9 +10,9 @@ use Osmium\Modules\Checkout\Models\CheckoutOrder;
 use Osmium\Modules\Checkout\Services\CheckoutBasketService;
 use Osmium\Modules\Checkout\Services\ShopOrderService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
-class ShopOrderServiceTest extends DatabaseTestCase
+class ShopOrderServiceTest extends ShopDatabaseTestCase
 {
     private ShopOrderService $orders;
     private CheckoutBasketService $baskets;

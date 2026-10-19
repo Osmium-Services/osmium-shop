@@ -14,7 +14,7 @@ use Osmium\Modules\Checkout\Services\ShopPaymentException;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
 use Tests\Helpers\ControllerHarness;
 use Tests\Helpers\FakePaymentProvider;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The checkout endpoint end to end: the real controller file, real services, a real
@@ -22,7 +22,7 @@ use Tests\Integration\DatabaseTestCase;
  * run through the real loader. What happens to an order and to the customer's money
  * as the browser walks through create_order and capture_order.
  */
-class CheckoutActionTest extends DatabaseTestCase
+class CheckoutActionTest extends ShopDatabaseTestCase
 {
     private const TOKEN = 'checkout-token-456';
     private const SESSION_EXPIRED = 'Your session has expired. Please reload the page and try again.';

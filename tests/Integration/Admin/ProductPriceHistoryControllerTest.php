@@ -14,7 +14,7 @@ use Osmium\Modules\Admin\Services\AdminAuth;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -27,7 +27,7 @@ require_once 'app/services/osmium-shop/controllers/ProductPriceHistoryController
  * still be undone, and the undo itself, which puts a product's price back. Real controller, real models, rolled
  * back. Undoing a batch that has since been overtaken answers with echo and exit, so that one refusal is not driven.
  */
-class ProductPriceHistoryControllerTest extends DatabaseTestCase
+class ProductPriceHistoryControllerTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

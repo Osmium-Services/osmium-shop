@@ -17,7 +17,7 @@ use Osmium\Modules\Admin\Services\AdminPresence;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -34,7 +34,7 @@ require_once 'app/services/osmium-shop/controllers/DiscountsController.php';
  * refused, what a type change clears) and the action endpoint (bin, restore, permanent delete and who may do
  * them). Real controller, real models, rolled back.
  */
-class DiscountsControllerTest extends DatabaseTestCase
+class DiscountsControllerTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

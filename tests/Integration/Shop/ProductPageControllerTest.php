@@ -16,7 +16,7 @@ use Osmium\Modules\Admin\Models\ProductOptionValue;
 use Osmium\Modules\Admin\Services\AdminShopOptions;
 use Osmium\Modules\Shop\Core\OsmiumShop;
 use Osmium\Modules\Shop\Core\OsmiumShopModel;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/library/Autoload.php';
@@ -28,7 +28,7 @@ require_once 'app/services/osmium-shop/models/AdminShopOptions.php';
  * fields, the social image and the meta description fallback. The script runs for real against real products and
  * the shop models (rolled back); only the site around it (config, image lookups) is a stand-in.
  */
-class ProductPageControllerTest extends DatabaseTestCase
+class ProductPageControllerTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

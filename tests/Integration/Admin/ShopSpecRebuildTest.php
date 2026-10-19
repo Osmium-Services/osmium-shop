@@ -8,7 +8,7 @@ use Osmium\Core\Library\FileSystem;
 use Osmium\Core\Osmium;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Osmium\Modules\Admin\Services\ShopSpecRebuild;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -21,7 +21,7 @@ require_once 'app/services/osmium-shop/models/ShopSpecRebuild.php';
  * The Rebuild Spec JSON action on the Migrations page: it rewrites every product's parsed specs from its techspec.
  * Real models, rolled back.
  */
-class ShopSpecRebuildTest extends DatabaseTestCase
+class ShopSpecRebuildTest extends ShopDatabaseTestCase
 {
     private const SPEC_TABLE = '<table><tbody><tr><td>Power</td><td>100 W</td></tr><tr><td>Weight</td><td>2 kg</td></tr></tbody></table>';
 

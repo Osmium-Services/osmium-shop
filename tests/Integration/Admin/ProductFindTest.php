@@ -6,12 +6,12 @@ namespace Tests\Integration\Admin;
 
 use Osmium\Core\Library\Autoload;
 use Osmium\Modules\Admin\Services\ProductMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/ProductMcp.php';
 
 /** products_find run for real: matches brand, model and reference, never a deleted product, and caps the list. */
-class ProductFindTest extends DatabaseTestCase
+class ProductFindTest extends ShopDatabaseTestCase
 {
     private static bool $autoloadRegistered = false;
 

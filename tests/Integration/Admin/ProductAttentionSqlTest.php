@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Tests\Integration\Admin;
 
 use Osmium\Modules\Admin\Models\Product;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The SQL behind products_attention, run against the real tables: which products count as live, and what each one
  * reports (stock state, restock date, price, category). The report is read through the model, as the tool does.
  */
-class ProductAttentionSqlTest extends DatabaseTestCase
+class ProductAttentionSqlTest extends ShopDatabaseTestCase
 {
     private Product $products;
 

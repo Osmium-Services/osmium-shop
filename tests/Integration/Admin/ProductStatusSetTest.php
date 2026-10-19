@@ -7,7 +7,7 @@ namespace Tests\Integration\Admin;
 use Osmium\Core\Library\Autoload;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Services\ProductMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/ProductMcp.php';
 
@@ -15,7 +15,7 @@ require_once 'app/services/osmium-shop/models/ProductMcp.php';
  * product_status_set run for real: only the status changes, the restock date is dropped when the new status is
  * not a restocking one, and every refusal leaves the product as it was.
  */
-class ProductStatusSetTest extends DatabaseTestCase
+class ProductStatusSetTest extends ShopDatabaseTestCase
 {
     private static bool $autoloadRegistered = false;
 

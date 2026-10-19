@@ -6,7 +6,7 @@ namespace Tests\Integration\Admin;
 
 use Osmium\Modules\Admin\Models\Product;
 use Osmium\Modules\Admin\Services\AdminShopImages;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/Product.php';
 require_once 'app/services/osmium-shop/models/AdminShopImages.php';
@@ -17,7 +17,7 @@ require_once 'app/services/osmium-shop/models/AdminShopImages.php';
  * database rows (rolled back). The processor's debug log (app/logs/image-upload.log) is put back to the length it
  * had before each test.
  */
-class AdminShopImagesTest extends DatabaseTestCase
+class AdminShopImagesTest extends ShopDatabaseTestCase
 {
     private AdminShopImages $images;
     private string $root;

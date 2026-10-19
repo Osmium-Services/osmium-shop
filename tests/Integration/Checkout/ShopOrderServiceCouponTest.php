@@ -13,9 +13,9 @@ use Osmium\Modules\Checkout\Services\ShopDiscountService;
 use Osmium\Modules\Checkout\Services\ShopOrderException;
 use Osmium\Modules\Checkout\Services\ShopOrderService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
-class ShopOrderServiceCouponTest extends DatabaseTestCase
+class ShopOrderServiceCouponTest extends ShopDatabaseTestCase
 {
     private ShopOrderService $orders;
     private ShopDiscountService $discounts;

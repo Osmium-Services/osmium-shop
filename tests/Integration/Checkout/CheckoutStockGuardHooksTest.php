@@ -13,13 +13,13 @@ use Osmium\Modules\Checkout\Services\ShopOrderException;
 use Osmium\Modules\Checkout\Services\ShopOrderService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
 use Tests\Helpers\FakeStockGuard;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The points where an installed service can refuse a basket change or an order:
  * basket.line.check (add and raise quantity) and order.check (start checkout).
  */
-class CheckoutStockGuardHooksTest extends DatabaseTestCase
+class CheckoutStockGuardHooksTest extends ShopDatabaseTestCase
 {
     private CheckoutBasketService $baskets;
     private ShopOrderService $orders;

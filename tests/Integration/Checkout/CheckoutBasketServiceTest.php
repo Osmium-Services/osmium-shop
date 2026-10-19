@@ -7,9 +7,9 @@ namespace Tests\Integration\Checkout;
 use Osmium\Modules\Checkout\Models\CheckoutBasket;
 use Osmium\Modules\Checkout\Services\CheckoutBasketService;
 use Osmium\Modules\Checkout\Services\ShopOrderException;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
-class CheckoutBasketServiceTest extends DatabaseTestCase
+class CheckoutBasketServiceTest extends ShopDatabaseTestCase
 {
     private CheckoutBasketService $baskets;
     private int $testProductId;

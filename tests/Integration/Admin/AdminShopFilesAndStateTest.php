@@ -9,7 +9,7 @@ use Osmium\Modules\Admin\Models\Product;
 use Osmium\Modules\Admin\Models\ProductOptionType;
 use Osmium\Modules\Admin\Models\ProductOptionValue;
 use Osmium\Modules\Admin\Services\AdminShop;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/AdminShop.php';
 
@@ -21,7 +21,7 @@ require_once 'app/services/osmium-shop/models/AdminShop.php';
  * redirect. A real upload's final move can't run either, because PHP only
  * moves files it received over HTTP.
  */
-class AdminShopFilesAndStateTest extends DatabaseTestCase
+class AdminShopFilesAndStateTest extends ShopDatabaseTestCase
 {
     private AdminShop $shop;
     private Product $products;

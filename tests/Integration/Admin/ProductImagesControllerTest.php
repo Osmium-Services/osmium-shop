@@ -18,7 +18,7 @@ use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -30,7 +30,7 @@ require_once 'app/services/osmium-shop/controllers/ProductImagesController.php';
  * action to the real AdminShopImages (real GD and files under a throwaway document root, real product rows rolled
  * back), and what comes back as JSON. The image processing itself is AdminShopImagesTest's job.
  */
-class ProductImagesControllerTest extends DatabaseTestCase
+class ProductImagesControllerTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

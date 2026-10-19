@@ -33,7 +33,7 @@ use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\ShopAdminServices;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -92,7 +92,7 @@ class ProductsControllerWithoutRoutesFile extends ProductsController
  * controller, real models, rolled back. The edit page's file work (renaming images, uploads) is not driven from
  * here, and the CSV export ends the request with exit.
  */
-class ProductsControllerFormsTest extends DatabaseTestCase
+class ProductsControllerFormsTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

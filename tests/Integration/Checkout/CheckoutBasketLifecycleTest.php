@@ -6,13 +6,13 @@ namespace Tests\Integration\Checkout;
 
 use Osmium\Modules\Checkout\Models\CheckoutBasket;
 use Osmium\Modules\Checkout\Services\CheckoutBasketService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * Basket lifecycle and option pricing: which basket a session gets, what the
  * header count shows, and that option premiums are priced from the database.
  */
-class CheckoutBasketLifecycleTest extends DatabaseTestCase
+class CheckoutBasketLifecycleTest extends ShopDatabaseTestCase
 {
     private CheckoutBasketService $baskets;
     private int $productId;

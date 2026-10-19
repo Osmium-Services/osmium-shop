@@ -11,13 +11,13 @@ use Osmium\Modules\Checkout\Services\CheckoutBasketService;
 use Osmium\Modules\Checkout\Services\ShopOrderException;
 use Osmium\Modules\Checkout\Services\ShopOrderService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * Order creation rules and the status lifecycle: what is stored, what is
  * refused, and that money states only move in safe directions.
  */
-class ShopOrderServiceLifecycleTest extends DatabaseTestCase
+class ShopOrderServiceLifecycleTest extends ShopDatabaseTestCase
 {
     private ShopOrderService $orders;
     private CheckoutBasketService $baskets;

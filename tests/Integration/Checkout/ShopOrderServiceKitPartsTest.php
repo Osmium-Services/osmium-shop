@@ -10,13 +10,13 @@ use Osmium\Modules\Checkout\Models\CheckoutOrder;
 use Osmium\Modules\Checkout\Services\CheckoutBasketService;
 use Osmium\Modules\Checkout\Services\ShopOrderService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * An order keeps, per line, the products that line took stock from, frozen at
  * the moment the order was made.
  */
-class ShopOrderServiceKitPartsTest extends DatabaseTestCase
+class ShopOrderServiceKitPartsTest extends ShopDatabaseTestCase
 {
     private ShopOrderService $orders;
     private CheckoutBasketService $baskets;

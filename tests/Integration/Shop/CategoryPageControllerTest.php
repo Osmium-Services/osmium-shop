@@ -10,7 +10,7 @@ use Osmium\Core\Models\Model;
 use Osmium\Core\Osmium;
 use Osmium\Core\OsmiumConfig;
 use Osmium\Modules\Admin\Models\Page;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/library/Autoload.php';
@@ -23,7 +23,7 @@ require_once 'app/services/osmium-shop/tests/Helpers/OsmiumShopStandIn.php';
  * images, the counts and the one-line summary, and what an empty category looks like. The script runs for real
  * over real categories, products and the shop models (rolled back); only the site around it is a stand-in.
  */
-class CategoryPageControllerTest extends DatabaseTestCase
+class CategoryPageControllerTest extends ShopDatabaseTestCase
 {
     /** @var object[] Every connection stays referenced: freeing an earlier test's would roll back a later test's transaction */
     private static array $keepAlive = [];

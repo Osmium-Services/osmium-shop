@@ -17,7 +17,7 @@ use Osmium\Modules\Admin\Services\AdminPresence;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\OsmiumAdminModel;
 use Tests\Helpers\RecordingAdminMailer;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/core/Osmium.php';
 require_once 'app/core/admin/services/OsmiumAdminModel.php';
@@ -31,7 +31,7 @@ require_once 'app/services/osmium-shop/controllers/BrandsController.php';
  * endpoint (bin, restore, permanent delete, who may do them and when a brand is still in use) and the lists.
  * Real controller, real models, rolled back.
  */
-class BrandsControllerTest extends DatabaseTestCase
+class BrandsControllerTest extends ShopDatabaseTestCase
 {
     private OsmiumAdminModel $model;
     private object $admin;

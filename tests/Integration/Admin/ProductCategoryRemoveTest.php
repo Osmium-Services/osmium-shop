@@ -7,12 +7,12 @@ namespace Tests\Integration\Admin;
 use Osmium\Core\Library\Autoload;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Services\ProductMcp;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 require_once 'app/services/osmium-shop/models/ProductMcp.php';
 
 /** product_category_remove run for real: only the link goes, and every refusal leaves the links as they were. */
-class ProductCategoryRemoveTest extends DatabaseTestCase
+class ProductCategoryRemoveTest extends ShopDatabaseTestCase
 {
     private static bool $autoloadRegistered = false;
 
