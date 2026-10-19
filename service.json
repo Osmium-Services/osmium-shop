@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -18,6 +18,10 @@
   "modules": {
     "checkout": "modules/checkout",
     "shop": "modules/shop"
+  },
+  "configFiles": {
+    "shop": "config-defaults/shop.json.php",
+    "checkout": "config-defaults/checkout.json.php"
   },
   "api": {
     "routes": {
