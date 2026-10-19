@@ -126,6 +126,18 @@ class Product extends AdminModel
         $this->run('product-techspec-json-update.sql', [':id' => $id, ':techspec_json' => $json]);
     }
 
+    /** @return array<string, mixed>|null the product a page belongs to, if any */
+    public function findProductOfPage(int $pageId): ?array
+    {
+        return $this->fetchOne('page-check-product-linked.sql', [':page_id' => $pageId]);
+    }
+
+    /** @return array<string, mixed>|null the category a page is the page of, if any */
+    public function findCategoryOfPage(int $pageId): ?array
+    {
+        return $this->fetchOne('page-check-category-linked.sql', [':page_id' => $pageId]);
+    }
+
     public function getPageLinks(): array
     {
         return $this->fetchAll('products-pages-list.sql');

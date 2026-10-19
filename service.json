@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.21.1",
+  "version": "0.22.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -53,6 +53,9 @@
     ],
     "pages.product_links": [
       "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::links"
+    ],
+    "pages.delete_blockers": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::deleteBlocker"
     ],
     "migrations.actions": [
       "Osmium\\Modules\\Admin\\Services\\ShopSpecRebuild::action"
