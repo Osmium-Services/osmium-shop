@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -55,8 +55,11 @@
     "pages.protected_urls": [
       "Osmium\\Modules\\Admin\\Services\\ShopPages::protectedUrls"
     ],
-    "pages.product_links": [
-      "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::links"
+    "pages.owners": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::owners"
+    ],
+    "pages.reserved_ids": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::reservedIds"
     ],
     "pages.delete_blockers": [
       "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::deleteBlocker"

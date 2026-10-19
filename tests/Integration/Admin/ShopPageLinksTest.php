@@ -8,8 +8,8 @@ use Osmium\Modules\Admin\Services\ShopPageLinks;
 use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
- * What the Osmium Shop tells core about pages through pages.delete_blockers and pages.product_links: a page that
- * belongs to a product or a category cannot be deleted, and its id stays spoken for.
+ * What the Osmium Shop tells core about pages through pages.delete_blockers, pages.owners and pages.reserved_ids: a page that
+ * belongs to a product or a category cannot be deleted, a live product's page is the shop's, and every product page id stays spoken for.
  */
 class ShopPageLinksTest extends ShopDatabaseTestCase
 {
@@ -52,14 +52,36 @@ class ShopPageLinksTest extends ShopDatabaseTestCase
         $this->assertSame('Page is the page for category "Locked category"', $this->blocker($page));
     }
 
-    public function test_the_links_hook_lists_a_products_page(): void
+    public function test_a_live_products_page_is_owned_by_the_shop_and_kept_out_of_the_parent_choices(): void
+    {
+        $page = $this->page();
+        $product = $this->createTestProduct(['model_name' => 'Owned Widget']);
+        $this->db->insert(tableName: $this->db->tablePrefix() . 'products_pages', data: ['product_id' => $product, 'page_id' => $page]);
+
+        $owners = ShopPageLinks::owners(['dataSource' => $this->db]);
+
+        $this->assertSame('Shop product "Owned Widget"', $owners[$page]['label']);
+        $this->assertSame('shop/products/edit/?id=' . $product, $owners[$page]['editUrl']);
+        $this->assertFalse($owners[$page]['canBeParent']);
+    }
+
+    public function test_a_deleted_products_page_is_not_owned(): void
     {
         $page = $this->page();
         $product = $this->createTestProduct();
         $this->db->insert(tableName: $this->db->tablePrefix() . 'products_pages', data: ['product_id' => $product, 'page_id' => $page]);
+        $this->db->prepare(sql: 'UPDATE ' . $this->db->tablePrefix() . 'products SET deleted_at = NOW() WHERE id = :id', bindings: [':id' => $product])->execute();
 
-        $result = ShopPageLinks::links(['dataSource' => $this->db]);
+        $this->assertArrayNotHasKey($page, ShopPageLinks::owners(['dataSource' => $this->db]));
+    }
 
-        $this->assertContains($page, \array_map('intval', \array_column($result['links'], 'page_id')));
+    public function test_every_products_page_id_stays_reserved_even_when_the_product_is_deleted(): void
+    {
+        $page = $this->page();
+        $product = $this->createTestProduct();
+        $this->db->insert(tableName: $this->db->tablePrefix() . 'products_pages', data: ['product_id' => $product, 'page_id' => $page]);
+        $this->db->prepare(sql: 'UPDATE ' . $this->db->tablePrefix() . 'products SET deleted_at = NOW() WHERE id = :id', bindings: [':id' => $product])->execute();
+
+        $this->assertContains($page, ShopPageLinks::reservedIds(['dataSource' => $this->db])['ids']);
     }
 }

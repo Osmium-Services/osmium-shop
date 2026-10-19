@@ -7,24 +7,47 @@ namespace Osmium\Modules\Admin\Services;
 use Osmium\Modules\Admin\Models\Product;
 
 /**
- * Tells the admin Pages list which pages belong to products, through the pages.product_links hook, and keeps a product's or
- * category's page from being deleted, through pages.delete_blockers.
+ * Tells core about the shop's pages: a live product's page is owned by the shop (pages.owners), every product page id stays
+ * reserved (pages.reserved_ids), and a product's or category's page cannot be deleted (pages.delete_blockers).
  */
 class ShopPageLinks
 {
     /**
-     * @param array{osmium: object} $payload
-     * @return array{links: array<int, array<string, mixed>>, deletedIds: array<int, int|string>}
+     * A product whose own record is deleted is left out, so its page can be deleted from the Pages list.
+     *
+     * @param array{osmium?: object, dataSource?: object} $payload
+     * @return array<int, array{label: string, editUrl: string, canBeParent: bool}> keyed by page id
      */
-    public static function links(array $payload): array
+    public static function owners(array $payload): array
     {
-        $dataSource = $payload['dataSource'] ?? $payload['osmium']->dataSource; // The admin Pages list passes the framework, the page editor the connection
-        $product = new Product($dataSource, 'products');
+        $product = new Product(self::dataSource($payload), 'products');
 
-        return [
-            'links' => $product->getPageLinks(),
-            'deletedIds' => \array_column($product->getDeletedIds(), 'id'),
-        ];
+        $owners = [];
+        foreach ($product->getPageOwners() as $row) {
+            $owners[(int) $row['page_id']] = [
+                'label' => 'Shop product "' . $row['model_name'] . '"',
+                'editUrl' => 'shop/products/edit/?id=' . (int) $row['product_id'],
+                'canBeParent' => false, // A shop has too many product pages to offer each as a parent
+            ];
+        }
+
+        return $owners;
+    }
+
+    /**
+     * @param array{osmium?: object, dataSource?: object} $payload
+     * @return array{ids: array<int, int>}
+     */
+    public static function reservedIds(array $payload): array
+    {
+        $product = new Product(self::dataSource($payload), 'products');
+
+        return ['ids' => \array_map('intval', \array_column($product->getPageLinks(), 'page_id'))];
+    }
+
+    private static function dataSource(array $payload): object
+    {
+        return $payload['dataSource'] ?? $payload['osmium']->dataSource; // The Pages list passes the framework, the page editor the connection
     }
 
     /**

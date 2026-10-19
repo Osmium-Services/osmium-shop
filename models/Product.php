@@ -138,14 +138,16 @@ class Product extends AdminModel
         return $this->fetchOne('page-check-category-linked.sql', [':page_id' => $pageId]);
     }
 
+    /** @return array<int, array<string, mixed>> page_id of every product page, deleted products included */
     public function getPageLinks(): array
     {
         return $this->fetchAll('products-pages-list.sql');
     }
 
-    public function getDeletedIds(): array
+    /** @return array<int, array<string, mixed>> page_id, product_id and model_name of each live product's page */
+    public function getPageOwners(): array
     {
-        return $this->fetchAll('products-deleted-ids.sql');
+        return $this->fetchAll('products-page-owners.sql');
     }
 
     /** @return array<string, mixed>|null */
