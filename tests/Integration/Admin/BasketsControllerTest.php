@@ -260,6 +260,7 @@ class BasketsControllerTest extends DatabaseTestCase
 
         $this->assertSame('app/core/admin/views/baskets/index.phtml', $data['adminContent']);
         $this->assertNotEmpty($data['admin']['lists']);
+        $this->assertArrayHasKey('isAdmin', $data['admin'], 'the view reads it for the list context');
     }
 
     public function test_the_default_threshold_is_two_hours_when_the_shop_config_has_none(): void

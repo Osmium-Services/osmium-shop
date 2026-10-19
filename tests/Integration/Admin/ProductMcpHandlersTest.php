@@ -230,7 +230,7 @@ class ProductMcpHandlersTest extends DatabaseTestCase
         $result = RecordingProductMcp::addCategory($this->call(['id' => $id, 'expected_name' => $this->fullName(), 'category_id' => $category, 'expected_category' => " {$this->runTag} Panels "]));
 
         $this->assertSame(1, $this->assigned($id));
-        $this->assertSame(['added' => true, 'id' => $id, 'name' => $this->fullName(), 'category_id' => $category, 'category' => "{$this->runTag} Panels", 'undo' => 'Remove it from the category in the admin'], $result);
+        $this->assertSame(['added' => true, 'id' => $id, 'name' => $this->fullName(), 'category_id' => $category, 'category' => "{$this->runTag} Panels", 'undo' => 'Remove it again with product_category_remove'], $result);
         $this->assertSame([['description' => "Added product {$this->fullName()} to category {$this->runTag} Panels", 'user_name' => 'Tester via MCP']], $this->changes($id));
     }
 

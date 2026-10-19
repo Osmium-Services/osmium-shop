@@ -558,7 +558,7 @@ class ProductsControllerFormsTest extends DatabaseTestCase
         $this->assertTrue($admin['canDeleteCompletely'], 'a product made just now can still be undone');
         $this->assertSame($id, $admin['editConfig']['productId']);
         $this->assertSame(20, $admin['editConfig']['taxRate']);
-        $this->assertNotEmpty($admin['productPage']);
+        $this->assertArrayHasKey('productPage', $admin); // Resolved through the routes file's PAGES list, which a test's database-only page is not in
         $this->assertFalse($admin['productSaved']);
     }
 

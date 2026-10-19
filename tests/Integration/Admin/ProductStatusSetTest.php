@@ -113,7 +113,10 @@ class ProductStatusSetTest extends DatabaseTestCase
         $disabled = $this->makeStatus(restocking: false, enabled: false);
         $id = $this->createTestProduct();
         $before = (int) $this->row($id)['status_id'];
-        $name = \trim((string) $this->db->prepare(sql: "SELECT model_name AS n FROM {$this->db->tablePrefix()}products WHERE id = :id", bindings: [':id' => $id])->single()['n']);
+        $name = \trim((string) $this->db->prepare(
+            sql: "SELECT CONCAT(COALESCE(b.name, ''), ' ', p.model_name) AS n FROM {$this->db->tablePrefix()}products p LEFT JOIN {$this->db->tablePrefix()}productbrands b ON b.id = p.brand_id WHERE p.id = :id",
+            bindings: [':id' => $id],
+        )->single()['n']); // The tool's name is brand and model together
 
         $this->refused(fn() => QuietProductMcp::setStatus($this->call($id, $name, $plain['id'], 'Wrong')), 'does not match');
         $this->refused(fn() => QuietProductMcp::setStatus($this->call($id, 'Wrong name', $plain['id'], $plain['label'])), 'does not match');

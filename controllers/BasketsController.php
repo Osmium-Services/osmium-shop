@@ -46,6 +46,7 @@ class BasketsController extends AdminController
         $abandonedBaskets = \array_map([$this, 'formatBasket'], $abandonedBaskets);
         $convertedBaskets = \array_map([$this, 'formatBasket'], $convertedBaskets);
 
+        $this->data['admin']['isAdmin'] = $this->isAdmin();
         $this->data['admin']['lists'] = $this->loadListDefinitions('baskets', __DIR__ . '/../lists');
         $this->data['admin']['activeBaskets'] = $activeBaskets;
         $this->data['admin']['abandonedBaskets'] = $abandonedBaskets;
