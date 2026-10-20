@@ -25,5 +25,5 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}checkout_basket_items` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_basket` (`basket_id`),
-  CONSTRAINT `fk_checkout_basket_items_basket` FOREIGN KEY (`basket_id`) REFERENCES `{PREFIX}checkout_baskets` (`id`) ON DELETE CASCADE
+  CONSTRAINT `{PREFIX}fk_checkout_basket_items_basket` FOREIGN KEY (`basket_id`) REFERENCES `{PREFIX}checkout_baskets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

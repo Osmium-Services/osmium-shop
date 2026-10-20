@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}shop_order_items` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_order` (`order_id`),
-  CONSTRAINT `fk_shop_order_items_order` FOREIGN KEY (`order_id`) REFERENCES `{PREFIX}shop_orders` (`id`) ON DELETE CASCADE
+  CONSTRAINT `{PREFIX}fk_shop_order_items_order` FOREIGN KEY (`order_id`) REFERENCES `{PREFIX}shop_orders` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `{PREFIX}shop_order_item_parts` (
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}shop_order_item_parts` (
   PRIMARY KEY (`id`),
   KEY `idx_order_item` (`order_item_id`),
   KEY `idx_product` (`product_id`),
-  CONSTRAINT `fk_shop_order_item_parts_item` FOREIGN KEY (`order_item_id`) REFERENCES `{PREFIX}shop_order_items` (`id`) ON DELETE CASCADE
+  CONSTRAINT `{PREFIX}fk_shop_order_item_parts_item` FOREIGN KEY (`order_item_id`) REFERENCES `{PREFIX}shop_order_items` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `{PREFIX}invoice_counter` (

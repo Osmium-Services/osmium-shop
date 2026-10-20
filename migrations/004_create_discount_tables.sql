@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}discount_products` (
   `discount_id` int unsigned NOT NULL,
   `product_id` int unsigned NOT NULL,
   PRIMARY KEY (`discount_id`,`product_id`),
-  CONSTRAINT `fk_discount_products_discount` FOREIGN KEY (`discount_id`) REFERENCES `{PREFIX}discounts` (`id`) ON DELETE CASCADE
+  CONSTRAINT `{PREFIX}fk_discount_products_discount` FOREIGN KEY (`discount_id`) REFERENCES `{PREFIX}discounts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `{PREFIX}discount_redemptions` (
@@ -38,5 +38,5 @@ CREATE TABLE IF NOT EXISTS `{PREFIX}discount_redemptions` (
   PRIMARY KEY (`id`),
   KEY `idx_discount_redemptions_discount` (`discount_id`),
   KEY `idx_discount_redemptions_email` (`customer_email`),
-  CONSTRAINT `fk_discount_redemptions_discount` FOREIGN KEY (`discount_id`) REFERENCES `{PREFIX}discounts` (`id`) ON DELETE CASCADE
+  CONSTRAINT `{PREFIX}fk_discount_redemptions_discount` FOREIGN KEY (`discount_id`) REFERENCES `{PREFIX}discounts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
