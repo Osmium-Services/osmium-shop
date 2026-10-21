@@ -49,8 +49,26 @@ class DiscountListView
             'statusBadge' => $statusBadge,
             'productCount' => $productCount,
             'scopeLabel' => $scopeLabel,
+            'ordersLabel' => self::buildOrdersLabel($discount),
+            'givenLabel' => self::buildGivenLabel($discount),
             'created_at' => $discount['created_at'],
         ];
+    }
+
+    /** Paid orders that used the discount; a dash when none. */
+    private static function buildOrdersLabel(array $discount): string
+    {
+        $orders = (int)($discount['orders_count'] ?? 0);
+
+        return $orders > 0 ? (string)$orders : '-';
+    }
+
+    /** What the discount has taken off paid orders, before VAT; a dash when nothing. */
+    private static function buildGivenLabel(array $discount): string
+    {
+        $given = (float)($discount['discount_given'] ?? 0);
+
+        return $given > 0 ? '£' . \number_format($given, 2) : '-';
     }
 
     /** Whether the basket would apply it right now: switched on, inside its window and, for a coupon, not used up. */

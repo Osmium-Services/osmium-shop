@@ -458,7 +458,17 @@ class ShopOrderService
             ':line_tax_amount' => $line['line_tax_amount'],
             ':tax_rate_percent' => $this->totals->taxRatePercent(),
             ':weight' => $line['weight'],
+            ':discount_id' => $line['discount_id'] ?? null,
+            ':discount_amount' => $this->lineDiscountAmount($line),
         ]);
+    }
+
+    /** Everything the line's discount took off it, before VAT. */
+    private function lineDiscountAmount(array $line): float
+    {
+        $perUnit = (float)($line['unit_price_before_discount_exc_tax'] ?? $line['unit_price_exc_tax']) - (float)$line['unit_price_exc_tax'];
+
+        return \round($perUnit * (int)$line['quantity'], 2);
     }
 
     private function value(array $input, string $key): string
