@@ -79,10 +79,12 @@ class Discount extends AdminModel
         $this->run('discount-restore.sql', [':id' => $id]);
     }
 
-    /** Removes the discount and its product links. */
+    /** Removes the discount and its product, category and brand links. */
     public function hardDelete(int $id): void
     {
         $this->run('discount-products-delete-for-discount.sql', [':discount_id' => $id]);
+        $this->run('discount-categories-delete-for-discount.sql', [':discount_id' => $id]);
+        $this->run('discount-brands-delete-for-discount.sql', [':discount_id' => $id]);
         $this->run('discount-hard-delete.sql', [':id' => $id]);
     }
 
@@ -104,6 +106,42 @@ class Discount extends AdminModel
                 ':discount_id' => $discountId,
                 ':product_id' => $productId,
             ]);
+        }
+    }
+
+    /** @return array<int, int> */
+    public function getCategoryIds(int $discountId): array
+    {
+        $rows = $this->fetchAll('discount-categories-get-for-discount.sql', [':discount_id' => $discountId]);
+
+        return \array_map(static fn (array $row): int => (int)$row['category_id'], $rows);
+    }
+
+    /** @param array<int, int|string> $categoryIds */
+    public function replaceCategories(int $discountId, array $categoryIds): void
+    {
+        $this->run('discount-categories-delete-for-discount.sql', [':discount_id' => $discountId]);
+
+        foreach ($categoryIds as $categoryId) {
+            $this->run('discount-categories-insert.sql', [':discount_id' => $discountId, ':category_id' => $categoryId]);
+        }
+    }
+
+    /** @return array<int, int> */
+    public function getBrandIds(int $discountId): array
+    {
+        $rows = $this->fetchAll('discount-brands-get-for-discount.sql', [':discount_id' => $discountId]);
+
+        return \array_map(static fn (array $row): int => (int)$row['brand_id'], $rows);
+    }
+
+    /** @param array<int, int|string> $brandIds */
+    public function replaceBrands(int $discountId, array $brandIds): void
+    {
+        $this->run('discount-brands-delete-for-discount.sql', [':discount_id' => $discountId]);
+
+        foreach ($brandIds as $brandId) {
+            $this->run('discount-brands-insert.sql', [':discount_id' => $discountId, ':brand_id' => $brandId]);
         }
     }
 

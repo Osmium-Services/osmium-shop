@@ -7,9 +7,9 @@ namespace Tests\Integration\Checkout;
 use Osmium\Modules\Checkout\Models\CheckoutDiscount;
 use Osmium\Modules\Checkout\Services\ShopDiscountService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
-class ShopDiscountServiceTest extends DatabaseTestCase
+class ShopDiscountServiceTest extends ShopDatabaseTestCase
 {
     private function createDiscount(array $overrides = []): int
     {
@@ -59,6 +59,102 @@ class ShopDiscountServiceTest extends DatabaseTestCase
             ':discount_id' => $discountId,
             ':product_id' => $productId,
         ])->execute();
+    }
+
+    private function createBrand(): int
+    {
+        $this->db->insert(tableName: $this->db->tablePrefix() . 'productbrands', data: ['name' => 'Brand ' . \uniqid()]);
+
+        return (int)$this->db->lastInsertId();
+    }
+
+    private function createCategoryHolding(int $productId, ?string $deletedAt = null): int
+    {
+        $prefix = $this->db->tablePrefix();
+        $this->db->insert(tableName: $prefix . 'productcategories', data: ['label' => 'Cat ' . \substr(\uniqid(), -8)]);
+        $categoryId = (int)$this->db->lastInsertId();
+        $this->db->insert(tableName: $prefix . 'products_productcategories', data: ['product_id' => $productId, 'category_id' => $categoryId, 'deleted_at' => $deletedAt]);
+
+        return $categoryId;
+    }
+
+    private function scopeDiscount(string $table, string $column, int $discountId, int $id): void
+    {
+        $this->db->insert(tableName: $this->db->tablePrefix() . $table, data: ['discount_id' => $discountId, $column => $id]);
+    }
+
+    private function productDiscountsFor(array $productIds): array
+    {
+        return (new ShopDiscountService(new CheckoutDiscount($this->db, 'discounts')))->activeProductDiscounts($productIds);
+    }
+
+    public function test_a_category_discount_covers_every_product_in_the_category_and_no_other(): void
+    {
+        $inCategory = $this->createTestProduct();
+        $outside = $this->createTestProduct();
+        $discountId = $this->createDiscount(['type' => 'product', 'value_type' => 'percent', 'value' => 25.00]);
+        $this->scopeDiscount('discount_categories', 'category_id', $discountId, $this->createCategoryHolding($inCategory));
+
+        $found = $this->productDiscountsFor([$inCategory, $outside]);
+
+        $this->assertSame([$inCategory], \array_keys($found));
+        $this->assertSame($discountId, (int)$found[$inCategory]['id']);
+    }
+
+    public function test_a_product_added_to_the_category_later_is_discounted_without_editing_the_discount(): void
+    {
+        $product = $this->createTestProduct();
+        $discountId = $this->createDiscount(['type' => 'product']);
+        $categoryId = $this->createCategoryHolding($this->createTestProduct());
+        $this->scopeDiscount('discount_categories', 'category_id', $discountId, $categoryId);
+        $this->assertSame([], $this->productDiscountsFor([$product]));
+
+        $this->db->insert(tableName: $this->db->tablePrefix() . 'products_productcategories', data: ['product_id' => $product, 'category_id' => $categoryId]);
+
+        $this->assertSame([$product], \array_keys($this->productDiscountsFor([$product])));
+    }
+
+    public function test_a_product_removed_from_the_category_loses_the_discount(): void
+    {
+        $product = $this->createTestProduct();
+        $discountId = $this->createDiscount(['type' => 'product']);
+        $this->scopeDiscount('discount_categories', 'category_id', $discountId, $this->createCategoryHolding($product, deletedAt: '2020-01-01 00:00:00'));
+
+        $this->assertSame([], $this->productDiscountsFor([$product]));
+    }
+
+    public function test_a_brand_discount_covers_that_brands_products_only(): void
+    {
+        $brandId = $this->createBrand();
+        $ofBrand = $this->createTestProduct(['brand_id' => $brandId]);
+        $otherBrand = $this->createTestProduct(['brand_id' => $this->createBrand()]);
+        $discountId = $this->createDiscount(['type' => 'product']);
+        $this->scopeDiscount('discount_brands', 'brand_id', $discountId, $brandId);
+
+        $this->assertSame([$ofBrand], \array_keys($this->productDiscountsFor([$ofBrand, $otherBrand])));
+    }
+
+    public function test_a_paused_category_discount_covers_nothing(): void
+    {
+        $product = $this->createTestProduct();
+        $discountId = $this->createDiscount(['type' => 'product', 'active' => 0]);
+        $this->scopeDiscount('discount_categories', 'category_id', $discountId, $this->createCategoryHolding($product));
+
+        $this->assertSame([], $this->productDiscountsFor([$product]));
+    }
+
+    public function test_the_best_of_a_direct_link_a_category_and_a_brand_wins(): void
+    {
+        $brandId = $this->createBrand();
+        $product = $this->createTestProduct(['brand_id' => $brandId]);
+        $direct = $this->createDiscount(['type' => 'product', 'value' => 5.00]);
+        $this->linkProduct($direct, $product);
+        $byCategory = $this->createDiscount(['type' => 'product', 'value' => 30.00]);
+        $this->scopeDiscount('discount_categories', 'category_id', $byCategory, $this->createCategoryHolding($product));
+        $byBrand = $this->createDiscount(['type' => 'product', 'value' => 20.00]);
+        $this->scopeDiscount('discount_brands', 'brand_id', $byBrand, $brandId);
+
+        $this->assertSame($byCategory, (int)$this->productDiscountsFor([$product])[$product]['id']);
     }
 
     public function test_active_sitewide_discount_reduces_unit_price(): void

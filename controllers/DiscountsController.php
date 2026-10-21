@@ -67,6 +67,8 @@ class DiscountsController extends AdminController
 
         $discount = $this->loadDiscountForEdit($discountId);
         $selectedProductIds = $discountId ? $this->loadSelectedProductIds($discountId) : [];
+        $selectedCategoryIds = $discountId ? $this->admin->model->discount->getCategoryIds($discountId) : [];
+        $selectedBrandIds = $discountId ? $this->admin->model->discount->getBrandIds($discountId) : [];
 
         $this->data['admin']['discount'] = $discount ?? $this->getEmptyDiscount();
         $this->data['admin']['discountId'] = $discountId;
@@ -75,10 +77,14 @@ class DiscountsController extends AdminController
         $this->data['admin']['error'] = $this->data['admin']['error'] ?? null;
         $this->data['admin']['products'] = $this->admin->model->product->listForPicker();
         $this->data['admin']['selectedProductIds'] = $selectedProductIds;
+        $this->data['admin']['categories'] = $this->categoryOptions();
+        $this->data['admin']['brands'] = $this->admin->model->brand->getActive();
         $this->data['admin']['discountForm'] = [
             'isProductType' => ($this->data['admin']['discount']['type'] ?? 'sitewide') === 'product',
             'isCouponType' => ($this->data['admin']['discount']['type'] ?? 'sitewide') === 'coupon',
             'selectedProductIds' => $selectedProductIds,
+            'selectedCategoryIds' => $selectedCategoryIds,
+            'selectedBrandIds' => $selectedBrandIds,
             'startsAtLocal' => $this->datetimeLocal($this->data['admin']['discount']['starts_at'] ?? null),
             'endsAtLocal' => $this->datetimeLocal($this->data['admin']['discount']['ends_at'] ?? null),
         ];
@@ -259,6 +265,8 @@ class DiscountsController extends AdminController
         $minSpendIncTax = $type === 'coupon' ? DiscountRules::parseMoney($input->string(key: 'min_spend_inc_tax')) : null;
         $active = (int) $input->has(key: 'active');
         $productIds = \array_map('intval', $input->array(key: 'product_ids'));
+        $categoryIds = \array_map('intval', $input->array(key: 'category_ids'));
+        $brandIds = \array_map('intval', $input->array(key: 'brand_ids'));
 
         $validationError = DiscountRules::validate(
             name: $name,
@@ -271,10 +279,14 @@ class DiscountsController extends AdminController
             productIds: $productIds,
             codeInUse: fn(string $code): bool => $this->codeAlreadyUsed(code: $code, excludingDiscountId: $discountId),
             minSpendIncTax: $minSpendIncTax,
+            categoryIds: $categoryIds,
+            brandIds: $brandIds,
         );
         if ($validationError) return $validationError;
 
         $scopedProductIds = $type === 'product' ? $productIds : [];
+        $scopedCategoryIds = $type === 'product' ? $categoryIds : [];
+        $scopedBrandIds = $type === 'product' ? $brandIds : [];
         $scopedCode = $type === 'coupon' ? $code : null;
 
         if ($discountId) {
@@ -292,6 +304,8 @@ class DiscountsController extends AdminController
                 minSpendIncTax: $minSpendIncTax,
                 active: $active,
                 productIds: $scopedProductIds,
+                categoryIds: $scopedCategoryIds,
+                brandIds: $scopedBrandIds,
             );
         } else {
             $this->insertDiscount(
@@ -307,6 +321,8 @@ class DiscountsController extends AdminController
                 minSpendIncTax: $minSpendIncTax,
                 active: $active,
                 productIds: $scopedProductIds,
+                categoryIds: $scopedCategoryIds,
+                brandIds: $scopedBrandIds,
             );
         }
 
@@ -337,6 +353,8 @@ class DiscountsController extends AdminController
         ?float $minSpendIncTax,
         int $active,
         array $productIds,
+        array $categoryIds,
+        array $brandIds,
     ) {
         $this->admin->model->discount->update($discountId, [
             'name' => $name,
@@ -352,7 +370,7 @@ class DiscountsController extends AdminController
             'active' => $active,
         ]);
 
-        $this->saveProductScope(discountId: $discountId, productIds: $productIds);
+        $this->saveProductScope(discountId: $discountId, productIds: $productIds, categoryIds: $categoryIds, brandIds: $brandIds);
 
         $this->admin->model->changelog->log(
             description: "Updated discount: {$name}",
@@ -377,6 +395,8 @@ class DiscountsController extends AdminController
         ?float $minSpendIncTax,
         int $active,
         array $productIds,
+        array $categoryIds,
+        array $brandIds,
     ) {
         $newDiscountId = $this->admin->model->discount->insert([
             'name' => $name,
@@ -392,7 +412,7 @@ class DiscountsController extends AdminController
             'active' => $active,
         ]);
 
-        $this->saveProductScope(discountId: $newDiscountId, productIds: $productIds);
+        $this->saveProductScope(discountId: $newDiscountId, productIds: $productIds, categoryIds: $categoryIds, brandIds: $brandIds);
 
         $this->admin->model->changelog->log(
             description: "Created discount: {$name}",
@@ -404,9 +424,20 @@ class DiscountsController extends AdminController
         $this->redirect("shop/discounts/edit/?id={$newDiscountId}");
     }
 
-    private function saveProductScope(int $discountId, array $productIds): void
+    private function saveProductScope(int $discountId, array $productIds, array $categoryIds, array $brandIds): void
     {
         $this->admin->model->discount->replaceProducts($discountId, $productIds);
+        $this->admin->model->discount->replaceCategories($discountId, $categoryIds);
+        $this->admin->model->discount->replaceBrands($discountId, $brandIds);
+    }
+
+    /** Live categories for the scope picker, by name. */
+    private function categoryOptions(): array
+    {
+        $categories = $this->admin->model->productCategory->getSimpleList();
+        \usort($categories, static fn(array $a, array $b): int => \strcasecmp($a['label'], $b['label']));
+
+        return $categories;
     }
 
     // =========================================================================
@@ -448,7 +479,12 @@ class DiscountsController extends AdminController
             'active' => 0,
         ]);
 
-        $this->saveProductScope(discountId: $newDiscountId, productIds: $this->loadSelectedProductIds((int)$sourceId));
+        $this->saveProductScope(
+            discountId: $newDiscountId,
+            productIds: $this->loadSelectedProductIds((int)$sourceId),
+            categoryIds: $this->admin->model->discount->getCategoryIds((int)$sourceId),
+            brandIds: $this->admin->model->discount->getBrandIds((int)$sourceId),
+        );
 
         $this->admin->model->changelog->log(
             description: "Duplicated discount: {$source['name']}",

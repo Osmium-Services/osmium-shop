@@ -35,7 +35,7 @@ return [
             ],
             ['key' => 'windowLabel', 'label' => 'Window', 'type' => 'text', 'small' => true, 'nowrap' => true],
             ['key' => 'statusBadge', 'label' => 'Status', 'type' => 'raw'],
-            ['key' => 'productCount', 'label' => 'Products', 'type' => 'badge', 'dashIfZero' => true],
+            ['key' => 'scopeLabel', 'label' => 'Covers', 'type' => 'text', 'small' => true],
             ['key' => 'created_at', 'label' => 'Added', 'type' => 'date', 'nowrap' => true],
         ],
         'actions' => [

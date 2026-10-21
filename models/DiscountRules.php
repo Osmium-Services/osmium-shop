@@ -27,6 +27,8 @@ class DiscountRules
         array $productIds,
         callable $codeInUse,
         ?float $minSpendIncTax = null,
+        array $categoryIds = [],
+        array $brandIds = [],
     ): ?string {
         $nameEmpty = empty($name);
         if ($nameEmpty) return 'Discount name is required';
@@ -52,8 +54,8 @@ class DiscountRules
         $endBeforeStart = $bothDatesSet && $endsAt < $startsAt;
         if ($endBeforeStart) return 'End date must be after the start date';
 
-        $productTypeNeedsProducts = $type === 'product' && empty($productIds);
-        if ($productTypeNeedsProducts) return 'Select at least one product for a per-product discount';
+        $productTypeNeedsScope = $type === 'product' && empty($productIds) && empty($categoryIds) && empty($brandIds);
+        if ($productTypeNeedsScope) return 'Select at least one product, category or brand for a per-product discount';
 
         $couponTypeNeedsCode = $type === 'coupon' && $code === '';
         if ($couponTypeNeedsCode) return 'A coupon code is required';

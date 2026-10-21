@@ -11,7 +11,12 @@ class CheckoutDiscount extends CheckoutModel
         return $this->fetchOne('discount-active-sitewide.sql');
     }
 
-    /** @param array<int> $productIds non-empty, already de-duplicated */
+    /**
+     * Active per-product discounts covering these products, whether linked to the product itself or to its brand or a
+     * category it is in. A product can appear more than once; the caller keeps the best.
+     *
+     * @param array<int> $productIds non-empty, already de-duplicated
+     */
     public function activeForProducts(array $productIds): array
     {
         $placeholders = \implode(',', \array_fill(0, \count($productIds), '?'));
@@ -20,7 +25,11 @@ class CheckoutDiscount extends CheckoutModel
             $bindings[$index + 1] = $productId;
         }
 
-        return $this->fetchAll('discount-active-for-products.sql', $bindings, ['PLACEHOLDERS' => $placeholders]);
+        $replacements = ['PLACEHOLDERS' => $placeholders];
+        $linkedToProduct = $this->fetchAll('discount-active-for-products.sql', $bindings, $replacements);
+        $coveredByCategoryOrBrand = $this->fetchAll('discount-active-for-product-scopes.sql', $bindings, $replacements);
+
+        return \array_merge($linkedToProduct, $coveredByCategoryOrBrand);
     }
 
     public function activeCouponByCode(string $code): ?array

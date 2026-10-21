@@ -13,9 +13,9 @@ SELECT
     D.times_used,
     D.active,
     D.created_at,
-    COUNT(DP.product_id) as product_count
+    (SELECT COUNT(*) FROM {PREFIX}discount_products WHERE discount_id = D.id) AS product_count,
+    (SELECT COUNT(*) FROM {PREFIX}discount_categories WHERE discount_id = D.id) AS category_count,
+    (SELECT COUNT(*) FROM {PREFIX}discount_brands WHERE discount_id = D.id) AS brand_count
 FROM {PREFIX}discounts AS D
-LEFT JOIN {PREFIX}discount_products AS DP ON DP.discount_id = D.id
 WHERE D.deleted_at IS NULL
-GROUP BY D.id
 ORDER BY D.created_at DESC

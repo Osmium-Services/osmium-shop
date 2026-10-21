@@ -59,6 +59,8 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $this->model = new OsmiumAdminModel($this->db, $models);
         $this->model->addModel($this->db, 'product', \Osmium\Modules\Admin\Models\Product::class, 'products'); // The shop service's model
         $this->model->addModel($this->db, 'discount', \Osmium\Modules\Admin\Models\Discount::class, 'discounts'); // The shop service's model
+        $this->model->addModel($this->db, 'brand', \Osmium\Modules\Admin\Models\Brand::class, 'productbrands'); // The shop service's model
+        $this->model->addModel($this->db, 'productCategory', \Osmium\Modules\Admin\Models\ProductCategory::class, 'productcategories'); // The shop service's model
 
         $this->auth = new class (
             $this->model,
@@ -340,6 +342,23 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $this->assertEqualsCanonicalizing([$first, $second], $this->scopedProducts($id));
     }
 
+    public function test_a_per_product_discount_can_be_scoped_to_categories_and_brands_alone(): void
+    {
+        $id = $this->createdId($this->submit($this->sitewide(['type' => 'product', 'category_ids' => ['7', '9'], 'brand_ids' => ['3']])));
+
+        $this->assertSame([], $this->scopedProducts($id));
+        $this->assertEqualsCanonicalizing([7, 9], $this->model->discount->getCategoryIds($id));
+        $this->assertSame([3], $this->model->discount->getBrandIds($id));
+    }
+
+    public function test_categories_and_brands_ticked_on_a_sitewide_discount_are_not_kept(): void
+    {
+        $id = $this->createdId($this->submit($this->sitewide(['category_ids' => ['7'], 'brand_ids' => ['3']])));
+
+        $this->assertSame([], $this->model->discount->getCategoryIds($id));
+        $this->assertSame([], $this->model->discount->getBrandIds($id));
+    }
+
     public function test_products_ticked_on_a_sitewide_discount_are_not_kept(): void
     {
         $product = $this->createTestProduct();
@@ -362,7 +381,7 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
             'no amount' => [['value' => '0'], 'Discount value must be greater than zero'],
             'over a hundred percent' => [['value' => '101'], 'Percentage discount cannot exceed 100%'],
             'ends before it starts' => [['starts_at' => '2030-02-01T09:00', 'ends_at' => '2030-01-01T09:00'], 'End date must be after the start date'],
-            'per-product with no products' => [['type' => 'product'], 'Select at least one product for a per-product discount'],
+            'per-product with no products' => [['type' => 'product'], 'Select at least one product, category or brand for a per-product discount'],
             'coupon with no code' => [['type' => 'coupon', 'code' => ''], 'A coupon code is required'],
             'coupon code with a space' => [['type' => 'coupon', 'code' => 'TWO WORDS'], 'Coupon codes may only contain letters, numbers, hyphens and underscores'],
             'absurd minimum spend' => [['type' => 'coupon', 'code' => 'BIGSPEND', 'min_spend_inc_tax' => '2000000'], 'Minimum spend must be under'],

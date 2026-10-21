@@ -32,6 +32,7 @@ class DiscountListView
         $statusBadge = self::buildStatusBadge(discount: $discount);
 
         $productCount = (int)$discount['product_count'];
+        $scopeLabel = self::buildScopeLabel($discount);
 
         return [
             'id' => $discount['id'],
@@ -43,8 +44,26 @@ class DiscountListView
             'usageLabel' => $usageLabel,
             'statusBadge' => $statusBadge,
             'productCount' => $productCount,
+            'scopeLabel' => $scopeLabel,
             'created_at' => $discount['created_at'],
         ];
+    }
+
+    /** What a per-product discount covers, such as "3 products, 1 category"; a dash when nothing is chosen. */
+    private static function buildScopeLabel(array $discount): string
+    {
+        $parts = [];
+        $counts = [
+            ['product_count', 'product', 'products'],
+            ['category_count', 'category', 'categories'],
+            ['brand_count', 'brand', 'brands'],
+        ];
+        foreach ($counts as [$key, $singular, $plural]) {
+            $count = (int)($discount[$key] ?? 0);
+            if ($count > 0) $parts[] = $count . ' ' . ($count === 1 ? $singular : $plural);
+        }
+
+        return $parts === [] ? '-' : \implode(', ', $parts);
     }
 
     private static function buildUsageLabel(array $discount): ?string

@@ -76,7 +76,7 @@ $form = $admin['discountForm'];
                             Sitewide (whole basket)
                         </option>
                         <option value="product" <?= $form['isProductType'] ? 'selected' : '' ?>>
-                            Specific products
+                            Specific products, categories or brands
                         </option>
                         <option value="coupon" <?= $form['isCouponType'] ? 'selected' : '' ?>>
                             Coupon code (whole basket)
@@ -151,7 +151,7 @@ $form = $admin['discountForm'];
             </div>
             <div class="row" id="product-scope-row" style="<?= $form['isProductType'] ? '' : 'display:none;' ?>">
                 <div class="col-12 mb-3">
-                    <label class="form-label">Products <span class="text-danger">*</span></label>
+                    <label class="form-label">Products</label>
                     <div id="selected-products-chips" class="d-flex flex-wrap gap-2 mb-2"></div>
                     <select class="form-select" id="product_ids" name="product_ids[]" multiple size="10">
                         <?php foreach ($admin['products'] as $product): ?>
@@ -160,7 +160,29 @@ $form = $admin['discountForm'];
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <small class="text-muted">Cmd/Ctrl-click to select multiple products</small>
+                    <small class="text-muted">Cmd/Ctrl-click to select multiple. Pick any mix of products, categories and brands</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="category_ids" class="form-label">Categories</label>
+                    <select class="form-select" id="category_ids" name="category_ids[]" multiple size="6">
+                        <?php foreach ($admin['categories'] as $category): ?>
+                            <option value="<?= $category['id'] ?>" <?= \in_array((int)$category['id'], $form['selectedCategoryIds'], true) ? 'selected' : '' ?>>
+                                <?= \htmlspecialchars($category['label']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Every product in a chosen category, including ones added later</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="brand_ids" class="form-label">Brands</label>
+                    <select class="form-select" id="brand_ids" name="brand_ids[]" multiple size="6">
+                        <?php foreach ($admin['brands'] as $brand): ?>
+                            <option value="<?= $brand['id'] ?>" <?= \in_array((int)$brand['id'], $form['selectedBrandIds'], true) ? 'selected' : '' ?>>
+                                <?= \htmlspecialchars($brand['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Every product from a chosen brand, including ones added later</small>
                 </div>
             </div>
         </div>

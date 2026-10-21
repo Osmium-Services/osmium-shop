@@ -41,9 +41,11 @@ class DiscountRulesTest extends TestCase
             'startsAt' => '2026-02-01 00:00:00', 'endsAt' => '2026-01-01 00:00:00',
         ]));
         $this->assertSame(
-            'Select at least one product for a per-product discount',
+            'Select at least one product, category or brand for a per-product discount',
             $this->validate(['type' => 'product']),
         );
+        $this->assertNull($this->validate(['type' => 'product', 'categoryIds' => [7]]));
+        $this->assertNull($this->validate(['type' => 'product', 'brandIds' => [3]]));
         $this->assertSame('A coupon code is required', $this->validate(['type' => 'coupon']));
         $this->assertSame(
             'Coupon codes may only contain letters, numbers, hyphens and underscores',
