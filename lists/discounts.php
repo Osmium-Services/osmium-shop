@@ -45,6 +45,12 @@ return [
                 'href' => 'shop/discounts/edit/?id={id}',
             ],
             [
+                'label' => 'Duplicate',
+                'icon' => 'bx-copy',
+                'action' => 'duplicate',
+                'submit' => 'form',
+            ],
+            [
                 'label' => 'Delete',
                 'icon' => 'bx-trash',
                 'action' => 'delete',

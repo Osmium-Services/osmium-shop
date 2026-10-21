@@ -18,7 +18,7 @@ require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
  * Routes:
  *   - index()  → /admin/shop/discounts/           (list view)
  *   - edit()   → /admin/shop/discounts/edit/       (create/edit form)
- *   - action() → /admin/shop/discounts/action/     (AJAX operations)
+ *   - action() → /admin/shop/discounts/action/     (AJAX operations; 'duplicate' is a form post that redirects)
  *
  * Covers sitewide, per-product and coupon-code discounts. See
  * PaymentProviders for why discounts only take effect when a supported
@@ -91,6 +91,9 @@ class DiscountsController extends AdminController
 
     public function action()
     {
+        $isDuplicate = $this->isPost() && Input::post()->string(key: 'action') === 'duplicate';
+        if ($isDuplicate) $this->duplicate(); // A plain form post that redirects, not JSON
+
         \header('Content-Type: application/json');
 
         $isNotPost = !$this->isPost();
@@ -414,6 +417,46 @@ class DiscountsController extends AdminController
     {
         $discount = $this->admin->model->discount->getById($id);
         return $discount['name'] ?? "Discount #{$id}";
+    }
+
+    /**
+     * Copy a discount, with its products, as a paused draft and open it for editing.
+     * The code is cleared because codes are unique; the copy has no effect until it is edited and switched on.
+     */
+    private function duplicate(): void
+    {
+        $csrfInvalid = !$this->admin->auth->validateCsrf();
+        if ($csrfInvalid) $this->redirect('shop/discounts/');
+
+        $sourceId = Input::post()->nullableInt(key: 'id');
+        $source = $sourceId ? $this->admin->model->discount->getById($sourceId) : null;
+        if (!$source) $this->redirect('shop/discounts/');
+
+        $name = \mb_substr('Copy of ' . $source['name'], 0, 255);
+
+        $newDiscountId = $this->admin->model->discount->insert([
+            'name' => $name,
+            'type' => $source['type'],
+            'code' => null,
+            'value_type' => $source['value_type'],
+            'value' => $source['value'],
+            'starts_at' => $source['starts_at'],
+            'ends_at' => $source['ends_at'],
+            'usage_limit' => $source['usage_limit'],
+            'usage_limit_per_customer' => $source['usage_limit_per_customer'],
+            'min_spend_inc_tax' => $source['min_spend_inc_tax'],
+            'active' => 0,
+        ]);
+
+        $this->saveProductScope(discountId: $newDiscountId, productIds: $this->loadSelectedProductIds((int)$sourceId));
+
+        $this->admin->model->changelog->log(
+            description: "Duplicated discount: {$source['name']}",
+            recordType: self::RECORD_TYPE,
+            recordId: $newDiscountId,
+        );
+
+        $this->redirect("shop/discounts/edit/?id={$newDiscountId}");
     }
 
     private function softDelete(int $id): array
