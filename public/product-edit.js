@@ -43,25 +43,10 @@ document.getElementById('brand_input').addEventListener('input', function() {
     }
 });
 
-// Update hidden status_id and toggle restock date when datalist selection changes
-document.getElementById('status_input').addEventListener('input', function() {
-    const input = this.value;
-    const datalist = document.getElementById('status_list');
-    const options = datalist.querySelectorAll('option');
+// Toggle restock date when status selection changes
+document.getElementById('status_id').addEventListener('change', function() {
     const restockWrapper = document.getElementById('restock_date_wrapper');
-
-    for (const option of options) {
-        if (option.value === input) {
-            document.getElementById('status_id').value = option.dataset.id;
-            // Show/hide restock date based on status restocking flag
-            if (option.dataset.restocking === '1') {
-                restockWrapper.style.display = '';
-            } else {
-                restockWrapper.style.display = 'none';
-            }
-            break;
-        }
-    }
+    restockWrapper.style.display = this.selectedOptions[0].dataset.restocking === '1' ? '' : 'none';
 });
 
 // Update hidden kit_id when datalist selection changes

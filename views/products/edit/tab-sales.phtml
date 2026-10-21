@@ -89,15 +89,12 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="status_input" class="form-label fw-semibold">Product Status</label>
-                            <input type="text" class="form-control" id="status_input" list="status_list"
-                                   value="<?= \htmlspecialchars($admin['currentStatus']['descr_long'] ?? '') ?>" required>
-                            <input type="hidden" id="status_id" name="status_id" value="<?= $admin['product']['status_id'] ?>">
-                            <datalist id="status_list">
+                            <label for="status_id" class="form-label fw-semibold">Product Status</label>
+                            <select class="form-select" id="status_id" name="status_id" required>
                                 <?php foreach ($admin['statuses'] as $status): ?>
-                                    <option data-id="<?= $status['id'] ?>" data-restocking="<?= $status['restocking'] ?>" value="<?= \htmlspecialchars($status['descr_long'] ?? '') ?>">
+                                    <option value="<?= $status['id'] ?>" data-restocking="<?= $status['restocking'] ?>"<?= (int) $status['id'] === (int) $admin['product']['status_id'] ? ' selected' : '' ?>><?= \htmlspecialchars($status['descr_long'] ?? '') ?></option>
                                 <?php endforeach; ?>
-                            </datalist>
+                            </select>
                         </div>
                         <div class="col-md-6 mb-3" id="restock_date_wrapper" style="<?= $edit['currentRestocking'] ? '' : 'display: none;' ?>">
                             <label for="restock_at" class="form-label fw-semibold">Expected Restock Date</label>
