@@ -37,6 +37,10 @@ class DiscountListView
         return [
             'id' => $discount['id'],
             'name' => $discount['name'],
+            'type' => $discount['type'],
+            'valueType' => $discount['value_type'],
+            'value' => (float)$discount['value'],
+            'isLive' => self::isLive($discount),
             'typeLabel' => $typeLabel,
             'code' => $discount['code'],
             'valueLabel' => $valueLabel,
@@ -47,6 +51,23 @@ class DiscountListView
             'scopeLabel' => $scopeLabel,
             'created_at' => $discount['created_at'],
         ];
+    }
+
+    /** Whether the basket would apply it right now: switched on, inside its window and, for a coupon, not used up. */
+    private static function isLive(array $discount): bool
+    {
+        if (!$discount['active']) return false;
+
+        $now = new \DateTimeImmutable();
+        $notYetStarted = $discount['starts_at'] && $now < new \DateTimeImmutable($discount['starts_at']);
+        if ($notYetStarted) return false;
+
+        $hasExpired = $discount['ends_at'] && $now > new \DateTimeImmutable($discount['ends_at']);
+        if ($hasExpired) return false;
+
+        $usedUp = $discount['type'] === 'coupon' && $discount['usage_limit'] !== null && (int)$discount['times_used'] >= (int)$discount['usage_limit'];
+
+        return !$usedUp;
     }
 
     /** What a per-product discount covers, such as "3 products, 1 category"; a dash when nothing is chosen. */

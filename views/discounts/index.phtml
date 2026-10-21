@@ -32,6 +32,47 @@ include \Osmium\Core\Library\AdminPaths::view('partials/page-header.phtml');
     </div>
 <?php endif; ?>
 
+<?php
+$live = $admin['liveSummary'];
+$e = static fn(string $text): string => \htmlspecialchars($text);
+$describe = static fn(array $row): string => '<strong>' . $e($row['name']) . '</strong> (' . $e($row['valueLabel']) . ')';
+?>
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Live right now</h5></div>
+    <div class="card-body">
+        <?php if (!$live['hasAny']): ?>
+            <p class="mb-0 text-muted">No discounts are active. Customers pay full price.</p>
+        <?php else: ?>
+            <ul class="mb-0">
+                <?php if ($live['sitewide']): ?>
+                    <li>
+                        Sitewide: <?= $describe($live['sitewide']) ?> off everything. It overrides every other discount, and coupon codes are refused while it runs.
+                        <?php if ($live['shadowedSitewide'] > 0): ?>
+                            <span class="text-warning"><?= $live['shadowedSitewide'] ?> other sitewide <?= $live['shadowedSitewide'] === 1 ? 'discount is' : 'discounts are' ?> live but only the biggest applies.</span>
+                        <?php endif; ?>
+                    </li>
+                <?php endif; ?>
+                <?php foreach ($live['products'] as $row): ?>
+                    <li class="<?= $live['sitewide'] ? 'text-muted' : '' ?>">
+                        Products: <?= $describe($row) ?> on <?= $e($row['scopeLabel']) ?><?= $live['sitewide'] ? ' (overridden by the sitewide discount)' : '' ?>
+                    </li>
+                <?php endforeach; ?>
+                <?php if (\count($live['products']) > 1 && !$live['sitewide']): ?>
+                    <li class="text-muted">Where more than one product discount covers the same product, the biggest applies.</li>
+                <?php endif; ?>
+                <?php foreach ($live['coupons'] as $row): ?>
+                    <li class="<?= $live['sitewide'] ? 'text-muted' : '' ?>">
+                        Coupon <code><?= $e((string)$row['code']) ?></code>: <?= $describe($row) ?><?= $live['sitewide'] ? ' (blocked by the sitewide discount)' : '' ?>
+                    </li>
+                <?php endforeach; ?>
+                <?php if ($live['couponsReplaceProducts'] && !$live['sitewide']): ?>
+                    <li class="text-muted">A customer who enters one of these codes loses the product discounts on that basket.</li>
+                <?php endif; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+</div>
+
 <?= ListView::render($lists['active'], $admin['discounts'], $listContext) ?>
 <?= ListView::render($lists['deleted'], $admin['deletedDiscounts'], $listContext) ?>
 

@@ -7,6 +7,7 @@ namespace Osmium\Modules\Admin\Controllers;
 use Osmium\Core\Library\Input;
 use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Modules\Admin\Services\DiscountListView;
+use Osmium\Modules\Admin\Services\DiscountLiveSummary;
 use Osmium\Modules\Admin\Services\DiscountRules;
 use Osmium\Core\Library\PaymentProviders;
 
@@ -44,6 +45,7 @@ class DiscountsController extends AdminController
 
         $this->data['admin']['lists'] = $lists;
         $this->data['admin']['discounts'] = $formattedDiscounts;
+        $this->data['admin']['liveSummary'] = DiscountLiveSummary::build($formattedDiscounts);
         $this->data['admin']['deletedDiscounts'] = $this->loadListRows($lists['deleted'], $this->admin->model->discount);
         $this->data['admin']['activeEditors'] = $this->loadActiveEditors();
         $this->data['admin']['isAdmin'] = $this->isAdmin();
