@@ -20,7 +20,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #e9ecef;
+    background: var(--bs-border-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,7 +47,7 @@
 .wizard-connector {
     width: 60px;
     height: 2px;
-    background: #e9ecef;
+    background: var(--bs-border-color);
     margin: 0 0.5rem;
     margin-bottom: 1.25rem;
 }

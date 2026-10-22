@@ -169,7 +169,7 @@ const ProductOptions = {
         new Sortable(this.container, {
             handle: '.drag-handle-type',
             animation: 150,
-            ghostClass: 'bg-light',
+            ghostClass: 'bg-body-tertiary',
             draggable: '.option-type-card',
             onEnd: function() {
                 const cards = self.container.querySelectorAll('.option-type-card');
@@ -252,7 +252,7 @@ const ProductOptions = {
                 </div>
                 <div class="option-values-container" data-type-id="${type.id}">
                     <table class="table table-sm mb-0">
-                        <thead style="background-color: #f9f9f9;">
+                        <thead style="background-color: var(--bs-tertiary-bg);">
                             <tr style="white-space: nowrap;">
                                 <th></th>
                                 <th style="width: 100%;">Description</th>
