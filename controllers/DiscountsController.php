@@ -46,6 +46,7 @@ class DiscountsController extends AdminController
         $this->data['admin']['lists'] = $lists;
         $this->data['admin']['discounts'] = $formattedDiscounts;
         $this->data['admin']['liveSummary'] = DiscountLiveSummary::build($formattedDiscounts);
+        $this->data['admin']['recentDiscounts'] = $this->loadListRows($lists['recent'], $this->admin->model->discount);
         $this->data['admin']['deletedDiscounts'] = $this->loadListRows($lists['deleted'], $this->admin->model->discount);
         $this->data['admin']['activeEditors'] = $this->loadActiveEditors();
         $this->data['admin']['isAdmin'] = $this->isAdmin();

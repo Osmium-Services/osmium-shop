@@ -32,6 +32,7 @@ class StatusesController extends AdminController
     {
         $lists = $this->loadListDefinitions('statuses', __DIR__ . '/../lists');
         $this->data['admin']['lists'] = $lists;
+        $this->data['admin']['recentStatuses'] = $this->loadListRows($lists['recent'], $this->admin->model->status);
         $this->data['admin']['statuses'] = $this->loadListRows($lists['active'], $this->admin->model->status);
         $this->data['admin']['deletedStatuses'] = $this->loadListRows($lists['deleted'], $this->admin->model->status);
         $this->data['admin']['activeEditors'] = $this->loadActiveEditors();

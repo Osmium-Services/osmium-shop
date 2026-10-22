@@ -10,6 +10,26 @@ use Osmium\Modules\Admin\Core\ListView;
  * DiscountsController::formatDiscount().
  */
 return [
+    'recent' => [
+        'id' => 'discounts-recent',
+        'title' => 'Recent Changes',
+        'noun' => ['discount', 'discounts'],
+        'icon' => 'bx-time-five',
+        'query' => 'discount-list-recent.sql',
+        'endpoint' => 'shop/discounts/action/',
+        'datatable' => false,
+        'collapsible' => ['label' => 'Recent Changes ({count})'],
+        'hideWhenEmpty' => false,
+        'columns' => [
+            ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
+            ['key' => 'type', 'label' => 'Type', 'type' => 'text', 'format' => fn(string $value): string => \ucfirst($value)],
+            ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
+        ],
+        'actions' => [
+            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/discounts/edit/?id={id}'],
+        ],
+    ],
+
     'active' => [
         'id' => 'discounts',
         'title' => 'Discount Management',
@@ -68,6 +88,7 @@ return [
         'noun' => ['item', 'items'],
         'query' => 'discount-list-deleted.sql',
         'endpoint' => 'shop/discounts/action/',
+        'hideWhenEmpty' => false,
         'columns' => [
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             [

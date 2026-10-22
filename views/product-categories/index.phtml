@@ -76,6 +76,8 @@
             </button>
         </div>
 
+        <?= \Osmium\Modules\Admin\Core\ListView::render($admin['lists']['recent'], $admin['recentCategories'], ['adminUrl' => $adminUrl, 'isAdmin' => $layout['isAdmin']]) ?>
+
         <div class="card">
             <div class="card-body">
                 <div id="categoryTree" class="category-tree">
@@ -88,7 +90,6 @@
             </div>
         </div>
 
-        <?php if (!empty($admin['deletedCategories'])): ?>
             <!-- Deleted Categories -->
             <div class="mt-4">
                 <div class="d-flex align-items-center gap-2 mb-2" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#deletedCategoriesCard">
@@ -136,7 +137,6 @@
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
 
     <?php endif; ?>
 </div>

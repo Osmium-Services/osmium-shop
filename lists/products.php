@@ -58,7 +58,7 @@ return [
         'title' => 'Recent Changes',
         'icon' => 'bx-time-five',
         'collapsible' => ['label' => 'Recent Changes ({count})'],
-        'hideWhenEmpty' => true,
+        'hideWhenEmpty' => false,
         'columns' => [
             $cartColumn,
             $seoColumn,
@@ -132,6 +132,7 @@ return [
         'title' => 'Deleted Products',
         'noun' => ['product', 'products'],
         'endpoint' => 'shop/products/action/',
+        'hideWhenEmpty' => false,
         'columns' => [
             ['key' => 'reference', 'label' => 'Reference', 'type' => 'text', 'code' => true, 'nowrap' => true],
             ['key' => 'productTitle', 'label' => 'Product', 'type' => 'text', 'strong' => true, 'fill' => true],

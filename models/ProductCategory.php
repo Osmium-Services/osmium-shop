@@ -13,6 +13,11 @@ class ProductCategory extends AdminModel
         return $this->fetchAll('category-list-with-counts.sql');
     }
 
+    public function getRecent(): array
+    {
+        return $this->fetchAll('category-list-recent.sql');
+    }
+
     public function getDeleted(): array
     {
         return $this->fetchAll('category-list-deleted.sql');

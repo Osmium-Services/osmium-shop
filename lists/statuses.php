@@ -16,6 +16,26 @@ $check = static fn(string $key, string $falseClass): array => [
 ];
 
 return [
+    'recent' => [
+        'id' => 'statuses-recent',
+        'title' => 'Recent Changes',
+        'noun' => ['status', 'statuses'],
+        'icon' => 'bx-time-five',
+        'query' => 'status-list-recent.sql',
+        'endpoint' => 'shop/statuses/action/',
+        'datatable' => false,
+        'collapsible' => ['label' => 'Recent Changes ({count})'],
+        'hideWhenEmpty' => false,
+        'columns' => [
+            ['key' => 'descr_short', 'label' => 'Short', 'type' => 'text', 'strong' => true, 'fill' => true],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
+        ],
+        'actions' => [
+            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/statuses/edit/?id={id}'],
+        ],
+    ],
+
     'active' => [
         'id' => 'statuses',
         'title' => 'Status Management',
@@ -63,6 +83,7 @@ return [
         'noun' => ['item', 'items'],
         'query' => 'status-list-deleted.sql',
         'endpoint' => 'shop/statuses/action/',
+        'hideWhenEmpty' => false,
         'columns' => [
             ['key' => 'descr_short', 'label' => 'Short Description', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],

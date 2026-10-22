@@ -32,6 +32,7 @@ class BrandsController extends AdminController
     {
         $lists = $this->loadListDefinitions('brands', __DIR__ . '/../lists');
         $this->data['admin']['lists'] = $lists;
+        $this->data['admin']['recentBrands'] = $this->loadListRows($lists['recent'], $this->admin->model->brand);
         $this->data['admin']['brands'] = $this->loadListRows($lists['active'], $this->admin->model->brand);
         $this->data['admin']['deletedBrands'] = $this->loadListRows($lists['deleted'], $this->admin->model->brand);
         $this->data['admin']['activeEditors'] = $this->loadActiveEditors();

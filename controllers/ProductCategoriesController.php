@@ -38,7 +38,10 @@ class ProductCategoriesController extends AdminController
         $deletedCategories = $this->loadDeletedCategories();
         $categoryUrls = $this->buildCategoryUrlMap();
         $lockStatus = $this->getLockStatus();
+        $lists = $this->loadListDefinitions('product-categories', __DIR__ . '/../lists');
 
+        $this->data['admin']['lists'] = $lists;
+        $this->data['admin']['recentCategories'] = $this->loadRecentCategories();
         $this->data['admin']['categoryTree'] = $categories;
         $this->data['admin']['allCategories'] = $allCategories;
         $this->data['admin']['deletedCategories'] = $deletedCategories;
@@ -165,6 +168,21 @@ class ProductCategoriesController extends AdminController
             ];
         }
         return $allCategories;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function loadRecentCategories(): array
+    {
+        $rows = $this->admin->model->productCategory->getRecent();
+
+        foreach ($rows as &$row) {
+            $row['updatedFormatted'] = \date(
+                format: 'j M Y, g:ia',
+                timestamp: \strtotime($row['updated_at'] ?? $row['created_at']),
+            );
+        }
+
+        return $rows;
     }
 
     private function loadDeletedCategories(): array

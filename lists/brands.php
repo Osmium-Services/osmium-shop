@@ -11,6 +11,26 @@ use Osmium\Modules\Admin\Core\ListView;
  * {field} in 'href' / 'confirm' / 'title' is replaced with the row's value.
  */
 return [
+    'recent' => [
+        'id' => 'brands-recent',
+        'title' => 'Recent Changes',
+        'noun' => ['brand', 'brands'],
+        'icon' => 'bx-time-five',
+        'query' => 'brand-list-recent.sql',
+        'endpoint' => 'shop/brands/action/',
+        'datatable' => false,
+        'collapsible' => ['label' => 'Recent Changes ({count})'],
+        'hideWhenEmpty' => false,
+        'columns' => [
+            ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
+        ],
+        'actions' => [
+            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/brands/edit/?id={id}'],
+        ],
+    ],
+
     'active' => [
         'id' => 'brands',
         'title' => 'Brand Management',
@@ -51,6 +71,7 @@ return [
         'noun' => ['item', 'items'],
         'query' => 'brand-list-deleted.sql',
         'endpoint' => 'shop/brands/action/',
+        'hideWhenEmpty' => false,
         'columns' => [
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
