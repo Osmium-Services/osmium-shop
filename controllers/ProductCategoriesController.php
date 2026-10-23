@@ -178,7 +178,7 @@ class ProductCategoriesController extends AdminController
         foreach ($rows as &$row) {
             $row['updatedFormatted'] = \date(
                 format: 'j M Y, g:ia',
-                timestamp: \strtotime($row['updated_at'] ?? $row['created_at']),
+                timestamp: \strtotime(\max($row['updated_at'] ?? '', $row['deleted_at'] ?? '', $row['created_at'])),
             );
         }
 
@@ -283,6 +283,8 @@ class ProductCategoriesController extends AdminController
             'label' => $cat['label'] ?? '',
             'deleted_at' => $cat['deleted_at'],
             'deleted_formatted' => $deletedFormatted,
+            'changed_by' => $cat['changed_by'] ?? null,
+            'changed_by_avatar' => $cat['changed_by_avatar'] ?? null,
         ];
     }
 

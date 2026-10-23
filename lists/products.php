@@ -52,23 +52,24 @@ $common = [
     'datatable' => false,
 ];
 
+require_once 'app/core/admin/services/ChangedByCell.php';
+
 return [
     'recent' => $common + [
         'id' => 'products-recent',
         'title' => 'Recent Changes',
         'icon' => 'bx-time-five',
+        'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             $cartColumn,
             $seoColumn,
             ['key' => 'productTitle', 'label' => 'Product', 'type' => 'text', 'strong' => true, 'fill' => true],
             $priceColumn,
             ['key' => 'reference', 'label' => 'Reference', 'type' => 'text', 'code' => true, 'nowrap' => true],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
-        ],
-        'actions' => [
-            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/products/edit/?id={id}'],
         ],
     ],
 
@@ -134,6 +135,7 @@ return [
         'endpoint' => 'shop/products/action/',
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'reference', 'label' => 'Reference', 'type' => 'text', 'code' => true, 'nowrap' => true],
             ['key' => 'productTitle', 'label' => 'Product', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'deletedFormatted', 'label' => 'Deleted', 'type' => 'text', 'small' => true, 'nowrap' => true],

@@ -69,20 +69,6 @@ class DiscountListViewTest extends TestCase
         $this->assertStringContainsString('Click to enable', $off);
     }
 
-    public function test_the_last_editor_shows_as_avatar_or_initials(): void
-    {
-        $this->assertStringContainsString('>GC<', DiscountListView::changedByHtml(['changed_by' => 'Gavin Cox'], '/img/', 'nowhere/'));
-        $this->assertStringContainsString('title="Gavin Cox"', DiscountListView::changedByHtml(['changed_by' => 'Gavin Cox', 'changed_by_avatar' => 'missing.png'], '/img/', 'nowhere/'));
-        $this->assertStringContainsString('-', DiscountListView::changedByHtml([], '/img/', 'nowhere/'));
-        $this->assertStringNotContainsString('<script', DiscountListView::changedByHtml(['changed_by' => '<script>x'], '/img/', 'nowhere/'));
-
-        $dir = \sys_get_temp_dir() . '/';
-        \touch($dir . 'zq-avatar.png');
-        $html = DiscountListView::changedByHtml(['changed_by' => 'Gavin Cox', 'changed_by_avatar' => 'zq-avatar.png'], '/img/', $dir);
-        \unlink($dir . 'zq-avatar.png');
-        $this->assertStringContainsString('<img src="/img/zq-avatar.png"', $html);
-    }
-
     public function test_status_badges(): void
     {
         $badge = fn(array $o): string => DiscountListView::row($this->discount($o))['statusBadge'];

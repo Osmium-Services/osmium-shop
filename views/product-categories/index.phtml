@@ -88,55 +88,9 @@
             </div>
         </div>
 
-            <?= \Osmium\Modules\Admin\Core\ListView::render($admin['lists']['recent'], $admin['recentCategories'], ['adminUrl' => $adminUrl, 'isAdmin' => $layout['isAdmin']]) ?>
+            <?= \Osmium\Modules\Admin\Core\ListView::render($admin['lists']['recent'], $admin['recentCategories'], ['adminUrl' => $adminUrl, 'isAdmin' => $layout['isAdmin'], 'avatarUrl' => $admin['avatarUrl'] ?? '']) ?>
 
-            <!-- Deleted Categories -->
-            <div class="mt-4">
-                <div class="d-flex align-items-center gap-2 mb-2" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#deletedCategoriesCard">
-                    <i class="bx bx-chevron-down" id="deletedCategoriesIcon"></i>
-                    <span class="text-muted"><i class="bx bx-trash me-1"></i>Deleted Categories (<?= \count($admin['deletedCategories']) ?>)</span>
-                </div>
-                <div class="collapse" id="deletedCategoriesCard">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 100%;">Label</th>
-                                        <th>Deleted</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($admin['deletedCategories'] as $cat): ?>
-                                        <tr class="table-danger">
-                                            <td><?= \htmlspecialchars($cat['label']) ?></td>
-                                            <td style="white-space: nowrap;"><small><?= $cat['deleted_formatted'] ?></small></td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                        <i class="bx bx-slider" style="font-size: 1.25rem;"></i>
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item text-success" href="#" data-call="CategoryManager.restore" <?= $dataArgs((int) $cat['id']) ?>>
-                                                            <i class="bx bx-undo me-1"></i> Restore
-                                                        </a>
-                                                        <?php if (($admin['user']['role'] ?? '') === 'admin'): ?>
-                                                            <a class="dropdown-item text-danger" href="#" data-call="CategoryManager.permanentDelete" <?= $dataArgs((int) $cat['id'], $cat['label']) ?>>
-                                                                <i class="bx bx-trash me-1"></i> Permanently Delete
-                                                            </a>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <?= \Osmium\Modules\Admin\Core\ListView::render($admin['lists']['deleted'], $admin['deletedCategories'], ['adminUrl' => $adminUrl, 'isAdmin' => $layout['isAdmin'], 'avatarUrl' => $admin['avatarUrl'] ?? '']) ?>
 
     <?php endif; ?>
 </div>
@@ -246,4 +200,5 @@ window.categoriesConfig = {
     hasOwnBackup: <?= $admin['hasOwnBackup'] ? 'true' : 'false' ?>
 };
 </script>
+<script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>
 <script src="/assets/services/osmium-shop/product-categories.js<?= $adminAssetVersion('/assets/services/osmium-shop/product-categories.js') ?>"></script>

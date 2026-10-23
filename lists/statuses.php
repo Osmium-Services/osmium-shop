@@ -15,24 +15,25 @@ $check = static fn(string $key, string $falseClass): array => [
         : '<i class="bx bx-x ' . $falseClass . '" style="font-size: 1.25rem"></i>',
 ];
 
+require_once 'app/core/admin/services/ChangedByCell.php';
+
 return [
     'recent' => [
         'id' => 'statuses-recent',
         'title' => 'Recent Changes',
         'noun' => ['status', 'statuses'],
         'icon' => 'bx-time-five',
+        'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'query' => 'status-list-recent.sql',
         'endpoint' => 'shop/statuses/action/',
         'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'descr_short', 'label' => 'Short', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
-        ],
-        'actions' => [
-            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/statuses/edit/?id={id}'],
         ],
     ],
 
@@ -85,6 +86,7 @@ return [
         'endpoint' => 'shop/statuses/action/',
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'descr_short', 'label' => 'Short Description', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
             ['key' => 'deleted_at', 'label' => 'Deleted', 'type' => 'date', 'nowrap' => true],

@@ -9,19 +9,22 @@ use Osmium\Modules\Admin\Core\ListView;
  * Row fields (typeLabel, valueLabel, statusBadge...) are prepared by
  * DiscountsController::formatDiscount().
  */
+require_once 'app/core/admin/services/ChangedByCell.php';
+
 return [
     'recent' => [
         'id' => 'discounts-recent',
         'title' => 'Recent Changes',
         'noun' => ['discount', 'discounts'],
         'icon' => 'bx-time-five',
+        'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'query' => 'discount-list-recent.sql',
         'endpoint' => 'shop/discounts/action/',
         'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
-            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\DiscountListView::changedByHtml($row, (string)($context['avatarUrl'] ?? ''), \Osmium\Modules\Admin\Services\AdminPresence::AVATAR_PATH)],
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'type', 'label' => 'Type', 'type' => 'text', 'format' => fn(string $value): string => \ucfirst($value)],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
@@ -88,7 +91,7 @@ return [
         'endpoint' => 'shop/discounts/action/',
         'hideWhenEmpty' => false,
         'columns' => [
-            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\DiscountListView::changedByHtml($row, (string)($context['avatarUrl'] ?? ''), \Osmium\Modules\Admin\Services\AdminPresence::AVATAR_PATH)],
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             [
                 'key' => 'type',

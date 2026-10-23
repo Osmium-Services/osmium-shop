@@ -5,18 +5,22 @@ SELECT
     P.price_exc_tax,
     P.created_at,
     P.updated_at,
+    P.deleted_at,
     PB.name as brand_name,
     PS.descr_long as status_name,
     PS.product_available as available,
     PP.page_id,
+    CL.user_name AS changed_by,
+    U.avatar AS changed_by_avatar,
     MAX(CASE WHEN PPC.product_id IS NOT NULL THEN 1 ELSE 0 END) as has_category
 FROM { PREFIX }products AS P
 LEFT JOIN { PREFIX }productbrands AS PB ON PB.id = P.brand_id
 LEFT JOIN { PREFIX }productstatus AS PS ON PS.id = P.status_id
 LEFT JOIN { PREFIX }products_pages AS PP ON PP.product_id = P.id AND PP.is_qr = 0
 LEFT JOIN { PREFIX }products_productcategories AS PPC ON PPC.product_id = P.id AND PPC.deleted_at IS NULL
-WHERE P.deleted_at IS NULL
-  AND (P.created_at >= NOW() - INTERVAL 24 HOUR OR P.updated_at >= NOW() - INTERVAL 24 HOUR)
-GROUP BY P.id, PP.page_id
-ORDER BY GREATEST(COALESCE(P.updated_at, P.created_at), P.created_at) DESC, P.id DESC
+LEFT JOIN { PREFIX }changelog AS CL ON CL.id = (SELECT MAX(id) FROM { PREFIX }changelog WHERE record_type = 'product' AND record_id = P.id)
+LEFT JOIN { PREFIX }users AS U ON U.id = CL.user_id
+WHERE (P.created_at >= NOW() - INTERVAL 24 HOUR OR P.updated_at >= NOW() - INTERVAL 24 HOUR OR P.deleted_at >= NOW() - INTERVAL 24 HOUR)
+GROUP BY P.id, P.deleted_at, PP.page_id, CL.user_name, U.avatar
+ORDER BY GREATEST(COALESCE(P.updated_at, P.created_at), P.created_at, COALESCE(P.deleted_at, P.created_at)) DESC, P.id DESC
 LIMIT 10

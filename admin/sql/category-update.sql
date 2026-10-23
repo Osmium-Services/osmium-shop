@@ -6,5 +6,6 @@ SET parent_id = :parent_id,
     subtitle = :subtitle,
     description = :description,
     image = :image,
-    social_image = :social_image
+    social_image = :social_image,
+    updated_at = NOW()
 WHERE id = :id

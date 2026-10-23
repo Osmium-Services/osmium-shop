@@ -42,7 +42,7 @@ class ProductListView
         $priceExcTax = (float)($product['price'] ?? $product['price_exc_tax'] ?? 0);
         $priceIncVat = $priceExcTax * (1 + ($taxRate / 100)); // Price with VAT
 
-        $updatedAt = $product['updated_at'] ?? null;
+        $updatedAt = \max($product['updated_at'] ?? '', $product['deleted_at'] ?? '') ?: null;
         $createdAt = $product['created_at'] ?? $product['created'] ?? null;
         $updatedFormatted = $updatedAt
             ? \date(format: 'd M H:i', timestamp: \strtotime($updatedAt))
@@ -67,6 +67,9 @@ class ProductListView
             'created_at' => $createdAt,
             'updated_at' => $updatedAt,
             'thumbnail' => $product['thumbnail'] ?? '',
+            'deleted_at' => $product['deleted_at'] ?? null,
+            'changed_by' => $product['changed_by'] ?? null,
+            'changed_by_avatar' => $product['changed_by_avatar'] ?? null,
 
             'productTitle' => $productTitle, // Formatted display values
             'seoStatus' => $seoStatus,
@@ -98,6 +101,8 @@ class ProductListView
             'model_name' => $modelName,
             'reference' => $product['reference'] ?? '',
             'deleted_at' => $product['deleted_at'] ?? null,
+            'changed_by' => $product['changed_by'] ?? null,
+            'changed_by_avatar' => $product['changed_by_avatar'] ?? null,
             'productTitle' => $productTitle,
             'deletedFormatted' => $deletedFormatted ?: '-',
         ];

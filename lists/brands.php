@@ -10,24 +10,25 @@ use Osmium\Modules\Admin\Core\ListView;
  * Column types: text, link, icon-link, badge, date, html (needs 'render').
  * {field} in 'href' / 'confirm' / 'title' is replaced with the row's value.
  */
+require_once 'app/core/admin/services/ChangedByCell.php';
+
 return [
     'recent' => [
         'id' => 'brands-recent',
         'title' => 'Recent Changes',
         'noun' => ['brand', 'brands'],
         'icon' => 'bx-time-five',
+        'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'query' => 'brand-list-recent.sql',
         'endpoint' => 'shop/brands/action/',
         'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
-        ],
-        'actions' => [
-            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/brands/edit/?id={id}'],
         ],
     ],
 
@@ -73,6 +74,7 @@ return [
         'endpoint' => 'shop/brands/action/',
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
             ['key' => 'deleted_at', 'label' => 'Deleted', 'type' => 'date', 'nowrap' => true],

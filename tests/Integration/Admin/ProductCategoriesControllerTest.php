@@ -341,6 +341,20 @@ class ProductCategoriesControllerTest extends ShopDatabaseTestCase
         $this->assertContains("Updated category: {$this->runTag} New Name", $this->changelogFor($id));
     }
 
+    public function test_editing_a_category_with_no_page_still_saves_it(): void
+    {
+        $id = $this->addCategory('No Page');
+        $this->db->prepare(
+            sql: 'DELETE FROM ' . $this->db->tablePrefix() . 'productcategories_pages WHERE productcategory_id = :id',
+            bindings: [':id' => $id],
+        )->execute();
+
+        $this->assertTrue($this->act(['action' => 'update', 'id' => $id, 'label' => "{$this->runTag} Renamed"])['ok']);
+
+        $this->assertSame("{$this->runTag} Renamed", $this->row($id)['label']);
+        $this->assertNotNull($this->row($id)['updated_at']);
+    }
+
     public function test_a_category_can_be_moved_under_another(): void
     {
         $a = $this->addCategory('A');

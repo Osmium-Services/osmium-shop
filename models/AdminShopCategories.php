@@ -258,10 +258,9 @@ class AdminShopCategories
         }
 
         $pageResult = $this->category->getPageByCategory($id);
+        $pageId = $pageResult ? (int)$pageResult['page_id'] : null;
 
         if ($pageResult) {
-            $pageId = (int)$pageResult['page_id'];
-
             $parentPageId = null;
             $urlPrefix = '';
             if ($parentId) {
@@ -281,19 +280,19 @@ class AdminShopCategories
                 'description' => $subtitle ?: $description,
                 'robots' => 'noindex,follow',
             ]);
-
-            $this->category->update([
-                'id' => $id,
-                'parent_id' => $parentId ?: null,
-                'page_id' => $pageId,
-                'label' => $label,
-                'title' => $title,
-                'subtitle' => $subtitle,
-                'description' => $description,
-                'image' => $image,
-                'social_image' => $socialImage,
-            ]);
         }
+
+        $this->category->update([
+            'id' => $id,
+            'parent_id' => $parentId ?: null,
+            'page_id' => $pageId,
+            'label' => $label,
+            'title' => $title,
+            'subtitle' => $subtitle,
+            'description' => $description,
+            'image' => $image,
+            'social_image' => $socialImage,
+        ]);
     }
 
     /**
