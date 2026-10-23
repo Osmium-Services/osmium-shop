@@ -73,8 +73,8 @@ $describe = static fn(array $row): string => '<strong>' . $e($row['name']) . '</
     </div>
 </div>
 
-<?= ListView::render($lists['recent'], $admin['recentDiscounts'], $listContext) ?>
 <?= ListView::render($lists['active'], $admin['discounts'], $listContext) ?>
+<?= ListView::render($lists['recent'], $admin['recentDiscounts'], $listContext) ?>
 <?= ListView::render($lists['deleted'], $admin['deletedDiscounts'], $listContext) ?>
 
 <script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>

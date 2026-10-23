@@ -26,9 +26,6 @@ return [
             ['key' => 'type', 'label' => 'Type', 'type' => 'text', 'format' => fn(string $value): string => \ucfirst($value)],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
         ],
-        'actions' => [
-            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/discounts/edit/?id={id}'],
-        ],
     ],
 
     'active' => [
