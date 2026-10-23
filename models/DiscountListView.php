@@ -57,6 +57,27 @@ class DiscountListView
         ];
     }
 
+    /** Avatar (or initials) of whoever last changed the discount, for the Recent Changes and Deleted lists. */
+    public static function changedByHtml(array $row, string $avatarUrl, string $avatarDir): string
+    {
+        $name = (string)($row['changed_by'] ?? '');
+        if ($name === '') return '<span class="text-muted">-</span>';
+
+        $title = \htmlspecialchars($name);
+        $avatar = (string)($row['changed_by_avatar'] ?? '');
+        $avatarExists = $avatar !== '' && \file_exists($avatarDir . $avatar);
+        if ($avatarExists) {
+            return '<img src="' . \htmlspecialchars($avatarUrl . $avatar) . '" alt="' . $title . '" title="' . $title
+                . '" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">';
+        }
+
+        $parts = \explode(' ', \trim($name));
+        $initials = \strtoupper(($parts[0][0] ?? '') . ($parts[1][0] ?? ''));
+
+        return '<span class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" title="' . $title
+            . '" style="width: 32px; height: 32px; font-size: 0.7rem; color: white;">' . \htmlspecialchars($initials) . '</span>';
+    }
+
     /** Paid orders that used the discount; a dash when none. */
     private static function buildOrdersLabel(array $discount): string
     {

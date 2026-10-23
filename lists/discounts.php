@@ -21,6 +21,7 @@ return [
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\DiscountListView::changedByHtml($row, (string)($context['avatarUrl'] ?? ''), \Osmium\Modules\Admin\Services\AdminPresence::AVATAR_PATH)],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'type', 'label' => 'Type', 'type' => 'text', 'format' => fn(string $value): string => \ucfirst($value)],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
@@ -90,6 +91,7 @@ return [
         'endpoint' => 'shop/discounts/action/',
         'hideWhenEmpty' => false,
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\DiscountListView::changedByHtml($row, (string)($context['avatarUrl'] ?? ''), \Osmium\Modules\Admin\Services\AdminPresence::AVATAR_PATH)],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             [
                 'key' => 'type',
