@@ -30,6 +30,7 @@ class ShopProduct extends ShopModel
     public private(set) string $accessories = '';
     public private(set) string $alternatives = '';
     public private(set) string $faq = '';
+    public private(set) ?string $faqList = null;
     public private(set) string $discounts = '';
     public private(set) float $packedWeight = 0;
     public private(set) string $optionLabel = '';
@@ -88,6 +89,7 @@ class ShopProduct extends ShopModel
         $this->accessories = $productData['accessories'] ?? '';
         $this->alternatives = $productData['alternatives'] ?? '';
         $this->faq = $productData['faq'] ?? '';
+        $this->faqList = ($productData['faq_list'] ?? '') !== '' ? $productData['faq_list'] : null;
         $this->discounts = $productData['discounts'] ?? '';
         $this->packedWeight = $productData['packed_weight'] ?? 0;
         $this->optionLabel = $productData['option_label'] ?? '';

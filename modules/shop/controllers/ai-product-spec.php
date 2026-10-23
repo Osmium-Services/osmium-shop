@@ -17,8 +17,10 @@ declare(strict_types=1);
 
 use Osmium\Core\Library\ResponseSentException;
 use Osmium\Modules\Shop\Models\ShopProduct;
+use Osmium\Modules\Shop\Services\ShopProductFaq;
 
 require_once __DIR__ . '/../models/ShopProduct.php';
+require_once __DIR__ . '/../services/ShopProductFaq.php';
 
 $slug = $this->routeParams['slug'] ?? '';
 $format = $this->routeParams['format'] ?? '';
@@ -99,6 +101,8 @@ if ($hasTechspecJson) {
 
 $priceIncTax = \round((float)$product['price_exc_tax'] * 1.2, 2);
 
+$faqItems = ShopProductFaq::items($product['faq_list'] ?? null, $this->osmium->dataSource); // A shared FAQs list replaces the product's own FAQ text
+
 $record = [
     'sku' => $product['reference'],
     'gtin13' => $product['barcode'] ?: null,
@@ -110,7 +114,7 @@ $record = [
     'availability' => $product['status_descr'],
     'description' => $cleanText($product['descr']),
     'specifications' => $specSections,
-    'faq' => $parseFAQPairs($product['faq']),
+    'faq' => $faqItems ? ShopProductFaq::pairs($faqItems) : $parseFAQPairs($product['faq']),
     'guidance' => null, // Not yet written - see Known Issues
 ];
 

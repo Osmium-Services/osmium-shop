@@ -217,6 +217,7 @@ class Product extends AdminModel
             ':techspec' => $data['techspec'],
             ':techspec_json' => $data['techspec_json'],
             ':faq' => $data['faq'],
+            ':faq_list' => $data['faq_list'] ?? null,
             ':packed_weight' => $data['packed_weight'],
             ':option_label' => $data['option_label'],
             ':option_default' => $data['option_default'],
@@ -394,6 +395,7 @@ class Product extends AdminModel
         $this->database->bind(':features', $original['features']);
         $this->database->bind(':accessories', $original['accessories']);
         $this->database->bind(':faq', $original['faq']);
+        $this->database->bind(':faq_list', $original['faq_list'] ?? null);
         $this->database->bind(':packed_weight', $original['packed_weight']);
         $this->database->bind(':option_label', $original['option_label']);
         $this->database->bind(':option_default', $original['option_default']);

@@ -6,10 +6,12 @@ use Osmium\Core\Library\ServiceLoader;
 use Osmium\Core\Models\ServiceModel;
 use Osmium\Modules\Shop\Core\OsmiumShop;
 use Osmium\Modules\Shop\Services\ShopProductPageData;
+use Osmium\Modules\Shop\Services\ShopProductFaq;
 use Osmium\Modules\Shop\Services\ShopKitAvailability;
 use Osmium\Modules\Shop\Services\ShopProductService;
 
 require_once __DIR__ . '/../services/ShopProductPageData.php';
+require_once __DIR__ . '/../services/ShopProductFaq.php';
 require_once __DIR__ . '/../services/ShopProductService.php';
 require_once __DIR__ . '/../services/ShopKitAvailability.php';
 
@@ -199,8 +201,9 @@ $this->data['product']['suboptionRRPs'] = $legacy['suboptionRRPs']; // Legacy co
 // ─────────────────────────────────────────────────────────────────────────────
 
 $this->data['product']['videoURL'] = $product->videoURL;
-$this->data['product']['FAQ'] = $product->faq;
-$this->data['product']['faqPairs'] = ShopProductPageData::faqPairs($product->faq); // For FAQPage schema
+$faqItems = ShopProductFaq::items($product->faqList, $this->osmium->dataSource); // A shared FAQs list replaces the product's own FAQ text
+$this->data['product']['FAQ'] = $faqItems ? ShopProductFaq::html($faqItems) : $product->faq;
+$this->data['product']['faqPairs'] = $faqItems ? ShopProductFaq::pairs($faqItems) : ShopProductPageData::faqPairs($product->faq); // For FAQPage schema
 $this->data['product']['techSpec'] = $product->techspec;
 $this->data['product']['specProperties'] = ShopProductPageData::specProperties($product->techspecJson); // For Product schema additionalProperty
 

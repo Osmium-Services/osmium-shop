@@ -52,9 +52,24 @@ class ProductEditView
             'otherProductsWithOptions' => self::excluding($admin['productsWithOptions'] ?? [], $currentId),
             'otherProductsWithTechspec' => self::excluding($admin['productsWithTechspec'] ?? [], $currentId),
             'otherProductsWithFaq' => self::excluding($admin['productsWithFaq'] ?? [], $currentId),
+            'faqListChoices' => self::faqListChoices($admin['faqListChoices'] ?? [], (string) ($product['faq_list'] ?? '')),
             'pageRobots' => $admin['productPage']['robots'] ?? 'index,follow',
             'currentRestocking' => $admin['currentStatus']['restocking'] ?? 0,
         ];
+    }
+
+    /**
+     * The FAQs lists a product can pick, as [slug => label]. A list the product still points at but that has been
+     * deleted stays in the choices, marked, so saving the product does not silently drop it.
+     *
+     * @param array<string, string> $choices
+     * @return array<string, string>
+     */
+    private static function faqListChoices(array $choices, string $current): array
+    {
+        if ($current !== '' && !isset($choices[$current])) $choices[$current] = $current . ' (list not found)';
+
+        return $choices;
     }
 
     /**

@@ -22,6 +22,18 @@
                     </button>
                 </div>
                 <div class="card-body">
+                    <?php if ($edit['faqListChoices']): ?>
+                    <div class="mb-3">
+                        <label for="faq_list" class="form-label">Shared FAQ list</label>
+                        <select class="form-select" id="faq_list" name="faq_list">
+                            <option value="">None - use the FAQ text below</option>
+                            <?php foreach ($edit['faqListChoices'] as $slug => $name): ?>
+                            <option value="<?= \htmlspecialchars($slug) ?>"<?= (string) $slug === ($admin['product']['faq_list'] ?? '') ? ' selected' : '' ?>><?= \htmlspecialchars($name) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">A list chosen here is shown on the product page instead of the FAQ text below. Edit it under Content &gt; FAQs.</div>
+                    </div>
+                    <?php endif; ?>
                     <textarea class="form-control" id="faq" name="faq" rows="10"><?= \htmlspecialchars($admin['product']['faq'] ?? '') ?></textarea>
                 </div>
             </div>

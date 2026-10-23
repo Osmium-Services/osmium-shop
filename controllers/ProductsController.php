@@ -21,12 +21,14 @@ use Osmium\Core\Library\TechspecParser;
 use Osmium\Core\Library\ServiceLoader;
 use Osmium\Core\Library\ServiceHooks;
 use Osmium\Core\Models\ServiceModel;
+use Osmium\Modules\Shop\Services\ShopProductFaq;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 require_once __DIR__ . '/../models/ProductEditView.php';
 require_once __DIR__ . '/../models/ProductFormData.php';
 require_once __DIR__ . '/../models/ProductListView.php';
 require_once __DIR__ . '/../models/ProductPriceCsv.php';
+require_once __DIR__ . '/../modules/shop/services/ShopProductFaq.php';
 
 /**
  * Products controller - manages product catalog (CRUD, import/export).
@@ -498,6 +500,7 @@ class ProductsController extends AdminController
             'techspec' => $techspec,
             'techspec_json' => $this->techspecJson($techspec),
             'faq' => Input::post()->string(key: 'faq'),
+            'faq_list' => Input::post()->nullableString(key: 'faq_list'),
             'packed_weight' => Input::post()->float(key: 'packed_weight'),
             'option_label' => Input::post()->string(key: 'option_label'),
             'option_default' => Input::post()->string(key: 'option_default'),
@@ -615,6 +618,7 @@ class ProductsController extends AdminController
         $this->data['admin']['productsWithOptions'] = ShopAdminServices::options($this->admin)->getProductsWithOptions();
         $this->data['admin']['productsWithTechspec'] = $this->formData->fetchProductsWithTechspec();
         $this->data['admin']['productsWithFaq'] = $this->formData->fetchProductsWithFaq();
+        $this->data['admin']['faqListChoices'] = ShopProductFaq::choices($this->osmium->dataSource);
         $this->data['admin']['pdfPaths'] = $this->formData->buildPdfPaths($product);
         $this->data['admin']['imageUrls'] = $this->formData->buildImageUrls($product);
         $this->data['admin']['availableImageSlots'] = $this->formData->buildAvailableImageSlots($product);

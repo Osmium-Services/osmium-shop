@@ -15,6 +15,7 @@ UPDATE { PREFIX }products SET
     techspec = :techspec,
     techspec_json = :techspec_json,
     faq = :faq,
+    faq_list = :faq_list,
     packed_weight = :packed_weight,
     option_label = :option_label,
     option_default = :option_default,
