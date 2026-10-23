@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-between align-items-center py-3 mb-4">
     <h4 class="mb-0">
-        <span class="text-muted fw-light">Content / Shop / <a href="<?= $adminUrl('shop/discounts/') ?>">Discounts</a> /</span>
+        <span class="text-muted fw-light"><a href="<?= $adminUrl('shop/discounts/') ?>">Shop Discounts</a> /</span>
         <?= $admin['isNew'] ? 'Create Discount' : \htmlspecialchars($admin['discount']['name'] ?? '') ?>
     </h4>
     <a href="<?= $adminUrl('shop/discounts/') ?>" class="btn btn-outline-secondary">

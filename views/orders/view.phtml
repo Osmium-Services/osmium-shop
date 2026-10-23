@@ -5,7 +5,7 @@ $orderView = $admin['orderView'];
 ?>
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">
-        Content / Shop / <a href="<?= $adminUrl('shop/orders/') ?>">Orders</a> /
+        <a href="<?= $adminUrl('shop/orders/') ?>">Shop Orders</a> /
     </span>
     <?= \htmlspecialchars((string)$order['order_ref']) ?>
     <span class="badge <?= $order['status_class'] ?> ms-2"><?= \htmlspecialchars($order['status_label']) ?></span>
