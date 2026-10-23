@@ -34,8 +34,8 @@ $lists = $admin['lists'];
     </div>
 </div>
 
-<?= ListView::render($lists['recent'], $admin['recentProducts'], $listContext) ?>
 <?= ListView::render($lists['active'], $admin['products'], $listContext) ?>
+<?= ListView::render($lists['recent'], $admin['recentProducts'], $listContext) ?>
 <?= ListView::render($lists['deleted'], $admin['deletedProducts'], $listContext) ?>
 
 <script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>

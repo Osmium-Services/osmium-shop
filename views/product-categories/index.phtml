@@ -76,8 +76,6 @@
             </button>
         </div>
 
-        <?= \Osmium\Modules\Admin\Core\ListView::render($admin['lists']['recent'], $admin['recentCategories'], ['adminUrl' => $adminUrl, 'isAdmin' => $layout['isAdmin']]) ?>
-
         <div class="card">
             <div class="card-body">
                 <div id="categoryTree" class="category-tree">
@@ -89,6 +87,8 @@
                 </div>
             </div>
         </div>
+
+            <?= \Osmium\Modules\Admin\Core\ListView::render($admin['lists']['recent'], $admin['recentCategories'], ['adminUrl' => $adminUrl, 'isAdmin' => $layout['isAdmin']]) ?>
 
             <!-- Deleted Categories -->
             <div class="mt-4">

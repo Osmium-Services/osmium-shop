@@ -14,8 +14,8 @@ $listContext = [
 $lists = $admin['lists'];
 ?>
 
-<?= ListView::render($lists['recent'], $admin['recentStatuses'], $listContext) ?>
 <?= ListView::render($lists['active'], $admin['statuses'], $listContext) ?>
+<?= ListView::render($lists['recent'], $admin['recentStatuses'], $listContext) ?>
 <?= ListView::render($lists['deleted'], $admin['deletedStatuses'], $listContext) ?>
 
 <script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>
