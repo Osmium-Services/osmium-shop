@@ -37,8 +37,8 @@ class DiscountListViewTest extends TestCase
         $this->assertSame('12.5%', DiscountListView::row($this->discount(['value' => '12.50']))['valueLabel']);
         $fixed = $this->discount(['value_type' => 'fixed', 'value' => '5']);
         $this->assertSame('£5.00', DiscountListView::row($fixed)['valueLabel']);
-        $freeDelivery = $this->discount(['value_type' => 'free_delivery', 'value' => '0.00']);
-        $this->assertSame('Free delivery', DiscountListView::row($freeDelivery)['valueLabel']);
+        $freeDelivery = $this->discount(['value' => '10.00', 'free_delivery' => 1]);
+        $this->assertSame('10% + free delivery', DiscountListView::row($freeDelivery)['valueLabel']);
     }
 
     public function test_date_window_labels(): void
@@ -57,6 +57,16 @@ class DiscountListViewTest extends TestCase
         $this->assertSame('3 used', DiscountListView::row($unlimited)['usageLabel']);
         $limited = $this->discount(['type' => 'coupon', 'times_used' => 3, 'usage_limit' => 10]);
         $this->assertSame('3 / 10 used', DiscountListView::row($limited)['usageLabel']);
+    }
+
+    public function test_the_status_pill_is_the_on_off_switch(): void
+    {
+        $live = DiscountListView::row($this->discount())['statusBadge'];
+        $off = DiscountListView::row($this->discount(['active' => 0]))['statusBadge'];
+
+        $this->assertStringContainsString('data-list-action="toggle_active"', $live);
+        $this->assertStringContainsString('Click to disable', $live);
+        $this->assertStringContainsString('Click to enable', $off);
     }
 
     public function test_status_badges(): void

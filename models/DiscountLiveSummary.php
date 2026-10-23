@@ -25,7 +25,7 @@ class DiscountLiveSummary
         $products = \array_values(\array_filter($live, static fn(array $row): bool => $row['type'] === 'product'));
         $coupons = \array_values(\array_filter($live, static fn(array $row): bool => $row['type'] === 'coupon'));
 
-        $couponsReplaceProducts = $products !== [] && \array_filter($coupons, static fn(array $row): bool => $row['valueType'] !== 'free_delivery') !== [];
+        $couponsReplaceProducts = $products !== [] && $coupons !== [];
 
         return [
             'sitewide' => $sitewide[0] ?? null,

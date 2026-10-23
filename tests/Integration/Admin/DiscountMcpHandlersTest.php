@@ -131,11 +131,11 @@ class DiscountMcpHandlersTest extends ShopDatabaseTestCase
         $this->assertEqualsWithDelta(49.99, (float) $row['min_spend_inc_tax'], 0.001);
     }
 
-    public function test_a_free_delivery_coupon_takes_no_value(): void
+    public function test_free_delivery_is_stored_when_switched_on(): void
     {
-        $result = $this->create(['name' => $this->discountName('free'), 'type' => 'coupon', 'code' => $this->couponCode('FREE'), 'value_type' => 'free_delivery']);
+        $result = $this->create(['name' => $this->discountName('free'), 'type' => 'coupon', 'code' => $this->couponCode('FREE'), 'value_type' => 'percent', 'value' => 5, 'free_delivery' => true]);
 
-        $this->assertSame('free_delivery', $this->discounts->getById($result['id'])['value_type']);
+        $this->assertSame(1, (int) $this->discounts->getById($result['id'])['free_delivery']);
     }
 
     public function test_dates_alone_mean_the_start_and_the_end_of_that_day(): void

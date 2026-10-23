@@ -54,10 +54,10 @@ class DiscountReportingTest extends ShopDatabaseTestCase
         );
     }
 
-    private function createDiscount(string $type, float $value, ?string $code = null, string $valueType = 'percent'): int
+    private function createDiscount(string $type, float $value, ?string $code = null, string $valueType = 'percent', int $freeDelivery = 0): int
     {
         $this->db->insert(tableName: $this->db->tablePrefix() . 'discounts', data: [
-            'name' => 'Report ' . \uniqid(), 'type' => $type, 'code' => $code, 'value_type' => $valueType, 'value' => $value, 'active' => 1,
+            'name' => 'Report ' . \uniqid(), 'type' => $type, 'code' => $code, 'value_type' => $valueType, 'value' => $value, 'free_delivery' => $freeDelivery, 'active' => 1,
         ]);
 
         return (int)$this->db->lastInsertId();
@@ -154,7 +154,7 @@ class DiscountReportingTest extends ShopDatabaseTestCase
 
     public function test_a_free_delivery_coupon_counts_its_orders_though_it_takes_nothing_off_the_goods(): void
     {
-        $discountId = $this->createDiscount('coupon', 0.0, code: 'SHIPFREE', valueType: 'free_delivery');
+        $discountId = $this->createDiscount('coupon', 0.0, code: 'SHIPFREE', freeDelivery: 1);
         $product = $this->createTestProduct(['price_exc_tax' => 100.00]);
         $this->orderFor($product, quantity: 1, coupon: 'SHIPFREE');
         $this->orderFor($product, quantity: 1);

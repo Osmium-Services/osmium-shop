@@ -23,9 +23,10 @@ class DiscountListView
 
         $valueLabel = match ($discount['value_type']) {
             'percent' => \rtrim(\rtrim(\number_format((float)$discount['value'], 2), '0'), '.') . '%',
-            'free_delivery' => 'Free delivery',
             default => '£' . \number_format((float)$discount['value'], 2),
         };
+
+        if (!empty($discount['free_delivery'])) $valueLabel .= ' + free delivery';
 
         $windowLabel = self::formatDateWindow(startsAt: $discount['starts_at'], endsAt: $discount['ends_at']);
 
@@ -40,6 +41,7 @@ class DiscountListView
             'type' => $discount['type'],
             'valueType' => $discount['value_type'],
             'value' => (float)$discount['value'],
+            'freeDelivery' => !empty($discount['free_delivery']),
             'isLive' => self::isLive($discount),
             'typeLabel' => $typeLabel,
             'code' => $discount['code'],
@@ -130,21 +132,31 @@ class DiscountListView
         return "{$startLabel} \u{2192} {$endLabel}";
     }
 
+    /** The status pill is also the on/off switch: clicking it posts toggle_active for the row. */
     private static function buildStatusBadge(array $discount): string
     {
+        [$class, $label] = self::statusPill($discount);
+        $title = $discount['active'] ? 'Click to disable' : 'Click to enable';
+
+        return '<a href="#" class="badge ' . $class . '" data-list-action="toggle_active" data-confirm="" title="' . $title . '">' . $label . '</a>';
+    }
+
+    /** @return array{0: string, 1: string} badge class and label */
+    private static function statusPill(array $discount): array
+    {
         $notActive = !$discount['active'];
-        if ($notActive) return '<span class="badge bg-secondary">Disabled</span>';
+        if ($notActive) return ['bg-secondary', 'Disabled'];
 
         $now = new \DateTimeImmutable();
         $starts = $discount['starts_at'] ? new \DateTimeImmutable($discount['starts_at']) : null;
         $ends = $discount['ends_at'] ? new \DateTimeImmutable($discount['ends_at']) : null;
 
         $notYetStarted = $starts && $now < $starts;
-        if ($notYetStarted) return '<span class="badge bg-label-info">Scheduled</span>';
+        if ($notYetStarted) return ['bg-label-info', 'Scheduled'];
 
         $hasExpired = $ends && $now > $ends;
-        if ($hasExpired) return '<span class="badge bg-label-secondary">Expired</span>';
+        if ($hasExpired) return ['bg-label-secondary', 'Expired'];
 
-        return '<span class="badge bg-success">Live</span>';
+        return ['bg-success', 'Live'];
     }
 }

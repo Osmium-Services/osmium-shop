@@ -37,14 +37,11 @@ class DiscountRules
         $invalidType = !\in_array($type, $validTypes, true);
         if ($invalidType) return 'Invalid discount type';
 
-        $validValueTypes = ['percent', 'fixed', 'free_delivery'];
+        $validValueTypes = ['percent', 'fixed'];
         $invalidValueType = !\in_array($valueType, $validValueTypes, true);
         if ($invalidValueType) return 'Invalid discount value type';
 
-        $freeDeliveryNeedsCoupon = $valueType === 'free_delivery' && $type !== 'coupon';
-        if ($freeDeliveryNeedsCoupon) return 'Free delivery is only available as a coupon code';
-
-        $valueNotPositive = $valueType !== 'free_delivery' && $value <= 0;
+        $valueNotPositive = $value <= 0;
         if ($valueNotPositive) return 'Discount value must be greater than zero';
 
         $percentTooHigh = $valueType === 'percent' && $value > 100;

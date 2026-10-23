@@ -10,18 +10,18 @@ use Osmium\Modules\Checkout\Services\ShopTotalsService;
 use Tests\Integration\DatabaseTestCase;
 
 /**
- * A free delivery coupon waives the delivery charge and takes nothing off the goods. It still respects a minimum
- * spend, and it does not stop per-product discounts applying.
+ * The free delivery switch waives the delivery charge on top of whatever the discount takes off. A coupon still
+ * respects its minimum spend.
  */
 class FreeDeliveryCouponTest extends DatabaseTestCase
 {
     private function discount(array $fields): int
     {
-        $row = $fields + ['name' => 'zz-fd-' . \uniqid(), 'type' => 'coupon', 'code' => null, 'value_type' => 'free_delivery', 'value' => 0, 'min_spend_inc_tax' => null];
+        $row = $fields + ['name' => 'zz-fd-' . \uniqid(), 'type' => 'coupon', 'code' => null, 'value_type' => 'percent', 'value' => 0, 'free_delivery' => 1, 'min_spend_inc_tax' => null];
         $this->db->prepare(
-            sql: "INSERT INTO {$this->db->tablePrefix()}discounts (name, type, code, value_type, value, min_spend_inc_tax, active)
-                  VALUES (:name, :type, :code, :value_type, :value, :min, 1)",
-            bindings: [':name' => $row['name'], ':type' => $row['type'], ':code' => $row['code'], ':value_type' => $row['value_type'], ':value' => $row['value'], ':min' => $row['min_spend_inc_tax']],
+            sql: "INSERT INTO {$this->db->tablePrefix()}discounts (name, type, code, value_type, value, free_delivery, min_spend_inc_tax, active)
+                  VALUES (:name, :type, :code, :value_type, :value, :fd, :min, 1)",
+            bindings: [':name' => $row['name'], ':type' => $row['type'], ':code' => $row['code'], ':value_type' => $row['value_type'], ':value' => $row['value'], ':fd' => $row['free_delivery'], ':min' => $row['min_spend_inc_tax']],
         )->execute();
 
         return (int) $this->db->lastInsertId();
@@ -97,25 +97,49 @@ class FreeDeliveryCouponTest extends DatabaseTestCase
         $this->assertTrue($over['free_delivery']);
     }
 
-    public function test_it_does_not_stop_a_per_product_discount_applying(): void
+    public function test_a_per_product_discount_with_the_switch_on_waives_delivery(): void
     {
-        $this->discount(['code' => 'ZZFREEDEL']);
-        $productDiscount = $this->discount(['type' => 'product', 'value_type' => 'percent', 'value' => 10]);
+        $productDiscount = $this->discount(['type' => 'product', 'value' => 10, 'free_delivery' => 1]);
         $this->db->prepare(
             sql: "INSERT INTO {$this->db->tablePrefix()}discount_products (discount_id, product_id) VALUES (:d, 1)",
             bindings: [':d' => $productDiscount],
         )->execute();
 
-        $with = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA', couponCode: 'ZZFREEDEL');
+        $with = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA');
 
         $this->assertSame(45.00, $with['lines'][0]['unit_price_exc_tax']); // 10% off the product
-        $this->assertSame(0.0, $with['delivery_exc_tax']); // and free delivery
+        $this->assertSame(0.0, $with['delivery_exc_tax']);
+        $this->assertTrue($with['free_delivery']);
+    }
+
+    public function test_a_per_product_discount_with_the_switch_off_leaves_delivery_alone(): void
+    {
+        $productDiscount = $this->discount(['type' => 'product', 'value' => 10, 'free_delivery' => 0]);
+        $this->db->prepare(
+            sql: "INSERT INTO {$this->db->tablePrefix()}discount_products (discount_id, product_id) VALUES (:d, 1)",
+            bindings: [':d' => $productDiscount],
+        )->execute();
+
+        $with = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA');
+
+        $this->assertSame(4.99, $with['delivery_exc_tax']);
+        $this->assertFalse($with['free_delivery']);
+    }
+
+    public function test_a_sitewide_discount_with_the_switch_on_waives_delivery(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 10, 'free_delivery' => 1]);
+
+        $with = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA');
+
+        $this->assertSame(0.0, $with['delivery_exc_tax']);
+        $this->assertTrue($with['free_delivery']);
     }
 
     public function test_a_sitewide_discount_still_wins_over_any_coupon(): void
     {
         $this->discount(['code' => 'ZZFREEDEL']);
-        $this->discount(['type' => 'sitewide', 'value_type' => 'percent', 'value' => 10]);
+        $this->discount(['type' => 'sitewide', 'value_type' => 'percent', 'value' => 10, 'free_delivery' => 0]);
 
         $with = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA', couponCode: 'ZZFREEDEL');
 

@@ -72,14 +72,4 @@ class DiscountLiveSummaryTest extends TestCase
         $this->assertSame(['3 products'], \array_column($summary['products'], 'scopeLabel'));
         $this->assertTrue($summary['couponsReplaceProducts']);
     }
-
-    public function test_a_free_delivery_coupon_does_not_replace_product_discounts(): void
-    {
-        $summary = DiscountLiveSummary::build([
-            $this->row(['type' => 'product', 'product_count' => 1]),
-            $this->row(['type' => 'coupon', 'code' => 'SHIP', 'value_type' => 'free_delivery', 'value' => '0.00']),
-        ]);
-
-        $this->assertFalse($summary['couponsReplaceProducts']);
-    }
 }

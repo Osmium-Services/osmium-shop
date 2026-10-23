@@ -8,6 +8,7 @@ use Osmium\Core\Library\FileSystem;
 use Osmium\Core\Library\Header;
 use Osmium\Core\Library\OsmiumPDO;
 use Osmium\Core\Library\Password;
+use Osmium\Core\Library\StoreFinance;
 use Osmium\Core\Library\ResponseSentException;
 use Osmium\Core\Library\Url;
 use Osmium\Core\Osmium;
@@ -153,6 +154,8 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
 
             public function clearStashedQuerystring(): void {}
         };
+
+        StoreFinance::useFor($osmium, new StoreFinance('GBP', '€', 'VAT', 20.0, 'GB'));
 
         return new DiscountsController($osmium, $this->admin, $data);
     }
@@ -318,11 +321,13 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $this->assertStringStartsWith('2030-02-01 09:00', $row['ends_at']);
     }
 
-    public function test_a_free_delivery_coupon_takes_no_amount_off_whatever_value_was_typed(): void
+    public function test_the_free_delivery_switch_is_saved_with_the_discount(): void
     {
-        $id = $this->createdId($this->submit($this->coupon('B', ['value_type' => 'free_delivery', 'value' => '99'])));
+        $on = $this->createdId($this->submit($this->coupon('B', ['free_delivery' => '1'])));
+        $off = $this->createdId($this->submit($this->coupon('C')));
 
-        $this->assertEqualsWithDelta(0.0, (float) $this->stored($id)['value'], 0.001);
+        $this->assertSame(1, (int) $this->stored($on)['free_delivery']);
+        $this->assertSame(0, (int) $this->stored($off)['free_delivery']);
     }
 
     public function test_a_minimum_spend_is_only_kept_for_a_coupon(): void
@@ -377,7 +382,6 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
             'no name' => [['name' => ''], 'Discount name is required'],
             'unknown type' => [['type' => 'bogus'], 'Invalid discount type'],
             'unknown value type' => [['value_type' => 'bogus'], 'Invalid discount value type'],
-            'free delivery outside a coupon' => [['value_type' => 'free_delivery'], 'Free delivery is only available as a coupon code'],
             'no amount' => [['value' => '0'], 'Discount value must be greater than zero'],
             'over a hundred percent' => [['value' => '101'], 'Percentage discount cannot exceed 100%'],
             'ends before it starts' => [['starts_at' => '2030-02-01T09:00', 'ends_at' => '2030-01-01T09:00'], 'End date must be after the start date'],
@@ -491,8 +495,10 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $this->assertTrue($data['admin']['isNew']);
         $this->assertSame('sitewide', $data['admin']['discount']['type']);
         $this->assertSame('percent', $data['admin']['discount']['value_type']);
+        $this->assertSame(0, $data['admin']['discount']['active']); // New discounts start switched off
         $this->assertSame([], $data['admin']['selectedProductIds']);
         $this->assertFalse($data['admin']['discountForm']['isCouponType']);
+        $this->assertSame('€', $data['admin']['discountForm']['currencySign']); // Comes from Shop settings, not a hard-coded £
     }
 
     public function test_an_existing_discount_form_is_filled_in_with_dates_in_the_browsers_format(): void
@@ -587,6 +593,24 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
 
         $this->assertSame(
             ["Created discount: {$this->runTag} sale", "Deleted discount: {$this->runTag} sale", "Restored discount: {$this->runTag} sale"],
+            $this->changelogFor($id),
+        );
+    }
+
+    public function test_clicking_the_status_pill_switches_a_discount_off_and_on(): void
+    {
+        $id = $this->createdId($this->submit($this->sitewide()));
+
+        $off = $this->act(['action' => 'toggle_active', 'id' => $id], role: 'editor');
+        $this->assertSame(['success' => true, 'action' => 'disable', 'id' => $id], $off['body']);
+        $this->assertSame(0, (int) $this->stored($id)['active']);
+
+        $on = $this->act(['action' => 'toggle_active', 'id' => $id], role: 'editor');
+        $this->assertSame(['success' => true, 'action' => 'enable', 'id' => $id], $on['body']);
+        $this->assertSame(1, (int) $this->stored($id)['active']);
+
+        $this->assertSame(
+            ["Created discount: {$this->runTag} sale", "Disabled discount: {$this->runTag} sale", "Enabled discount: {$this->runTag} sale"],
             $this->changelogFor($id),
         );
     }

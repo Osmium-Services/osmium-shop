@@ -1,4 +1,4 @@
-SELECT id, name, value_type, value, usage_limit, usage_limit_per_customer, min_spend_inc_tax, times_used
+SELECT id, name, value_type, value, free_delivery, usage_limit, usage_limit_per_customer, min_spend_inc_tax, times_used
 FROM {PREFIX}discounts
 WHERE
     type = 'coupon'

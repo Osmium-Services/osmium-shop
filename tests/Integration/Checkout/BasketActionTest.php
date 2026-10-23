@@ -301,8 +301,8 @@ class BasketActionTest extends ShopDatabaseTestCase
     {
         ControllerHarness::resetProviderMemo(['fake' => $this->fakeProvider()]);
         $this->db->prepare(
-            sql: "INSERT INTO {$this->db->tablePrefix()}discounts (name, type, code, value_type, value, active)
-                  VALUES ('Test free delivery', 'coupon', 'FREEDEL', 'free_delivery', 0, 1)",
+            sql: "INSERT INTO {$this->db->tablePrefix()}discounts (name, type, code, value_type, value, free_delivery, active)
+                  VALUES ('Test free delivery', 'coupon', 'FREEDEL', 'percent', 0, 1, 1)",
         )->execute();
         $checkout = ['paymentProvider' => 'fake'];
 

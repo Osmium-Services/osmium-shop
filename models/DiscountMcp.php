@@ -24,7 +24,7 @@ class DiscountMcp
     private const RECORD_TYPE = 'discount';
     private const MAX_NAME_LENGTH = 255;
     private const CLEARABLE_FIELDS = ['starts_at', 'ends_at', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
-    private const UPDATABLE_FIELDS = ['name', 'value_type', 'value', 'code', 'product_ids', 'starts_at', 'ends_at', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
+    private const UPDATABLE_FIELDS = ['name', 'value_type', 'value', 'free_delivery', 'code', 'product_ids', 'starts_at', 'ends_at', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
     private const COUPON_ONLY_FIELDS = ['code', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
 
     /**
@@ -51,14 +51,15 @@ class DiscountMcp
             ],
             [
                 'name' => 'discount_create',
-                'description' => 'Create a discount. It is ALWAYS created switched off (disabled) and does nothing until someone enables it in the admin (Shop > Discounts); this tool cannot switch one on. type is sitewide (the whole basket), product (the products in product_ids) or coupon (a code the customer enters, needs code). value_type is percent (value 1 to 100), fixed (value in pounds) or free_delivery (coupon only, no value: it waives the delivery charge). Coupons can also have usage_limit, usage_limit_per_customer and min_spend_inc_tax (the basket total including VAT, before the discount and delivery). Dates are YYYY-MM-DD or YYYY-MM-DD HH:MM, UK time; a date alone starts at the start of that day and ends at the end of it. The same rules as the admin form apply. Undo with discount_delete.',
+                'description' => 'Create a discount. It is ALWAYS created switched off (disabled) and does nothing until someone enables it in the admin (Shop > Discounts); this tool cannot switch one on. type is sitewide (the whole basket), product (the products in product_ids) or coupon (a code the customer enters, needs code). value_type is percent (value 1 to 100) or fixed (value in pounds). Set free_delivery true to also waive the delivery charge while the discount applies (any type). Coupons can also have usage_limit, usage_limit_per_customer and min_spend_inc_tax (the basket total including VAT, before the discount and delivery). Dates are YYYY-MM-DD or YYYY-MM-DD HH:MM, UK time; a date alone starts at the start of that day and ends at the end of it. The same rules as the admin form apply. Undo with discount_delete.',
                 'inputSchema' => [
                     'type' => 'object',
                     'properties' => [
                         'name' => ['type' => 'string', 'description' => 'The discount name, up to ' . self::MAX_NAME_LENGTH . ' characters, one line'],
                         'type' => ['type' => 'string', 'enum' => ['sitewide', 'product', 'coupon']],
-                        'value_type' => ['type' => 'string', 'enum' => ['percent', 'fixed', 'free_delivery']],
-                        'value' => ['type' => 'number', 'description' => 'The amount: a percentage (up to 100) or pounds. Leave out for free_delivery'],
+                        'value_type' => ['type' => 'string', 'enum' => ['percent', 'fixed']],
+                        'value' => ['type' => 'number', 'description' => 'The amount: a percentage (up to 100) or pounds'],
+                        'free_delivery' => ['type' => 'boolean', 'description' => 'Also waive the delivery charge while this discount applies'],
                         'code' => ['type' => 'string', 'description' => 'Coupons only: the code, letters, numbers, hyphens and underscores. It is made upper case'],
                         'product_ids' => ['type' => 'array', 'items' => ['type' => 'integer'], 'description' => 'Product discounts only: ids of live products, such as from products_attention'],
                         'starts_at' => ['type' => 'string', 'description' => 'Optional start, YYYY-MM-DD or YYYY-MM-DD HH:MM'],
@@ -74,15 +75,16 @@ class DiscountMcp
             ],
             [
                 'name' => 'discount_update',
-                'description' => 'Change a discount that is switched OFF (disabled). A discount that is switched on cannot be edited here: switch it off in the admin first. It stays switched off, and this tool cannot switch one on. Give the id and the exact name, then only the fields to change; the rest stay. The type cannot be changed. clear removes an optional field (starts_at, ends_at, usage_limit, usage_limit_per_customer, min_spend_inc_tax). Changing value_type to free_delivery drops the value; changing it back needs a value. The same rules as create and the admin form apply, and the reply says what each changed field was, to undo it.',
+                'description' => 'Change a discount that is switched OFF (disabled). A discount that is switched on cannot be edited here: switch it off in the admin first. It stays switched off, and this tool cannot switch one on. Give the id and the exact name, then only the fields to change; the rest stay. The type cannot be changed. clear removes an optional field (starts_at, ends_at, usage_limit, usage_limit_per_customer, min_spend_inc_tax). The same rules as create and the admin form apply, and the reply says what each changed field was, to undo it.',
                 'inputSchema' => [
                     'type' => 'object',
                     'properties' => [
                         'id' => ['type' => 'integer', 'description' => 'The discount id from discounts_list'],
                         'expected_name' => ['type' => 'string', 'description' => "The discount's exact current name as listed. The call is refused if it does not match the id"],
                         'name' => ['type' => 'string', 'description' => 'The new name'],
-                        'value_type' => ['type' => 'string', 'enum' => ['percent', 'fixed', 'free_delivery']],
+                        'value_type' => ['type' => 'string', 'enum' => ['percent', 'fixed']],
                         'value' => ['type' => 'number', 'description' => 'The new amount: a percentage (up to 100) or pounds'],
+                        'free_delivery' => ['type' => 'boolean', 'description' => 'Whether to also waive the delivery charge'],
                         'code' => ['type' => 'string', 'description' => 'Coupons only: the new code'],
                         'product_ids' => ['type' => 'array', 'items' => ['type' => 'integer'], 'description' => 'Product discounts only: the full new list of live product ids'],
                         'starts_at' => ['type' => 'string', 'description' => 'YYYY-MM-DD or YYYY-MM-DD HH:MM'],
@@ -164,6 +166,7 @@ class DiscountMcp
             'code' => $fields['code'],
             'value_type' => $fields['value_type'],
             'value' => $fields['value'],
+            'free_delivery' => (int) $fields['free_delivery'],
             'starts_at' => $fields['starts_at'],
             'ends_at' => $fields['ends_at'],
             'usage_limit' => $fields['usage_limit'],
@@ -223,7 +226,6 @@ class DiscountMcp
         $currentArguments = self::argumentsFromRow($discount, $currentProductIds);
 
         $merged = \array_diff_key($changes + $currentArguments, \array_flip($clear));
-        if (($merged['value_type'] ?? null) === 'free_delivery' && !\array_key_exists('value', $changes)) unset($merged['value']);
 
         $before = self::createFields($currentArguments, $liveProducts + \array_fill_keys($currentProductIds, ''));
         $productsToAccept = \array_key_exists('product_ids', $changes) ? $liveProducts : $liveProducts + \array_fill_keys($currentProductIds, ''); // Products it already covers stay, even if one has since been deleted
@@ -252,6 +254,7 @@ class DiscountMcp
             'code' => $after['code'],
             'value_type' => $after['value_type'],
             'value' => $after['value'],
+            'free_delivery' => (int) $after['free_delivery'],
             'starts_at' => $after['starts_at'],
             'ends_at' => $after['ends_at'],
             'usage_limit' => $after['usage_limit'],
@@ -303,7 +306,8 @@ class DiscountMcp
     private static function argumentsFromRow(array $row, array $productIds): array
     {
         $arguments = ['name' => (string) $row['name'], 'type' => (string) $row['type'], 'value_type' => (string) $row['value_type']];
-        if ($row['value_type'] !== 'free_delivery') $arguments['value'] = (float) $row['value'];
+        $arguments['value'] = (float) $row['value'];
+        if (!empty($row['free_delivery'])) $arguments['free_delivery'] = true;
         if ($row['type'] === 'coupon') $arguments['code'] = (string) $row['code'];
         if ($row['type'] === 'product') $arguments['product_ids'] = $productIds;
         foreach (['starts_at', 'ends_at'] as $field) {
@@ -337,7 +341,7 @@ class DiscountMcp
         $type = $arguments['type'] ?? null;
         if (!\in_array($type, ['sitewide', 'product', 'coupon'], true)) throw new McpToolException('The type must be sitewide, product or coupon.');
         $valueType = $arguments['value_type'] ?? null;
-        if (!\in_array($valueType, ['percent', 'fixed', 'free_delivery'], true)) throw new McpToolException('The value_type must be percent, fixed or free_delivery.');
+        if (!\in_array($valueType, ['percent', 'fixed'], true)) throw new McpToolException('The value_type must be percent or fixed.');
 
         if ($type !== 'coupon') {
             foreach (self::COUPON_ONLY_FIELDS as $field) {
@@ -346,14 +350,12 @@ class DiscountMcp
         }
         if ($type !== 'product' && \array_key_exists('product_ids', $arguments)) throw new McpToolException('product_ids only applies to a product discount.');
 
-        $value = 0.0;
-        if ($valueType === 'free_delivery') {
-            if (\array_key_exists('value', $arguments)) throw new McpToolException('Free delivery takes no value.');
-        } else {
-            $given = $arguments['value'] ?? null;
-            if (!\is_int($given) && !\is_float($given)) throw new McpToolException('Give the value as a number.');
-            $value = \round((float) $given, 2);
-        }
+        $given = $arguments['value'] ?? null;
+        if (!\is_int($given) && !\is_float($given)) throw new McpToolException('Give the value as a number.');
+        $value = \round((float) $given, 2);
+
+        $freeDelivery = $arguments['free_delivery'] ?? false;
+        if (!\is_bool($freeDelivery)) throw new McpToolException('free_delivery must be true or false.');
 
         $productIds = [];
         if ($type === 'product') {
@@ -379,6 +381,7 @@ class DiscountMcp
             'type' => $type,
             'value_type' => $valueType,
             'value' => $value,
+            'free_delivery' => $freeDelivery,
             'code' => $code,
             'product_ids' => $productIds,
             'starts_at' => self::when($arguments, 'starts_at', endOfDay: false),
@@ -526,6 +529,7 @@ class DiscountMcp
             $list[] = $entry + [
                 'code' => $row['code'] ?? null,
                 'value' => self::valueLabel((string) $row['value_type'], (float) $row['value']),
+                'free_delivery' => !empty($row['free_delivery']),
                 'starts_at' => $row['starts_at'] ?? null,
                 'ends_at' => $row['ends_at'] ?? null,
                 'status' => self::status($row, $now),
@@ -542,7 +546,6 @@ class DiscountMcp
 
     private static function valueLabel(string $valueType, float $value): string
     {
-        if ($valueType === 'free_delivery') return 'Free delivery';
         if ($valueType === 'percent') return \rtrim(\rtrim(\number_format($value, 2), '0'), '.') . '%';
 
         return '£' . \number_format($value, 2);

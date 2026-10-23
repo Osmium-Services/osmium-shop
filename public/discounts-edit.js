@@ -22,24 +22,6 @@ $(document).ready(function() {
         });
     }
 
-    const valueTypeSelect = document.getElementById('value_type');
-    const valueField = document.getElementById('value-field');
-    const valueInput = document.getElementById('value');
-
-    // Free delivery takes nothing off the goods, so it has no amount to enter, and it only works as a coupon
-    function syncValueType() {
-        if (!valueTypeSelect || !valueField || !valueInput) return;
-
-        const isFreeDelivery = valueTypeSelect.value === 'free_delivery';
-        valueField.style.display = isFreeDelivery ? 'none' : '';
-        valueInput.required = !isFreeDelivery;
-    }
-
-    if (valueTypeSelect) {
-        valueTypeSelect.addEventListener('change', syncValueType);
-        syncValueType();
-    }
-
     if (codeInput) {
         codeInput.addEventListener('input', function() {
             codeInput.value = codeInput.value.toUpperCase();

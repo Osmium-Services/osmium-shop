@@ -1,4 +1,4 @@
-SELECT p.id AS product_id, d.id, d.name, d.value_type, d.value
+SELECT p.id AS product_id, d.id, d.name, d.value_type, d.value, d.free_delivery
 FROM {PREFIX}products p
 INNER JOIN {PREFIX}discounts d ON d.type = 'product'
 WHERE

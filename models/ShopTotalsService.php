@@ -123,11 +123,6 @@ class ShopTotalsService
         // A running sitewide sale takes the place of any coupon, so say so rather than leave a valid code looking broken
         if ($sitewideDiscount !== null) $couponNotice = $this->couponBlockedBySale((string)$couponCode);
 
-        // A free delivery coupon takes nothing off the goods: it waives delivery only, so it neither counts as a
-        // price discount here nor stops per-product discounts applying. Its summary still goes on the order below.
-        $freeDeliveryCoupon = $couponDiscount !== null && ($couponDiscount['value_type'] ?? '') === 'free_delivery' ? $couponDiscount : null;
-        if ($freeDeliveryCoupon !== null) $couponDiscount = null;
-
         // Sitewide and coupon discounts both win over a per-product discount
         // and apply to every line, so there is no reason to resolve
         // per-product discounts once either is active.
@@ -137,6 +132,10 @@ class ShopTotalsService
             : [];
 
         $basketDiscount = $sitewideDiscount ?? $couponDiscount;
+
+        // Free delivery is a switch on any discount: the basket-wide one, or a per-product one on a line in the basket
+        $waivesDelivery = !empty($basketDiscount['free_delivery'])
+            || \array_filter($productDiscounts, static fn(array $discount): bool => !empty($discount['free_delivery'])) !== [];
 
         $pricedLines = [];
         $subtotalExcTax = 0.0;
@@ -156,7 +155,7 @@ class ShopTotalsService
 
         $zone = $this->resolveZone($postcode);
         $deliveryConfigured = $this->deliveryCharge !== null;
-        $delivery = $this->resolveDeliveryCharge(zone: $zone, subtotalExcTax: $subtotalExcTax, hasLines: !empty($pricedLines), freeDelivery: $freeDeliveryCoupon !== null);
+        $delivery = $this->resolveDeliveryCharge(zone: $zone, subtotalExcTax: $subtotalExcTax, hasLines: !empty($pricedLines), freeDelivery: $waivesDelivery);
         $deliveryTax = $this->taxOn($delivery);
 
         $taxAmount = \round(num: $lineTaxTotal + $deliveryTax, precision: 2);
@@ -177,8 +176,8 @@ class ShopTotalsService
         $discountSummary = null;
         if ($sitewideDiscount !== null) {
             $discountSummary = ['type' => 'sitewide', 'id' => (int)$sitewideDiscount['id'], 'name' => $sitewideDiscount['name'], 'code' => null];
-        } elseif ($couponDiscount !== null || $freeDeliveryCoupon !== null) {
-            $coupon = $couponDiscount ?? $freeDeliveryCoupon;
+        } elseif ($couponDiscount !== null) {
+            $coupon = $couponDiscount;
             $discountSummary = [
                 'type' => 'coupon',
                 'id' => (int)$coupon['id'],
@@ -195,7 +194,7 @@ class ShopTotalsService
             'delivery_zone' => $zone,
             'delivery_exc_tax' => $delivery,
             'delivery_tax_amount' => $deliveryTax,
-            'free_delivery' => $freeDeliveryCoupon !== null, // A free delivery coupon is waiving the delivery charge
+            'free_delivery' => $waivesDelivery, // A discount is waiving the delivery charge
             'delivery_configured' => $deliveryConfigured, // False means £0.00 is "we cannot quote", not "free delivery". Checkout must refuse to take money on this.
             'tax_amount' => $taxAmount,
             'tax_rate_percent' => $this->taxRatePercent,
@@ -388,7 +387,7 @@ class ShopTotalsService
      * @param string $zone Resolved delivery zone
      * @param float $subtotalExcTax Basket subtotal, for the threshold test
      * @param bool $hasLines Whether the basket has anything in it
-     * @param bool $freeDelivery Whether a free delivery coupon applies
+     * @param bool $freeDelivery Whether a discount on the basket waives delivery
      * @return float Charge exc VAT
      */
     private function resolveDeliveryCharge(string $zone, float $subtotalExcTax, bool $hasLines, bool $freeDelivery = false): float

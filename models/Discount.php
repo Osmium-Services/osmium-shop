@@ -16,7 +16,7 @@ class Discount extends AdminModel
 
     /** Columns written by insert() and update(). */
     private const FIELDS = [
-        'name', 'type', 'code', 'value_type', 'value',
+        'name', 'type', 'code', 'value_type', 'value', 'free_delivery',
         'starts_at', 'ends_at', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax', 'active',
     ];
 
@@ -67,6 +67,11 @@ class Discount extends AdminModel
     public function update(int $id, array $fields): void
     {
         $this->run('discount-update.sql', [':id' => $id] + $this->bindingsFor($fields));
+    }
+
+    public function setActive(int $id, bool $active): void
+    {
+        $this->run('discount-set-active.sql', [':id' => $id, ':active' => (int)$active]);
     }
 
     public function softDelete(int $id): void
@@ -155,6 +160,7 @@ class Discount extends AdminModel
         foreach (self::FIELDS as $field) {
             $bindings[':' . $field] = $fields[$field] ?? null;
         }
+        $bindings[':free_delivery'] = (int)($fields['free_delivery'] ?? 0); // A switch, never null
 
         return $bindings;
     }

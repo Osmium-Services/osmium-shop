@@ -1,4 +1,4 @@
-SELECT id, name, value_type, value
+SELECT id, name, value_type, value, free_delivery
 FROM {PREFIX}discounts
 WHERE
     type = 'sitewide'

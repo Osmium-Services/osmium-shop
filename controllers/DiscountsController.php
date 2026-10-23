@@ -85,6 +85,7 @@ class DiscountsController extends AdminController
         $this->data['admin']['discountForm'] = [
             'isProductType' => ($this->data['admin']['discount']['type'] ?? 'sitewide') === 'product',
             'isCouponType' => ($this->data['admin']['discount']['type'] ?? 'sitewide') === 'coupon',
+            'currencySign' => \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencySign(),
             'selectedProductIds' => $selectedProductIds,
             'selectedCategoryIds' => $selectedCategoryIds,
             'selectedBrandIds' => $selectedBrandIds,
@@ -132,13 +133,14 @@ class DiscountsController extends AdminController
 
         try {
             $result = match ($action) {
+                'toggle_active' => $this->toggleActive($id),
                 'delete' => $this->softDelete($id),
                 'restore' => $this->restore($id),
                 'permanently_delete' => $this->hardDelete($id),
                 default => throw new \InvalidArgumentException('Unknown action'),
             };
 
-            $this->logAction(action: $action, id: $id, name: $recordName);
+            $this->logAction(action: $result['action'] ?? $action, id: $id, name: $recordName);
             $this->admin->jsonSuccess($result);
         } catch (\Exception $e) {
             $this->admin->jsonError($e->getMessage());
@@ -197,12 +199,13 @@ class DiscountsController extends AdminController
             'code' => '',
             'value_type' => 'percent',
             'value' => '',
+            'free_delivery' => 0,
             'starts_at' => '',
             'ends_at' => '',
             'usage_limit' => '',
             'usage_limit_per_customer' => '',
             'min_spend_inc_tax' => '',
-            'active' => 1,
+            'active' => 0,
         ];
     }
 
@@ -259,7 +262,7 @@ class DiscountsController extends AdminController
         $code = \strtoupper($input->string(key: 'code'));
         $valueType = $input->string(key: 'value_type', default: 'percent');
         $value = $input->float(key: 'value');
-        if ($valueType === 'free_delivery') $value = 0.0; // Free delivery takes no amount off the goods
+        $freeDelivery = (int) $input->has(key: 'free_delivery');
         $startsAt = DiscountRules::parseDate($input->string(key: 'starts_at'));
         $endsAt = DiscountRules::parseDate($input->string(key: 'ends_at'));
         $usageLimit = DiscountRules::parseInt($input->string(key: 'usage_limit'));
@@ -300,6 +303,7 @@ class DiscountsController extends AdminController
                 code: $scopedCode,
                 valueType: $valueType,
                 value: $value,
+                freeDelivery: $freeDelivery,
                 startsAt: $startsAt,
                 endsAt: $endsAt,
                 usageLimit: $usageLimit,
@@ -317,6 +321,7 @@ class DiscountsController extends AdminController
                 code: $scopedCode,
                 valueType: $valueType,
                 value: $value,
+                freeDelivery: $freeDelivery,
                 startsAt: $startsAt,
                 endsAt: $endsAt,
                 usageLimit: $usageLimit,
@@ -349,6 +354,7 @@ class DiscountsController extends AdminController
         ?string $code,
         string $valueType,
         float $value,
+        int $freeDelivery,
         ?string $startsAt,
         ?string $endsAt,
         ?int $usageLimit,
@@ -365,6 +371,7 @@ class DiscountsController extends AdminController
             'code' => $code,
             'value_type' => $valueType,
             'value' => $value,
+            'free_delivery' => $freeDelivery,
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
             'usage_limit' => $usageLimit,
@@ -391,6 +398,7 @@ class DiscountsController extends AdminController
         ?string $code,
         string $valueType,
         float $value,
+        int $freeDelivery,
         ?string $startsAt,
         ?string $endsAt,
         ?int $usageLimit,
@@ -407,6 +415,7 @@ class DiscountsController extends AdminController
             'code' => $code,
             'value_type' => $valueType,
             'value' => $value,
+            'free_delivery' => $freeDelivery,
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
             'usage_limit' => $usageLimit,
@@ -474,6 +483,7 @@ class DiscountsController extends AdminController
             'code' => null,
             'value_type' => $source['value_type'],
             'value' => $source['value'],
+            'free_delivery' => $source['free_delivery'],
             'starts_at' => $source['starts_at'],
             'ends_at' => $source['ends_at'],
             'usage_limit' => $source['usage_limit'],
@@ -496,6 +506,18 @@ class DiscountsController extends AdminController
         );
 
         $this->redirect("shop/discounts/edit/?id={$newDiscountId}");
+    }
+
+    /** Flips the switch from the Status pill in the list; the reply carries the new state for the changelog. */
+    private function toggleActive(int $id): array
+    {
+        $discount = $this->admin->model->discount->getById($id);
+        if (!$discount) throw new \RuntimeException('Discount not found');
+
+        $nowActive = !$discount['active'];
+        $this->admin->model->discount->setActive($id, $nowActive);
+
+        return ['success' => true, 'action' => $nowActive ? 'enable' : 'disable', 'id' => $id];
     }
 
     private function softDelete(int $id): array
@@ -522,6 +544,8 @@ class DiscountsController extends AdminController
     private function logAction(string $action, int $id, string $name): void
     {
         $labels = [
+            'enable' => 'Enabled',
+            'disable' => 'Disabled',
             'delete' => 'Deleted',
             'restore' => 'Restored',
             'permanently_delete' => 'Permanently deleted',

@@ -47,76 +47,53 @@ $form = $admin['discountForm'];
         <input type="hidden" name="id" value="<?= $discount['id'] ?>">
     <?php endif; ?>
 
+    <div class="row">
+    <div class="col-lg-6">
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="mb-0">Discount Details</h5>
+            <h5 class="mb-0">Discount</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-12 mb-3">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="active" name="active"
-                            <?= ($discount['active'] ?? 1) ? 'checked' : '' ?>>
+                            <?= ($discount['active'] ?? 0) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="active">Active</label>
                     </div>
                     <small class="text-muted">Switch off to pause without deleting</small>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-12 mb-3">
                     <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="name" name="name"
                         value="<?= \htmlspecialchars($discount['name'] ?? '') ?>" required maxlength="255"
                         placeholder="e.g. Black Friday 2026">
                 </div>
-                <div class="col-md-6 mb-3">
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Offer</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 mb-3">
                     <label for="type" class="form-label">Applies To <span class="text-danger">*</span></label>
                     <select class="form-select" id="type" name="type">
+                        <option value="coupon" <?= $form['isCouponType'] ? 'selected' : '' ?>>
+                            Coupon code (whole basket)
+                        </option>
                         <option value="sitewide" <?= ($discount['type'] ?? '') === 'sitewide' ? 'selected' : '' ?>>
                             Sitewide (whole basket)
                         </option>
                         <option value="product" <?= $form['isProductType'] ? 'selected' : '' ?>>
                             Specific products, categories or brands
                         </option>
-                        <option value="coupon" <?= $form['isCouponType'] ? 'selected' : '' ?>>
-                            Coupon code (whole basket)
-                        </option>
                     </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="value_type" class="form-label">Discount Type <span class="text-danger">*</span></label>
-                    <select class="form-select" id="value_type" name="value_type">
-                        <option value="percent" <?= ($discount['value_type'] ?? '') === 'percent' ? 'selected' : '' ?>>
-                            Percentage off
-                        </option>
-                        <option value="fixed" <?= ($discount['value_type'] ?? '') === 'fixed' ? 'selected' : '' ?>>
-                            Fixed amount off
-                        </option>
-                        <option value="free_delivery" <?= ($discount['value_type'] ?? '') === 'free_delivery' ? 'selected' : '' ?>>
-                            Free delivery (coupon only)
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3" id="value-field">
-                    <label for="value" class="form-label">Value <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" min="0" class="form-control" id="value" name="value"
-                        value="<?= \htmlspecialchars((string)($discount['value'] ?? '')) ?>"<?= ($discount['value_type'] ?? '') === 'free_delivery' ? '' : ' required' ?>>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="starts_at" class="form-label">Starts</label>
-                    <input type="datetime-local" class="form-control" id="starts_at" name="starts_at"
-                        value="<?= $form['startsAtLocal'] ?>">
-                    <small class="text-muted">Leave blank to start immediately</small>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="ends_at" class="form-label">Ends</label>
-                    <input type="datetime-local" class="form-control" id="ends_at" name="ends_at"
-                        value="<?= $form['endsAtLocal'] ?>">
-                    <small class="text-muted">Leave blank to run indefinitely</small>
                 </div>
             </div>
             <div class="row" id="coupon-scope-row" style="<?= $form['isCouponType'] ? '' : 'display:none;' ?>">
@@ -142,7 +119,7 @@ $form = $admin['discountForm'];
                 <div class="col-md-4 mb-3">
                     <label for="min_spend_inc_tax" class="form-label">Minimum Spend (inc. VAT)</label>
                     <div class="input-group">
-                        <span class="input-group-text">£</span>
+                        <span class="input-group-text"><?= \htmlspecialchars($form['currencySign']) ?></span>
                         <input type="number" step="0.01" min="0" class="form-control" id="min_spend_inc_tax" name="min_spend_inc_tax"
                             value="<?= \htmlspecialchars((string)($discount['min_spend_inc_tax'] ?? '')) ?>">
                     </div>
@@ -185,13 +162,65 @@ $form = $admin['discountForm'];
                     <small class="text-muted">Every product from a chosen brand, including ones added later</small>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="value_type" class="form-label">Discount Type <span class="text-danger">*</span></label>
+                    <select class="form-select" id="value_type" name="value_type">
+                        <option value="percent" <?= ($discount['value_type'] ?? '') === 'percent' ? 'selected' : '' ?>>
+                            Percentage
+                        </option>
+                        <option value="fixed" <?= ($discount['value_type'] ?? '') === 'fixed' ? 'selected' : '' ?>>
+                            Fixed amount (<?= \htmlspecialchars($form['currencySign']) ?>)
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3" id="value-field">
+                    <label for="value" class="form-label">Value <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="value" name="value"
+                        value="<?= \htmlspecialchars((string)($discount['value'] ?? '')) ?>"required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="free_delivery" name="free_delivery" value="1" <?= !empty($discount['free_delivery']) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="free_delivery">Free delivery</label>
+                </div>
+                <small class="text-muted">Waives the delivery charge while this discount applies to the basket</small>
+            </div>
         </div>
-        <div class="card-footer d-flex justify-content-end gap-2">
-            <a href="<?= $adminUrl('shop/discounts/') ?>" class="btn btn-outline-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">
-                <i class="bx bx-save me-1"></i> <?= $admin['isNew'] ? 'Create Discount' : 'Save Changes' ?>
-            </button>
+    </div>
+
+    </div>
+    <div class="col-lg-6">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Schedule</h5>
         </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="starts_at" class="form-label">Starts</label>
+                    <input type="datetime-local" class="form-control" id="starts_at" name="starts_at"
+                        value="<?= $form['startsAtLocal'] ?>">
+                    <small class="text-muted">Leave blank to start immediately</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ends_at" class="form-label">Ends</label>
+                    <input type="datetime-local" class="form-control" id="ends_at" name="ends_at"
+                        value="<?= $form['endsAtLocal'] ?>">
+                    <small class="text-muted">Leave blank to run indefinitely</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mb-4">
+        <a href="<?= $adminUrl('shop/discounts/') ?>" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bx bx-save me-1"></i> <?= $admin['isNew'] ? 'Create Discount' : 'Save Changes' ?>
+        </button>
     </div>
 </form>
 

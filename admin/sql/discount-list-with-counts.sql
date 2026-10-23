@@ -5,6 +5,7 @@ SELECT
     D.code,
     D.value_type,
     D.value,
+    D.free_delivery,
     D.starts_at,
     D.ends_at,
     D.usage_limit,

@@ -119,11 +119,9 @@ class DiscountRulesTest extends TestCase
         }
     }
 
-    public function test_free_delivery_needs_no_amount_but_only_works_as_a_coupon(): void
+    public function test_free_delivery_is_no_longer_a_value_type(): void
     {
-        $this->assertNull($this->validate(['type' => 'coupon', 'code' => 'FREEDEL', 'valueType' => 'free_delivery', 'value' => 0.0]));
-        $this->assertSame('Free delivery is only available as a coupon code', $this->validate(['type' => 'sitewide', 'valueType' => 'free_delivery', 'value' => 0.0]));
-        $this->assertSame('Free delivery is only available as a coupon code', $this->validate(['type' => 'product', 'valueType' => 'free_delivery', 'value' => 0.0, 'productIds' => [1]]));
+        $this->assertSame('Invalid discount value type', $this->validate(['valueType' => 'free_delivery', 'value' => 0.0]));
     }
 
     public function test_the_other_types_still_need_an_amount_above_zero(): void

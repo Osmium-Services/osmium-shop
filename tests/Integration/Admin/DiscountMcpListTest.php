@@ -172,15 +172,15 @@ class DiscountMcpListTest extends ShopDatabaseTestCase
         $this->assertSame(0, (int) $row['active']);
     }
 
-    public function test_a_created_free_delivery_coupon_has_no_value(): void
+    public function test_a_created_coupon_can_have_free_delivery_switched_on(): void
     {
         $discounts = new Discount($this->db, 'discounts');
 
-        $result = $this->created(['name' => 'zz-create-fd', 'type' => 'coupon', 'value_type' => 'free_delivery', 'code' => 'ZZCREATEFD']);
+        $result = $this->created(['name' => 'zz-create-fd', 'type' => 'coupon', 'value_type' => 'percent', 'value' => 10, 'free_delivery' => true, 'code' => 'ZZCREATEFD']);
 
         $row = $discounts->getById($result['id']);
-        $this->assertSame('free_delivery', $row['value_type']);
-        $this->assertSame('0.00', $row['value']);
+        $this->assertSame('percent', $row['value_type']);
+        $this->assertSame(1, (int) $row['free_delivery']);
     }
 
     public function test_a_created_product_discount_covers_the_products_given_and_names_them(): void
@@ -200,7 +200,7 @@ class DiscountMcpListTest extends ShopDatabaseTestCase
 
         foreach ([
             ['name' => 'zz-bad-1', 'type' => 'sitewide', 'value_type' => 'percent', 'value' => 150],
-            ['name' => 'zz-bad-2', 'type' => 'sitewide', 'value_type' => 'free_delivery'],
+            ['name' => 'zz-bad-2', 'type' => 'sitewide', 'value_type' => 'free_delivery', 'value' => 5],
             ['name' => 'zz-bad-3', 'type' => 'sitewide', 'value_type' => 'fixed', 'value' => 0],
             ['name' => 'zz-bad-4', 'type' => 'sitewide', 'value_type' => 'percent', 'value' => 10, 'starts_at' => '2027-02-01', 'ends_at' => '2027-01-01'],
             ['name' => 'zz-bad-5', 'type' => 'coupon', 'value_type' => 'percent', 'value' => 10, 'code' => 'bad code!'],
@@ -328,18 +328,18 @@ class DiscountMcpListTest extends ShopDatabaseTestCase
         $this->assertStringContainsString('clear can hold', $this->refusedUpdate(['id' => $id, 'expected_name' => 'zz-upd-clear', 'clear' => ['name']]));
     }
 
-    public function test_changing_to_free_delivery_drops_the_value_and_changing_back_needs_one(): void
+    public function test_free_delivery_can_be_switched_on_and_off_on_an_edit(): void
     {
         $discounts = new Discount($this->db, 'discounts');
         $id = $this->switchedOffCoupon('zz-upd-fd', 'ZZUPDFD');
+        $this->assertSame(0, (int) $discounts->getById($id)['free_delivery']);
 
-        $this->updated(['id' => $id, 'expected_name' => 'zz-upd-fd', 'value_type' => 'free_delivery']);
-        $this->assertSame('free_delivery', $discounts->getById($id)['value_type']);
-        $this->assertSame('0.00', $discounts->getById($id)['value']);
+        $this->updated(['id' => $id, 'expected_name' => 'zz-upd-fd', 'free_delivery' => true]);
+        $this->assertSame(1, (int) $discounts->getById($id)['free_delivery']);
+        $this->assertSame('10.00', $discounts->getById($id)['value']);
 
-        $this->assertStringContainsString('value', $this->refusedUpdate(['id' => $id, 'expected_name' => 'zz-upd-fd', 'value_type' => 'percent']));
-        $this->updated(['id' => $id, 'expected_name' => 'zz-upd-fd', 'value_type' => 'percent', 'value' => 7]);
-        $this->assertSame('7.00', $discounts->getById($id)['value']);
+        $this->updated(['id' => $id, 'expected_name' => 'zz-upd-fd', 'free_delivery' => false]);
+        $this->assertSame(0, (int) $discounts->getById($id)['free_delivery']);
     }
 
     public function test_the_admin_rules_apply_to_an_edit_and_nothing_is_saved_when_one_fails(): void

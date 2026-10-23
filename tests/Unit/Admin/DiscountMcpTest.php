@@ -102,7 +102,7 @@ final class DiscountMcpTest extends TestCase
         $row = $this->row(['usage_limit' => '10', 'min_spend_inc_tax' => '50.00', 'product_count' => '4', 'created_at' => '2026-01-01', 'usage_limit_per_customer' => '1']);
 
         $this->assertSame([
-            'id' => 7, 'name' => 'Spring', 'type' => 'coupon', 'code' => 'SPRING10', 'value' => '10%',
+            'id' => 7, 'name' => 'Spring', 'type' => 'coupon', 'code' => 'SPRING10', 'value' => '10%', 'free_delivery' => false,
             'starts_at' => null, 'ends_at' => null, 'status' => 'live', 'times_used' => 3, 'usage_limit' => 10, 'usage_limit_per_customer' => 1, 'min_spend_inc_tax' => 50.0, 'products' => 4,
         ], DiscountMcp::shapeList([$row], $this->now())[0]);
     }
@@ -117,11 +117,10 @@ final class DiscountMcpTest extends TestCase
         );
     }
 
-    public function test_a_free_delivery_coupon_reads_as_free_delivery(): void
+    public function test_the_free_delivery_switch_is_listed(): void
     {
-        $row = $this->row(['value_type' => 'free_delivery', 'value' => '0.00']);
-
-        $this->assertSame('Free delivery', DiscountMcp::shapeList([$row], $this->now())[0]['value']);
+        $this->assertTrue(DiscountMcp::shapeList([$this->row(['free_delivery' => 1])], $this->now())[0]['free_delivery']);
+        $this->assertFalse(DiscountMcp::shapeList([$this->row()], $this->now())[0]['free_delivery']);
     }
 
     private const PRODUCTS = [7 => 'Panel A', 8 => 'Panel B'];
@@ -167,12 +166,14 @@ final class DiscountMcpTest extends TestCase
         $this->assertSame(50.0, $f['min_spend_inc_tax']);
     }
 
-    public function test_free_delivery_takes_no_value(): void
+    public function test_free_delivery_is_a_switch_that_defaults_off(): void
     {
-        $f = $this->fields(['name' => 'FD', 'type' => 'coupon', 'value_type' => 'free_delivery', 'code' => 'FD']);
+        $base = ['name' => 'FD', 'type' => 'coupon', 'value_type' => 'percent', 'value' => 10, 'code' => 'FD'];
 
-        $this->assertSame(0.0, $f['value']);
-        $this->assertStringContainsString('no value', $this->refused(['name' => 'FD', 'type' => 'coupon', 'value_type' => 'free_delivery', 'code' => 'FD', 'value' => 5]));
+        $this->assertFalse($this->fields($base)['free_delivery']);
+        $this->assertTrue($this->fields($base + ['free_delivery' => true])['free_delivery']);
+        $this->assertStringContainsString('true or false', $this->refused($base + ['free_delivery' => 'yes']));
+        $this->assertStringContainsString('percent or fixed', $this->refused(['value_type' => 'free_delivery'] + $base));
     }
 
     public function test_the_basics_are_required_and_must_be_the_right_kind(): void
