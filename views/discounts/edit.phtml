@@ -224,4 +224,12 @@ $form = $admin['discountForm'];
     </div>
 </form>
 
+<?php if (!$admin['isNew']): ?>
+    <script nonce="<?= $cspNonce ?>">
+        initPresenceTracking(adminBasePath + 'shop/discounts/action/', <?= (int) $discount['id'] ?>, {
+            formSelector: '#discount-form'
+        });
+    </script>
+<?php endif; ?>
+
 <script src="/assets/services/osmium-shop/discounts-edit.js<?= $adminAssetVersion('/assets/services/osmium-shop/discounts-edit.js') ?>"></script>
