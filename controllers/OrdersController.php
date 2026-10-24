@@ -383,8 +383,16 @@ class OrdersController extends AdminController
         $order['status_class'] = $this->statusClass((string)($order['status'] ?? ''));
         $order['invoice_display'] = $order['invoice_number'] ? 'INV-' . $order['invoice_number'] : '—';
         $order['provider_label'] = $this->providerLabel((string)($order['payment_provider'] ?? ''));
-        $order['provider_logo'] = PaymentProviders::logo((string)($order['payment_provider'] ?? ''), PaymentProviders::external($this->osmium));
+        $external = PaymentProviders::external($this->osmium);
+        $order['provider_logo'] = PaymentProviders::logo((string)($order['payment_provider'] ?? ''), $external);
         $order['is_test_payment'] = (bool)($order['is_test_payment'] ?? false);
+        $order['provider_url'] = PaymentProviders::paymentUrl(
+            provider: (string)($order['payment_provider'] ?? ''),
+            external: $external,
+            isTest: $order['is_test_payment'],
+            orderRef: $order['payment_order_ref'] ?? null,
+            captureRef: $order['payment_capture_ref'] ?? null,
+        );
 
         return $order;
     }

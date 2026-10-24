@@ -13,6 +13,8 @@ SELECT
     o.total_inc_tax,
     o.currency,
     o.payment_provider,
+    o.payment_order_ref,
+    o.payment_capture_ref,
     o.is_test_payment,
     o.paid_at,
     o.dispatched_at,

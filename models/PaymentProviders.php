@@ -49,7 +49,9 @@ class PaymentProviders
      * Each `payment.providers` handler returns one descriptor:
      *   id (string), label (string), ready (bool: switched on and usable),
      *   frontend (array: whatever the checkout page needs, e.g. a publishable
-     *   key), settingsRoute (?string: admin path of its settings page).
+     *   key), settingsRoute (?string: admin path of its settings page), and optionally
+     *   logo (site-relative /assets/ path) and paymentUrl (['test' => ?string, 'live' => ?string]:
+     *   https dashboard link templates using {order_ref} / {capture_ref}).
      * Best-effort: a broken handler is skipped and its provider is simply
      * absent, which fails safe to "no payment provider".
      *
@@ -116,6 +118,7 @@ class PaymentProviders
                 'frontend' => (array)($descriptor['frontend'] ?? []),
                 'settingsRoute' => $descriptor['settingsRoute'] ?? null,
                 'logo' => self::cleanLogo($descriptor['logo'] ?? null),
+                'paymentUrl' => self::cleanPaymentUrl($descriptor['paymentUrl'] ?? null),
             ];
         }
 
@@ -132,6 +135,50 @@ class PaymentProviders
         $isAssetPath = \is_string($logo) && \str_starts_with($logo, '/assets/') && !\str_contains($logo, '..');
 
         return $isAssetPath ? $logo : null;
+    }
+
+    /**
+     * A provider's dashboard link templates as ['test' => ?string, 'live' => ?string], or null.
+     * Only https URLs are kept, and the only placeholders are {order_ref} (the provider's
+     * order or intent id) and {capture_ref} (the provider's payment or charge id).
+     */
+    private static function cleanPaymentUrl(mixed $templates): ?array
+    {
+        if (!\is_array($templates)) return null;
+
+        $clean = [];
+        foreach (['test', 'live'] as $mode) {
+            $template = $templates[$mode] ?? null;
+            $usable = \is_string($template) && \str_starts_with($template, 'https://');
+            $clean[$mode] = $usable ? $template : null;
+        }
+
+        return $clean['test'] === null && $clean['live'] === null ? null : $clean;
+    }
+
+    /**
+     * Link to an order's payment in the provider's own dashboard, or null when the provider
+     * is not installed, ships no template for the order's mode, or the order has no reference yet.
+     *
+     * @param array<string, array> $external From external()
+     */
+    public static function paymentUrl(string $provider, array $external, bool $isTest, ?string $orderRef, ?string $captureRef): ?string
+    {
+        $templates = $external[$provider]['paymentUrl'] ?? null;
+        $template = $templates[$isTest ? 'test' : 'live'] ?? null;
+        if ($template === null) return null;
+
+        $needsOrderRef = \str_contains($template, '{order_ref}');
+        $needsCaptureRef = \str_contains($template, '{capture_ref}');
+        $missingRef = ($needsOrderRef && ($orderRef === null || $orderRef === ''))
+            || ($needsCaptureRef && ($captureRef === null || $captureRef === ''));
+        if ($missingRef) return null;
+
+        return \str_replace(
+            ['{order_ref}', '{capture_ref}'],
+            [\rawurlencode((string)$orderRef), \rawurlencode((string)$captureRef)],
+            $template,
+        );
     }
 
     /**

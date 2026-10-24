@@ -47,8 +47,13 @@ return [
                 'render' => function (array $row, array $context): string {
                     if (empty($row['provider_logo'])) return '';
 
-                    return '<img src="' . \htmlspecialchars((string) $row['provider_logo']) . '" alt="' . \htmlspecialchars((string) $row['provider_label'])
-                        . '" title="Paid with ' . \htmlspecialchars((string) $row['provider_label']) . '" width="28" height="28">';
+                    $label = \htmlspecialchars((string) $row['provider_label']);
+                    $img = '<img src="' . \htmlspecialchars((string) $row['provider_logo']) . '" alt="' . $label
+                        . '" title="Paid with ' . $label . '" width="28" height="28">';
+                    if (empty($row['provider_url'])) return $img;
+
+                    return '<a href="' . \htmlspecialchars((string) $row['provider_url']) . '" target="_blank" rel="noopener noreferrer" title="Open this payment in '
+                        . $label . '">' . $img . '</a>';
                 },
             ],
             [

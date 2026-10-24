@@ -92,7 +92,7 @@ class PaymentProvidersTest extends TestCase
 
         $providers = PaymentProviders::fromDescriptors([$descriptor]);
 
-        $this->assertSame(expected: ['stripe' => $descriptor + ['logo' => null]], actual: $providers);
+        $this->assertSame(expected: ['stripe' => $descriptor + ['logo' => null, 'paymentUrl' => null]], actual: $providers);
     }
 
     public function test_a_sparse_descriptor_gets_safe_defaults(): void
@@ -100,7 +100,7 @@ class PaymentProvidersTest extends TestCase
         $providers = PaymentProviders::fromDescriptors([['id' => 'square']]);
 
         $this->assertSame(
-            expected: ['id' => 'square', 'label' => 'Square', 'ready' => false, 'frontend' => [], 'settingsRoute' => null, 'logo' => null],
+            expected: ['id' => 'square', 'label' => 'Square', 'ready' => false, 'frontend' => [], 'settingsRoute' => null, 'logo' => null, 'paymentUrl' => null],
             actual: $providers['square'],
         ); // Not ready until the service says so
     }
@@ -118,6 +118,59 @@ class PaymentProvidersTest extends TestCase
             $providers = PaymentProviders::fromDescriptors([['id' => 'paypal', 'logo' => $logo]]);
 
             $this->assertNull(PaymentProviders::logo('paypal', $providers), $logo);
+        }
+    }
+
+    private function providersWithUrls(array $paymentUrl): array
+    {
+        return PaymentProviders::fromDescriptors([['id' => 'square', 'paymentUrl' => $paymentUrl]]);
+    }
+
+    public function test_a_payment_link_fills_in_the_orders_own_references(): void
+    {
+        $providers = $this->providersWithUrls(['test' => 'https://sandbox.example/pay/{capture_ref}', 'live' => 'https://live.example/pay/{capture_ref}']);
+
+        $this->assertSame('https://sandbox.example/pay/abc123', PaymentProviders::paymentUrl('square', $providers, true, 'NC-1', 'abc123'));
+        $this->assertSame('https://live.example/pay/abc123', PaymentProviders::paymentUrl('square', $providers, false, 'NC-1', 'abc123'));
+    }
+
+    public function test_a_payment_link_can_use_the_order_reference(): void
+    {
+        $providers = $this->providersWithUrls(['test' => 'https://x.example/{order_ref}/{capture_ref}', 'live' => null]);
+
+        $this->assertSame('https://x.example/pi_1/ch_2', PaymentProviders::paymentUrl('square', $providers, true, 'pi_1', 'ch_2'));
+    }
+
+    public function test_references_are_url_encoded_into_the_link(): void
+    {
+        $providers = $this->providersWithUrls(['test' => 'https://x.example/{capture_ref}', 'live' => null]);
+
+        $this->assertSame('https://x.example/a%2Fb%3Fc%23d', PaymentProviders::paymentUrl('square', $providers, true, null, 'a/b?c#d'));
+    }
+
+    public function test_no_payment_link_without_the_reference_it_needs(): void
+    {
+        $providers = $this->providersWithUrls(['test' => 'https://x.example/{capture_ref}', 'live' => null]);
+
+        $this->assertNull(PaymentProviders::paymentUrl('square', $providers, true, 'NC-1', null));
+        $this->assertNull(PaymentProviders::paymentUrl('square', $providers, true, 'NC-1', ''));
+    }
+
+    public function test_no_payment_link_for_a_mode_with_no_template_or_an_uninstalled_provider(): void
+    {
+        $providers = $this->providersWithUrls(['test' => 'https://x.example/{capture_ref}', 'live' => null]);
+
+        $this->assertNull(PaymentProviders::paymentUrl('square', $providers, false, 'NC-1', 'abc'));
+        $this->assertNull(PaymentProviders::paymentUrl('stripe', $providers, true, 'NC-1', 'abc'));
+    }
+
+    public function test_payment_link_templates_that_are_not_https_are_dropped(): void
+    {
+        foreach (['http://x.example/{capture_ref}', 'javascript:alert(1)', '//x.example/{capture_ref}', '/relative/{capture_ref}'] as $template) {
+            $providers = $this->providersWithUrls(['test' => $template, 'live' => $template]);
+
+            $this->assertNull(PaymentProviders::paymentUrl('square', $providers, true, 'NC-1', 'abc'), $template);
+            $this->assertNull($providers['square']['paymentUrl'], $template);
         }
     }
 
