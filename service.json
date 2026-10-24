@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.36.1",
+  "version": "0.36.2",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -413,7 +413,7 @@
         },
         {
           "id": "shop-settings",
-          "label": "Settings",
+          "label": "Osmium Shop",
           "order": 200,
           "route": "admin/settings/shop",
           "activePattern": "admin/settings/shop",
