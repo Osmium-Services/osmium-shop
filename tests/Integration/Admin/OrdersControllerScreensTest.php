@@ -383,6 +383,20 @@ class OrdersControllerScreensTest extends DatabaseTestCase
         $this->assertEqualsWithDelta(150.25, $value($after) - $value($before), 0.001);
     }
 
+    public function test_a_paid_test_payment_is_neither_awaiting_dispatch_nor_takings(): void
+    {
+        $before = $this->stats();
+        $this->createOrder('paid', ['paid_at' => \date('Y-m-d H:i:s'), 'total_inc_tax' => 100.00, 'is_test_payment' => 1]);
+        $this->createOrder('paid', ['paid_at' => \date('Y-m-d H:i:s'), 'total_inc_tax' => 100.00]);
+
+        $after = $this->stats();
+
+        $this->assertSame($before['awaiting_dispatch'] + 1, $after['awaiting_dispatch'], 'only the real one is waiting to be sent');
+        $this->assertSame($before['paid_30d'] + 1, $after['paid_30d'], 'sandbox payments are not takings');
+        $value = static fn (array $stats): float => (float) \str_replace(['£', ','], '', $stats['paid_30d_value']);
+        $this->assertEqualsWithDelta(100.00, $value($after) - $value($before), 0.001);
+    }
+
     // ---- the order page -----------------------------------------------------------
 
     public function test_the_order_page_goes_back_to_the_list_without_a_real_order(): void
