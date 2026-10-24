@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -398,6 +398,7 @@
           "order": 70,
           "route": "admin/shop/baskets",
           "activePattern": "admin/shop/baskets",
+          "hideWhenHook": "payment.hosted",
           "role": null
         },
         {
