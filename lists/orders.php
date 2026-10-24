@@ -39,6 +39,19 @@ return [
         ],
         'columns' => [
             [
+                'key' => 'provider_logo',
+                'label' => '',
+                'type' => 'html',
+                'nowrap' => true,
+                'sortable' => false,
+                'render' => function (array $row, array $context): string {
+                    if (empty($row['provider_logo'])) return '';
+
+                    return '<img src="' . \htmlspecialchars((string) $row['provider_logo']) . '" alt="' . \htmlspecialchars((string) $row['provider_label'])
+                        . '" title="Paid with ' . \htmlspecialchars((string) $row['provider_label']) . '" width="28" height="28">';
+                },
+            ],
+            [
                 'key' => 'order_ref',
                 'label' => 'Order',
                 'type' => 'text',

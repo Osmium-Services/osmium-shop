@@ -92,7 +92,7 @@ class PaymentProvidersTest extends TestCase
 
         $providers = PaymentProviders::fromDescriptors([$descriptor]);
 
-        $this->assertSame(expected: ['stripe' => $descriptor], actual: $providers);
+        $this->assertSame(expected: ['stripe' => $descriptor + ['logo' => null]], actual: $providers);
     }
 
     public function test_a_sparse_descriptor_gets_safe_defaults(): void
@@ -100,9 +100,30 @@ class PaymentProvidersTest extends TestCase
         $providers = PaymentProviders::fromDescriptors([['id' => 'square']]);
 
         $this->assertSame(
-            expected: ['id' => 'square', 'label' => 'Square', 'ready' => false, 'frontend' => [], 'settingsRoute' => null],
+            expected: ['id' => 'square', 'label' => 'Square', 'ready' => false, 'frontend' => [], 'settingsRoute' => null, 'logo' => null],
             actual: $providers['square'],
         ); // Not ready until the service says so
+    }
+
+    public function test_a_logo_under_assets_is_kept(): void
+    {
+        $providers = PaymentProviders::fromDescriptors([['id' => 'paypal', 'logo' => '/assets/services/paypal/logo.svg']]);
+
+        $this->assertSame(expected: '/assets/services/paypal/logo.svg', actual: PaymentProviders::logo('paypal', $providers));
+    }
+
+    public function test_a_logo_outside_assets_is_dropped(): void
+    {
+        foreach (['https://evil.example/x.svg', 'javascript:alert(1)', '/assets/../secret.svg', '//evil.example/x.svg'] as $logo) {
+            $providers = PaymentProviders::fromDescriptors([['id' => 'paypal', 'logo' => $logo]]);
+
+            $this->assertNull(PaymentProviders::logo('paypal', $providers), $logo);
+        }
+    }
+
+    public function test_a_provider_that_is_not_installed_has_no_logo(): void
+    {
+        $this->assertNull(PaymentProviders::logo('stripe', []));
     }
 
     public function test_descriptors_with_unusable_ids_are_dropped(): void

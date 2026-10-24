@@ -115,10 +115,34 @@ class PaymentProviders
                 'ready' => (bool)($descriptor['ready'] ?? false),
                 'frontend' => (array)($descriptor['frontend'] ?? []),
                 'settingsRoute' => $descriptor['settingsRoute'] ?? null,
+                'logo' => self::cleanLogo($descriptor['logo'] ?? null),
             ];
         }
 
         return $providers;
+    }
+
+    /**
+     * A provider's logo as a site-relative asset path, or null. Anything that is
+     * not under /assets/ is dropped, so a descriptor cannot point admin at an
+     * off-site or script URL.
+     */
+    private static function cleanLogo(mixed $logo): ?string
+    {
+        $isAssetPath = \is_string($logo) && \str_starts_with($logo, '/assets/') && !\str_contains($logo, '..');
+
+        return $isAssetPath ? $logo : null;
+    }
+
+    /**
+     * The logo of an installed provider, for showing next to its orders.
+     * Null when the provider is not installed or ships none.
+     *
+     * @param array<string, array> $external From external()
+     */
+    public static function logo(string $provider, array $external = []): ?string
+    {
+        return $external[$provider]['logo'] ?? null;
     }
 
     /**
