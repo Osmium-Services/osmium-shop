@@ -26,7 +26,7 @@
 <form method="POST" action="<?= $adminUrl('settings/shop/') ?>" id="settings-form">
     <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-8 col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-store me-2"></i>Shop Settings</h5>
@@ -162,9 +162,6 @@
                     <?php endif; ?>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-6">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-category me-2"></i>Category Pages</h5>
