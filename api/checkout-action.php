@@ -250,6 +250,7 @@ try {
                 orderId: $orderId,
                 captureRef: $captureRef,
                 payerEmail: $payerEmail,
+                paymentMethod: $payment['payment_method'] ?? null,
             );
 
             // Null means another caller (a retried capture, or the webhook)

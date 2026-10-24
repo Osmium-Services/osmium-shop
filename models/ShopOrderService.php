@@ -169,7 +169,7 @@ class ShopOrderService
      * @return int|null The invoice number assigned, or null when the order was
      *                  already paid and this call did nothing
      */
-    public function markPaid(int $orderId, string $captureRef, ?string $payerEmail): ?int
+    public function markPaid(int $orderId, string $captureRef, ?string $payerEmail, ?string $paymentMethod = null): ?int
     {
         $ownsTransaction = !$this->orders->database->inTransaction();
         if ($ownsTransaction) $this->orders->database->beginTransaction();
@@ -188,7 +188,7 @@ class ShopOrderService
 
             $invoiceNumber = $this->takeInvoiceNumber();
 
-            $this->orders->markPaid($orderId, $invoiceNumber, $captureRef, $payerEmail);
+            $this->orders->markPaid($orderId, $invoiceNumber, $captureRef, $payerEmail, $paymentMethod);
 
             // Only a coupon has a code and a usage limit worth tracking —
             // sitewide/product discounts have neither, and were never

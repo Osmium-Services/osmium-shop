@@ -96,7 +96,7 @@ class OrdersController extends AdminController
         $this->data['admin']['orderView'] = [
             'isPaid' => $isPaid,
             'isDispatched' => $isDispatched,
-            'canRefund' => $isPaid || $isDispatched,
+            'canRefund' => ($isPaid || $isDispatched) && empty($order['is_test_payment']), // A sandbox payment moved no money, so there is nothing to refund
             'canPrintDespatchNote' => $isPaid || $isDispatched,
             // A paid order always carries a provider, but the refund note must still
             // read as a sentence if one is ever missing.
@@ -332,7 +332,7 @@ class OrdersController extends AdminController
 
         $refunded = $this->admin->model->order->recordRefund($id);
         $nothingChanged = !$refunded;
-        if ($nothingChanged) throw new \RuntimeException('Only a paid or dispatched order can be refunded.');
+        if ($nothingChanged) throw new \RuntimeException('Only a paid or dispatched order with a real payment can be refunded. Test payments moved no money.');
 
         $this->admin->model->changelog->log(
             description: "Recorded refund against order {$id}",

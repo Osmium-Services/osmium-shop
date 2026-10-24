@@ -207,10 +207,10 @@ class OrdersControllerActionTest extends DatabaseTestCase
         $this->call(['action' => 'record_refund', 'id' => $paid]);
 
         $again = $this->call(['action' => 'record_refund', 'id' => $paid]);
-        $this->assertSame('Only a paid or dispatched order can be refunded.', $again['error']);
+        $this->assertSame('Only a paid or dispatched order with a real payment can be refunded. Test payments moved no money.', $again['error']);
 
         $pending = $this->createOrder('pending');
-        $this->assertSame('Only a paid or dispatched order can be refunded.', $this->call(['action' => 'record_refund', 'id' => $pending])['error']);
+        $this->assertSame('Only a paid or dispatched order with a real payment can be refunded. Test payments moved no money.', $this->call(['action' => 'record_refund', 'id' => $pending])['error']);
         $this->assertSame('pending', $this->orderStatus($pending));
     }
 

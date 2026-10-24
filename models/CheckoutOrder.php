@@ -71,13 +71,14 @@ class CheckoutOrder extends CheckoutModel
         return $this->fetchOne('order-lock-by-id.sql', [':id' => $orderId]);
     }
 
-    public function markPaid(int $orderId, int $invoiceNumber, string $captureRef, ?string $payerEmail): void
+    public function markPaid(int $orderId, int $invoiceNumber, string $captureRef, ?string $payerEmail, ?string $paymentMethod = null): void
     {
         $this->run('order-mark-paid.sql', [
             ':id' => $orderId,
             ':invoice_number' => $invoiceNumber,
             ':payment_capture_ref' => $captureRef,
             ':payment_payer_email' => $payerEmail,
+            ':payment_method' => $paymentMethod,
         ]);
     }
 

@@ -119,6 +119,18 @@ class ShopOrderServiceTest extends ShopDatabaseTestCase
         $this->assertSame(expected: 'payer@example.com', actual: $stored['payment_payer_email']);
     }
 
+    public function test_how_the_customer_paid_is_stored_with_the_payment(): void
+    {
+        $withMethod = $this->pendingOrderId();
+        $without = $this->pendingOrderId();
+
+        $this->orders->markPaid(orderId: $withMethod, captureRef: 'CAP-M', payerEmail: null, paymentMethod: 'PayPal account');
+        $this->orders->markPaid(orderId: $without, captureRef: 'CAP-N', payerEmail: null);
+
+        $this->assertSame(expected: 'PayPal account', actual: $this->orders->getOrder($withMethod)['payment_method']);
+        $this->assertNull($this->orders->getOrder($without)['payment_method']);
+    }
+
     public function test_invoice_numbers_are_gapless_across_orders(): void
     {
         $first = $this->orders->markPaid(orderId: $this->pendingOrderId(), captureRef: 'CAP-A', payerEmail: null);

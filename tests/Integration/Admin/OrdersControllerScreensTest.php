@@ -601,6 +601,19 @@ class OrdersControllerScreensTest extends DatabaseTestCase
         $this->assertSame('Courier API is down', $this->act(['action' => 'book_courier', 'id' => 1])['error']);
     }
 
+    public function test_a_test_payment_has_no_refund_button_and_cannot_be_recorded_as_refunded(): void
+    {
+        $id = $this->createOrder('paid', ['is_test_payment' => 1]);
+
+        $view = $this->screen('view', ['id' => (string) $id])['data']['admin']['orderView'];
+        $response = $this->act(['action' => 'record_refund', 'id' => $id]);
+
+        $this->assertFalse($view['canRefund']);
+        $this->assertTrue($view['canPrintDespatchNote'], 'a test order can still be printed, only the refund goes');
+        $this->assertSame('paid', $this->model->order->getById($id)['status'], 'not refunded');
+        $this->assertStringContainsString('Test payments moved no money', (string) ($response['error'] ?? ''));
+    }
+
     public function test_the_core_actions_are_never_handed_to_a_service(): void
     {
         $id = $this->createOrder('paid');

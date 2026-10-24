@@ -7,3 +7,4 @@ UPDATE {PREFIX}shop_orders
 SET status = 'refunded'
 WHERE id = :id
   AND status IN ('paid', 'dispatched')
+  AND is_test_payment = 0

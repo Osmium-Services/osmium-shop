@@ -9,6 +9,7 @@ SET status = 'paid',
     invoice_number = :invoice_number,
     payment_capture_ref = :payment_capture_ref,
     payment_payer_email = :payment_payer_email,
+    payment_method = :payment_method,
     paid_at = NOW()
 WHERE id = :id
   AND status = 'pending'

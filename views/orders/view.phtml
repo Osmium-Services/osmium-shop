@@ -173,6 +173,10 @@ $orderView = $admin['orderView'];
                 <dl class="row mb-0 small">
                     <dt class="col-5">Provider</dt>
                     <dd class="col-7"><?= \htmlspecialchars($order['provider_label']) ?></dd>
+                    <?php if (!empty($order['payment_method'])) : ?>
+                        <dt class="col-5">Method</dt>
+                        <dd class="col-7"><?= \htmlspecialchars((string)$order['payment_method']) ?></dd>
+                    <?php endif; ?>
                     <dt class="col-5">Invoice</dt>
                     <dd class="col-7"><?= \htmlspecialchars($order['invoice_display']) ?></dd>
                     <dt class="col-5">Paid</dt>
