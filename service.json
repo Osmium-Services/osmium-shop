@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.36.0",
+  "version": "0.36.1",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -414,8 +414,6 @@
         {
           "id": "shop-settings",
           "label": "Settings",
-          "placement": "group",
-          "group": "shop",
           "order": 200,
           "route": "admin/settings/shop",
           "activePattern": "admin/settings/shop",
@@ -424,8 +422,6 @@
         {
           "id": "payments",
           "label": "Payments",
-          "placement": "group",
-          "group": "shop",
           "order": 210,
           "route": "admin/settings/payments",
           "activePattern": "admin/settings/payments",
