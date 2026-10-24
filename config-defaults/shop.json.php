@@ -15,6 +15,7 @@
         "productShowDeliveryMessage": true,
         "deliveryMessage": "TBD_DELIVERY_MESSAGE",
         "basketAbandonedHours": 2,
+        "orderRefPrefix": "ORD-",
         "customerNotifications": {
             "order_paid": {
                 "email": true,

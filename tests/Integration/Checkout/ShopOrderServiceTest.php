@@ -57,7 +57,7 @@ class ShopOrderServiceTest extends ShopDatabaseTestCase
             userAgent: 'PHPUnit',
         );
 
-        $this->assertStringStartsWith(prefix: 'SG2-', string: $order['order_ref']);
+        $this->assertStringStartsWith(prefix: 'ORD-', string: $order['order_ref']);
 
         $stored = $this->orders->getOrder($order['id']);
         $this->assertSame(expected: 'pending', actual: $stored['status']);

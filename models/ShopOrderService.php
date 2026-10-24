@@ -26,8 +26,7 @@ require_once __DIR__ . '/CheckoutGuards.php';
  */
 class ShopOrderService
 {
-    private const ORDER_REF_PREFIX = 'SG2-';
-    private const ORDER_REF_BASE = 1000; // First order is SG2-1001
+    private const ORDER_REF_BASE = 1000; // First order is <prefix>1001
 
     public function __construct(
         private CheckoutOrder $orders,
@@ -35,6 +34,7 @@ class ShopOrderService
         private ShopTotalsService $totals,
         private StoreFinance $finance,
         private ?ShopDiscountService $discounts = null,
+        private string $orderRefPrefix = 'ORD-',
     ) {}
 
     /**
@@ -93,7 +93,7 @@ class ShopOrderService
                 userAgent: $userAgent,
             );
 
-            $orderRef = self::ORDER_REF_PREFIX . (self::ORDER_REF_BASE + $orderId);
+            $orderRef = $this->orderRefPrefix . (self::ORDER_REF_BASE + $orderId);
             $this->setOrderRef(orderId: $orderId, orderRef: $orderRef);
 
             foreach ($totals['lines'] as $line) {

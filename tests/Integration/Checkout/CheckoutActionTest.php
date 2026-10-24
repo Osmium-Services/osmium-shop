@@ -333,7 +333,7 @@ class CheckoutActionTest extends ShopDatabaseTestCase
         $this->assertTrue($response['body']['success']);
         $this->assertSame('FAKE-REF-1', $response['body']['provider_order_ref']);
         $this->assertSame('secret-1', $response['body']['client_secret']);
-        $this->assertMatchesRegularExpression('/^SG2-\d+$/', $response['body']['order_ref']);
+        $this->assertMatchesRegularExpression('/^[A-Z0-9-]+-\d+$/', $response['body']['order_ref']);
 
         $order = $this->storedOrder();
         $this->assertSame('pending', $order['status']);

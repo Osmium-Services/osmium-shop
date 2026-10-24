@@ -186,7 +186,7 @@ class ShopOrderServiceLifecycleTest extends ShopDatabaseTestCase
     {
         $order = $this->createOrder();
 
-        $this->assertSame('SG2-' . (1000 + $order['id']), $order['order_ref']);
+        $this->assertSame('ORD-' . (1000 + $order['id']), $order['order_ref']);
         $this->assertSame($order['order_ref'], $this->orders->getOrder($order['id'])['order_ref']);
     }
 

@@ -91,6 +91,7 @@ $orderService = new ShopOrderService(
     totals: $totalsService,
     discounts: $discountService,
     finance: $finance,
+    orderRefPrefix: (string)($this->osmium->config->shop->orderRefPrefix ?? '') ?: 'ORD-',
 );
 $validator = new ShopCheckoutValidator($totalsService);
 

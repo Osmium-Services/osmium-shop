@@ -92,6 +92,14 @@
                             value="<?= (int)($admin['config']['shop']['basketAbandonedHours'] ?? 2) ?>">
                         <div class="form-text">Baskets with no activity for this many hours are marked as abandoned</div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="order_ref_prefix" class="form-label fw-semibold">Order Reference Prefix</label>
+                        <input type="text" class="form-control" id="order_ref_prefix" name="order_ref_prefix"
+                            maxlength="10" pattern="[A-Za-z0-9-]{1,10}"
+                            value="<?= \htmlspecialchars($admin['config']['shop']['orderRefPrefix'] ?? 'ORD-') ?>">
+                        <div class="form-text">Starts every order reference, so NC- gives NC-1001, NC-1002 and so on. Applies to new orders only</div>
+                    </div>
                 </div>
             </div>
 

@@ -58,6 +58,11 @@ class ShopSettingsController extends ShopSettingsBase
         $currentDeliveryMessage = $this->config['shop']['deliveryMessage'];
         $deliveryMessage = Input::post()->stringOr(key: 'delivery_message', fallback: $currentDeliveryMessage);
         $basketHours = Input::post()->int(key: 'basket_abandoned_hours', default: 2); // Shop settings
+        $currentPrefix = (string)($this->config['shop']['orderRefPrefix'] ?? 'ORD-');
+        $submittedPrefix = \strtoupper(\trim(Input::post()->stringOr(key: 'order_ref_prefix', fallback: $currentPrefix)));
+        $prefixValid = (bool)\preg_match('/^[A-Z0-9-]{1,10}$/', $submittedPrefix);
+        $orderRefPrefix = $prefixValid ? $submittedPrefix : $currentPrefix;
+        if (!$prefixValid) $_SESSION['settings_error'] = 'Order reference prefix must be 1 to 10 letters, numbers or hyphens, such as NC- - left unchanged.';
 
         $configContent = ConfigJson::withValue($configContent, 'searchEnabled', $searchEnabled);
         $configContent = ConfigJson::withValue($configContent, 'currency', $currency);
@@ -67,6 +72,7 @@ class ShopSettingsController extends ShopSettingsBase
         $configContent = ConfigJson::withValue($configContent, 'country', $country);
         $configContent = ConfigJson::withValue($configContent, 'deliveryMessage', $deliveryMessage);
         $configContent = ConfigJson::withValue($configContent, 'basketAbandonedHours', $basketHours);
+        $configContent = ConfigJson::withValue($configContent, 'orderRefPrefix', $orderRefPrefix);
 
         $catShowCounts = Input::post()->has(key: 'category_show_counts');
         $catShowSummary = Input::post()->has(key: 'category_show_summary_text');
