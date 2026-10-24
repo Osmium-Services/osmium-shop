@@ -346,7 +346,8 @@ class ShopOrderPdfService
     private function renderTotals(\TCPDF $pdf, array $order): void
     {
         $y = $pdf->GetY() + 6;
-        $totalsHeight = 4 * 6;
+        $hasDiscount = (float)($order['discount_amount'] ?? 0) > 0;
+        $totalsHeight = 4 * 6 + ($hasDiscount ? 8 : 0);
         $totalsDoNotFit = $this->exceedsPage(pdf: $pdf, y: $y, height: $totalsHeight);
         if ($totalsDoNotFit) {
             $pdf->AddPage();
@@ -372,5 +373,17 @@ class ShopOrderPdfService
             $pdf->Cell($valueWidth, 6, $value, 0, 0, 'R');
             $y += 6;
         }
+
+        if (!$hasDiscount) return;
+
+        // A note, not a row: the prices above are already after the discount, so
+        // an amount in the totals column would read as a second deduction.
+        $code = (string)($order['discount_code'] ?? '');
+        $name = $code !== '' ? "Discount {$code}" : 'Discount';
+        $pdf->SetFont('helvetica', 'I', 8);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->SetXY(self::MARGIN, $y + 2);
+        $pdf->Cell(self::CONTENT_WIDTH, 5, "{$name} applied: {$order['discount_formatted']} off the goods (exc. {$taxName}), already included in the prices above", 0, 0, 'R');
+        $pdf->SetTextColor(0, 0, 0);
     }
 }

@@ -75,7 +75,7 @@ $orderView = $admin['orderView'];
                         <?php if ((float)($order['discount_amount'] ?? 0) > 0) : ?>
                             <tr>
                                 <td colspan="5" class="text-end small text-muted fst-italic">
-                                    Discount<?= !empty($order['discount_code']) ? ' ' . \htmlspecialchars((string)$order['discount_code']) : '' ?> saved <?= $order['discount_formatted'] ?> (exc. VAT), already included in the prices above
+                                    Discount<?= !empty($order['discount_code']) ? ' ' . \htmlspecialchars((string)$order['discount_code']) : '' ?> applied: <?= $order['discount_formatted'] ?> off the goods (exc. VAT), already included in the prices above
                                 </td>
                             </tr>
                         <?php endif; ?>
