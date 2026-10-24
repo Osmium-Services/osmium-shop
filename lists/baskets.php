@@ -79,7 +79,7 @@ return [
         'subtitle' => fn(array $context): string => 'No activity for ' . $context['abandonedHours'] . '+ hours',
         'headerButton' => ['label' => 'Clean up old baskets', 'icon' => 'bx-trash', 'class' => 'btn-outline-danger', 'event' => 'cleanup_old'],
         'hideWhenEmpty' => true,
-        'rowClass' => 'table-warning',
+        'rowClass' => 'table-danger',
         'order' => [3, 'desc'],
         'columns' => [$session, $items, $value, $date('updated_at_formatted', 'Abandoned', 'updated_at')],
         'actions' => $deleteAction,
