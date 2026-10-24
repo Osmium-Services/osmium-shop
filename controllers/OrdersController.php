@@ -372,6 +372,7 @@ class OrdersController extends AdminController
         $order['total_formatted'] = $this->money($order['total_inc_tax'] ?? 0);
         $order['subtotal_formatted'] = $this->money($order['subtotal_exc_tax'] ?? 0);
         $order['shipping_formatted'] = $this->money($order['shipping_amount'] ?? 0);
+        $order['discount_formatted'] = $this->money($order['discount_amount'] ?? 0);
         $order['tax_formatted'] = $this->money($order['tax_amount'] ?? 0);
 
         $order['created_at_formatted'] = $this->dateTime($order['created_at'] ?? null);

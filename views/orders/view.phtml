@@ -72,6 +72,13 @@ $orderView = $admin['orderView'];
                             <th colspan="4" class="text-end">Subtotal (exc. VAT)</th>
                             <th class="text-end"><?= $order['subtotal_formatted'] ?></th>
                         </tr>
+                        <?php if ((float)($order['discount_amount'] ?? 0) > 0) : ?>
+                            <tr>
+                                <td colspan="5" class="text-end small text-muted fst-italic">
+                                    Discount<?= !empty($order['discount_code']) ? ' ' . \htmlspecialchars((string)$order['discount_code']) : '' ?> saved <?= $order['discount_formatted'] ?> (exc. VAT), already included in the prices above
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                         <tr>
                             <th colspan="4" class="text-end">Delivery (exc. VAT) — <?= \htmlspecialchars((string)$order['delivery_zone']) ?></th>
                             <th class="text-end"><?= $order['shipping_formatted'] ?></th>
