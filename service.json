@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.36.3",
+  "version": "0.36.4",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -310,7 +310,7 @@
         "controller": "controllers/ShopSettingsController.php",
         "class": "Osmium\\Modules\\Admin\\Controllers\\ShopSettingsController",
         "method": "index",
-        "title": "Shop Settings"
+        "title": "Osmium Shop Settings"
       },
       "admin/settings/payments": {
         "controller": "controllers/PaymentSettingsController.php",
@@ -421,7 +421,7 @@
         },
         {
           "id": "payments",
-          "label": "Payments",
+          "label": "Shop Payments",
           "order": 210,
           "route": "admin/settings/payments",
           "activePattern": "admin/settings/payments",
