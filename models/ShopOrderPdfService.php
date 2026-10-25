@@ -125,8 +125,12 @@ class ShopOrderPdfService
         $lines = \array_merge($addressLines, [
             'Tel: ' . ($company->phone ?? ''),
             'Email: ' . ($company->email ?? ''),
-            $this->finance->taxName() . ' Reg: ' . ($company->vatNumber ?? ''),
         ]);
+
+        $companyNumber = \trim((string)($company->companyNumber ?? ''));
+        $vatNumber = \trim((string)($company->vatNumber ?? ''));
+        if ($companyNumber !== '') $lines[] = 'Company No: ' . $companyNumber;
+        if ($vatNumber !== '') $lines[] = $this->finance->taxName() . ' Reg: ' . $vatNumber;
 
         foreach ($lines as $line) {
             $pdf->Cell(90, 4, '', 0, 0);
