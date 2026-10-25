@@ -2,7 +2,7 @@ Great choice, {{customerName}} - your order's confirmed!
 
 Thank you for your order. We're already getting it ready and will email you as soon as it ships.
 
-Order {{orderRef}} - Invoice {{invoiceNumber}}
+{{customerNote}}Order {{orderRef}} - Invoice {{invoiceNumber}}
 
 {{itemRows}}
 

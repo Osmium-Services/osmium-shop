@@ -160,6 +160,12 @@
                     <?php else: ?>
                         <div class="form-text">Texts are sent through <?= \htmlspecialchars($smsProvider['label']) ?>, which charges for each one. Orders with no phone number are skipped.</div>
                     <?php endif; ?>
+
+                    <div class="mt-4">
+                        <label for="order_confirmation_note" class="form-label fw-semibold">Order Confirmation Note</label>
+                        <textarea class="form-control" id="order_confirmation_note" name="order_confirmation_note" rows="3"><?= \htmlspecialchars($admin['config']['shop']['orderConfirmationNote'] ?? '') ?></textarea>
+                        <div class="form-text">Optional. Added to the order confirmation email under "Thank you for your order…". Leave blank to add nothing.</div>
+                    </div>
                 </div>
             </div>
             <div class="card mb-4">

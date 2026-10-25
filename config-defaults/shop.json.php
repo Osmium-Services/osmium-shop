@@ -14,6 +14,7 @@
         "productShowPriceExcTax": true,
         "productShowDeliveryMessage": true,
         "deliveryMessage": "TBD_DELIVERY_MESSAGE",
+        "orderConfirmationNote": "",
         "basketAbandonedHours": 2,
         "orderRefPrefix": "ORD-",
         "customerNotifications": {

@@ -92,6 +92,10 @@ class ShopSettingsController extends ShopSettingsBase
 
         $configContent = ConfigJson::withValue($configContent, 'customerNotifications', $this->postedNotifications());
 
+        $currentNote = (string)($this->config['shop']['orderConfirmationNote'] ?? '');
+        $note = Input::post()->stringOr(key: 'order_confirmation_note', fallback: $currentNote);
+        $configContent = ConfigJson::withValue($configContent, 'orderConfirmationNote', $note, section: 'shop');
+
         $this->admin->model->changelog->log(
             description: 'Updated shop settings',
             recordType: 'settings',

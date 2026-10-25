@@ -106,6 +106,22 @@ final class ShopOrderMailerTest extends TestCase
         $this->assertStringNotContainsString('{{', $html);
     }
 
+    public function test_the_shops_confirmation_note_is_added_escaped_when_set_and_absent_when_blank(): void
+    {
+        $config = $this->config();
+        $config->shop = (object)['orderConfirmationNote' => "Call us on 0100 <b>now</b>\nThanks"];
+        $mail = new ShopOrderMailer($config, new StoreFinance('GBP', '£', 'VAT', 20.0, 'GB'), $mailer = $this->recorder());
+        $mail->sendOrderConfirmation($this->order(), invoiceNumber: 1042, respectSettings: false);
+        $html = $mailer->sent[0]['html'];
+
+        $this->assertStringContainsString('Call us on 0100 &lt;b&gt;now&lt;/b&gt;<br />', $html);
+        $this->assertStringNotContainsString('{{', $html);
+
+        $blank = $this->send($this->order())['mailer']->sent[0]['html'];
+        $this->assertStringNotContainsString('{{', $blank);
+        $this->assertStringNotContainsString('Call us', $blank);
+    }
+
     public function test_anything_the_customer_typed_is_escaped_in_the_html(): void
     {
         $order = $this->order([

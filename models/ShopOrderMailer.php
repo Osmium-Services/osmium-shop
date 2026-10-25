@@ -166,6 +166,7 @@ class ShopOrderMailer
             'tax' => $this->money((float)$order['tax_amount'], $order['currency']),
             'total' => $this->money((float)$order['total_inc_tax'], $order['currency']),
             'deliveryAddress' => $deliveryAddress,
+            'customerNote' => $this->customerNoteHtml(),
         ];
     }
 
@@ -199,7 +200,31 @@ class ShopOrderMailer
             'tax' => $this->money((float)$order['tax_amount'], $order['currency']),
             'total' => $this->money((float)$order['total_inc_tax'], $order['currency']),
             'deliveryAddress' => $deliveryAddress,
+            'customerNote' => $this->customerNoteText(),
         ];
+    }
+
+    /** The shop's optional note for the order confirmation (Shop settings), '' when blank. */
+    private function customerNote(): string
+    {
+        return \trim((string)($this->config->shop->orderConfirmationNote ?? ''));
+    }
+
+    private function customerNoteHtml(): string
+    {
+        $note = $this->customerNote();
+        if ($note === '') return '';
+
+        return '<p style="color: #666; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">'
+            . \nl2br(\htmlspecialchars($note))
+            . '</p>';
+    }
+
+    private function customerNoteText(): string
+    {
+        $note = $this->customerNote();
+
+        return $note === '' ? '' : $note . "\n\n";
     }
 
     private function money(float $amount, string $currency): string
