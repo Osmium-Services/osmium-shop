@@ -53,24 +53,17 @@ $totalsService = ShopTotalsService::fromConfig($this->osmium->config->checkout, 
 $priceAndDecorate = function (array $lines) use ($totalsService, $discountsSupported): array {
     $couponCode = $_SESSION['applied_coupon_code'] ?? null;
     $product = new ShopProduct(database: $this->osmium->dataSource, tableName: 'products');
-    $imagesByProductId = [];
+    $productIds = \array_map(fn($line) => (int)$line['product_id'], $lines);
+    $productsById = $product->loadMultipleByIDs($productIds);
 
     foreach ($lines as &$line) {
-        $productId = (int)$line['product_id'];
-
-        $imageNotCached = !\array_key_exists($productId, $imagesByProductId);
-        if ($imageNotCached) {
-            $loaded = $product->loadByID($productId);
-            $imagesByProductId[$productId] = $loaded
-                ? [
-                    'thumbImage' => $this->osmium->imagePath($product->imagePath('medium')),
-                    'thumbImageRetina' => $this->osmium->imagePath($product->imagePath('medium', '', '@2x')),
-                ]
-                : ['thumbImage' => null, 'thumbImageRetina' => null];
-        }
-
-        $line['thumbImage'] = $imagesByProductId[$productId]['thumbImage'];
-        $line['thumbImageRetina'] = $imagesByProductId[$productId]['thumbImageRetina'];
+        $loaded = $productsById[(int)$line['product_id']] ?? null;
+        $line['thumbImage'] = $loaded
+            ? $this->osmium->imagePath(ShopProduct::imagePathFor($loaded['brand_path'], $loaded['model_path'], 'medium'))
+            : null;
+        $line['thumbImageRetina'] = $loaded
+            ? $this->osmium->imagePath(ShopProduct::imagePathFor($loaded['brand_path'], $loaded['model_path'], 'medium', '', '@2x'))
+            : null;
     }
     unset($line);
 

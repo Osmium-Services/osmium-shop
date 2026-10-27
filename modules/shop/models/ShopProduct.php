@@ -250,10 +250,15 @@ class ShopProduct extends ShopModel
 
     public function imagePath(string $imageSize = 'medium', string $imageType = '', string $suffix = ''): string
     {
+        return self::imagePathFor($this->brandPath, $this->modelPath, $imageSize, $imageType, $suffix);
+    }
+
+    public static function imagePathFor(string $brandPath, string $modelPath, string $imageSize = 'medium', string $imageType = '', string $suffix = ''): string
+    {
         $hasImageType = \mb_strlen($imageType) > 0;
         if ($hasImageType) $imageType = '-' . $imageType;
 
-        $imagePath = "/shop/{$this->brandPath}/{$this->modelPath}/{$imageSize}/{$this->brandPath}-{$this->modelPath}{$imageType}{$suffix}";
+        $imagePath = "/shop/{$brandPath}/{$modelPath}/{$imageSize}/{$brandPath}-{$modelPath}{$imageType}{$suffix}";
 
         return $imagePath;
     }
