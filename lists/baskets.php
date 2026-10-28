@@ -75,7 +75,6 @@ return [
     'abandoned' => \array_merge($common, [
         'id' => 'abandoned-baskets',
         'title' => 'Abandoned Baskets',
-        'badgeClass' => 'bg-label-warning',
         'subtitle' => fn(array $context): string => 'No activity for ' . $context['abandonedHours'] . '+ hours',
         'headerButton' => ['label' => 'Clean up old baskets', 'icon' => 'bx-trash', 'class' => 'btn-outline-danger', 'event' => 'cleanup_old'],
         'hideWhenEmpty' => true,
@@ -87,8 +86,7 @@ return [
     'converted' => \array_merge($common, [
         'id' => 'converted-baskets',
         'title' => 'Converted Baskets',
-        'badgeClass' => 'bg-label-success',
-        'badgeLabel' => '{count} baskets (last 7 days)',
+        'subtitle' => 'Last 7 days',
         'hideWhenEmpty' => true,
         'rowClass' => 'table-success',
         'order' => [4, 'desc'],

@@ -21,7 +21,6 @@ return [
         'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'query' => 'brand-list-recent.sql',
         'endpoint' => 'shop/brands/action/',
-        'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [

@@ -20,7 +20,6 @@ return [
         'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'query' => 'discount-list-recent.sql',
         'endpoint' => 'shop/discounts/action/',
-        'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [

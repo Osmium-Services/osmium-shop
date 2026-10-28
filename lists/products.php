@@ -49,7 +49,6 @@ $common = [
     'noun' => ['product', 'products'],
     'endpoint' => 'shop/products/action/',
     'presence' => 'product',
-    'datatable' => false,
 ];
 
 require_once 'app/core/admin/services/ChangedByCell.php';
@@ -76,11 +75,7 @@ return [
     'active' => \array_merge($common, [
         'id' => 'products',
         'title' => 'Product Management',
-        'datatable' => true,
         'order' => null,
-        'badgeLabel' => fn(int $count, array $context): string => ($count === (int) $context['totalProductCount']
-            ? $count
-            : $count . ' of ' . $context['totalProductCount']) . ' products',
         'filters' => [
             [
                 'key' => 'category',

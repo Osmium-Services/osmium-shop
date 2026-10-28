@@ -26,7 +26,6 @@ return [
         'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'query' => 'status-list-recent.sql',
         'endpoint' => 'shop/statuses/action/',
-        'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
@@ -45,7 +44,6 @@ return [
         'endpoint' => 'shop/statuses/action/',
         'presence' => 'status',
         'order' => [0, 'asc'],
-        'badgeLabel' => '{count} statuses',
         'columns' => [
             ['key' => 'descr_short', 'label' => 'Short', 'type' => 'text', 'strong' => true, 'nowrap' => true],
             ['key' => 'descr_long', 'label' => 'Long Description', 'type' => 'text', 'small' => true, 'fill' => true],
