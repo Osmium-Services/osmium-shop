@@ -22,7 +22,6 @@ class ProductPriceHistoryController extends AdminController
         $this->osmium->clearStashedQuerystring();
 
         $importBatches = $this->loadImportBatches($productId);
-        $importDetails = $this->loadImportDetails($productId);
         $manualChanges = $this->loadManualChanges($productId);
 
         $this->data['admin']['importBatches'] = [];
@@ -31,11 +30,6 @@ class ProductPriceHistoryController extends AdminController
                 batch: $batch,
                 canUndo: $index === 0 && !$productId, // Only the latest import, and not from a single product's view
             );
-        }
-
-        $this->data['admin']['importDetails'] = [];
-        foreach ($importDetails as $changedAt => $details) {
-            $this->data['admin']['importDetails'][$changedAt] = \array_map($this->formatDetail(...), $details);
         }
 
         $this->data['admin']['manualChanges'] = [];
@@ -49,6 +43,9 @@ class ProductPriceHistoryController extends AdminController
             ? $this->loadProductName($productId)
             : null;
 
+        $this->data['admin']['lists'] = $this->loadListDefinitions('price-history', __DIR__ . '/../lists');
+        $this->data['admin']['isAdmin'] = $this->isAdmin();
+
         $this->setView('products/price-history.phtml');
     }
 
@@ -61,10 +58,12 @@ class ProductPriceHistoryController extends AdminController
 
         if (!$action) $this->admin->jsonError('Missing action');
 
-        $this->validateCsrf($input);
+        $isRead = $action === 'get_items'; // The list's row expander sends no token, and only reads
+        if (!$isRead) $this->validateCsrf($input);
 
         try {
             match ($action) {
+                'get_items' => $this->actionGetItems($input),
                 'undo_batch' => $this->actionUndoBatch($input),
                 'get_product_history' => $this->actionGetProductHistory($input),
                 'undo_manual' => $this->actionUndoManual($input),
@@ -85,6 +84,7 @@ class ProductPriceHistoryController extends AdminController
      */
     private function formatBatch(array $batch, bool $canUndo): array
     {
+        $batch['id'] = \strtotime($batch['changed_at']); // The list's row id; the action maps it back to the exact timestamp
         $batch['changedAtFormatted'] = \date('j M Y, H:i', \strtotime($batch['changed_at']));
         $batch['productCount'] = (int) $batch['product_count'];
         $batch['canUndo'] = $canUndo;
@@ -100,11 +100,11 @@ class ProductPriceHistoryController extends AdminController
      */
     private function formatDetail(array $detail): array
     {
-        $detail['productLabelHtml'] = $this->productLabelHtml($detail);
-        $detail['priceOldHtml'] = $this->poundsHtml($detail['price_exc_tax_old']);
-        $detail['priceNewHtml'] = $this->poundsHtml($detail['price_exc_tax_new']);
-        $detail['rrpOldDisplay'] = $detail['rrp_exc_tax_old'] ? $this->poundsHtml($detail['rrp_exc_tax_old']) : '-';
-        $detail['rrpNewDisplay'] = $detail['rrp_exc_tax_new'] ? $this->poundsHtml($detail['rrp_exc_tax_new']) : '-';
+        $detail['product_label'] = $this->buildProductName($detail);
+        $detail['price_old'] = '£' . \number_format((float) $detail['price_exc_tax_old'], 2);
+        $detail['price_new'] = '£' . \number_format((float) $detail['price_exc_tax_new'], 2);
+        $detail['rrp_old'] = $detail['rrp_exc_tax_old'] ? '£' . \number_format((float) $detail['rrp_exc_tax_old'], 2) : '-';
+        $detail['rrp_new'] = $detail['rrp_exc_tax_new'] ? '£' . \number_format((float) $detail['rrp_exc_tax_new'], 2) : '-';
 
         return $detail;
     }
@@ -155,15 +155,6 @@ class ProductPriceHistoryController extends AdminController
         return $this->admin->model->productPriceHistory->getImportBatches($productId);
     }
 
-    private function loadImportDetails(int $productId): array
-    {
-        $importDetails = [];
-        foreach ($this->admin->model->productPriceHistory->getImportDetails($productId) as $detail) {
-            $importDetails[$detail['changed_at']][] = $detail;
-        }
-        return $importDetails;
-    }
-
     private function loadManualChanges(int $productId): array
     {
         return $this->admin->model->productPriceHistory->getManualChanges($productId);
@@ -180,10 +171,37 @@ class ProductPriceHistoryController extends AdminController
     // ACTION HANDLERS
     // =====================================================================
 
+    /**
+     * A batch's exact changed_at, from the list's row id (its unix time). Looked up among the live batches so the
+     * timestamp is the stored one, whatever the timezone rounding.
+     */
+    private function batchTimestamp(array $input): string
+    {
+        $id = (int) ($input['id'] ?? 0);
+        if (!$id) $this->admin->jsonError('Missing batch');
+
+        foreach ($this->loadImportBatches(0) as $batch) {
+            if (\strtotime($batch['changed_at']) === $id) return $batch['changed_at'];
+        }
+
+        $this->admin->jsonError('No records found for this batch');
+    }
+
+    private function actionGetItems(array $input): void
+    {
+        $timestamp = $this->batchTimestamp($input);
+
+        $details = \array_filter(
+            $this->admin->model->productPriceHistory->getImportDetails(0),
+            fn(array $detail): bool => $detail['changed_at'] === $timestamp,
+        );
+
+        $this->admin->jsonSuccess(['success' => true, 'items' => \array_map($this->formatDetail(...), \array_values($details))]);
+    }
+
     private function actionUndoBatch(array $input): void
     {
-        $timestamp = $input['timestamp'] ?? null;
-        if (!$timestamp) $this->admin->jsonError('Missing timestamp');
+        $timestamp = $this->batchTimestamp($input);
 
         $records = $this->getBatchRecords($timestamp);
 
@@ -198,12 +216,7 @@ class ProductPriceHistoryController extends AdminController
                 callback: fn($c) => $this->buildProductName($c),
                 array: $conflicts,
             );
-            echo \json_encode([
-                'success' => false,
-                'error' => 'Cannot undo: ' . \count($conflicts) . ' product(s) have been modified',
-                'products' => $productNames,
-            ]);
-            exit;
+            $this->admin->jsonError('Cannot undo: ' . \count($conflicts) . ' product(s) have been modified since: ' . \implode(', ', $productNames));
         }
 
         $revertedCount = 0;

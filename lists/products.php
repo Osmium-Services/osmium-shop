@@ -10,7 +10,7 @@ use Osmium\Modules\Admin\Core\ListView;
  * 'query' here. The category filter is server-side (reloads with ?category=).
  * Duplicate is an event: products.js calls the action and opens the new product.
  *
- * Context: taxName, totalProductCount, selectedCategory, categories.
+ * Context: taxName, totalProductCount, productCount (the filtered rows), selectedCategory, categories.
  */
 $cartColumn = [
     'key' => 'isAvailable',
@@ -76,6 +76,9 @@ return [
         'id' => 'products',
         'title' => 'Product Management',
         'order' => null,
+        'subtitle' => fn(array $context): string => $context['productCount'] === (int) $context['totalProductCount']
+            ? ''
+            : $context['productCount'] . ' of ' . $context['totalProductCount'] . ' products',
         'filters' => [
             [
                 'key' => 'category',

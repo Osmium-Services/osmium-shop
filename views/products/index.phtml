@@ -10,6 +10,7 @@ $listContext = [
     'avatarUrl' => $admin['avatarUrl'] ?? '',
     'taxName' => $shop['taxName'],
     'totalProductCount' => $admin['totalProductCount'],
+    'productCount' => \count($admin['products']),
     'selectedCategory' => $admin['selectedCategory'],
     'categories' => $admin['categories'],
 ];

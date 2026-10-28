@@ -283,7 +283,7 @@ class ProductPriceHistoryControllerTest extends ShopDatabaseTestCase
         $idB = $this->change($b, 'import', $at, old: 50.00, new: 45.00, oldRrp: 60.00, newRrp: 50.00);
         $otherBatch = $this->change($other, 'import', '2026-04-02 09:00:00', old: 75.00, new: 70.00);
 
-        $response = $this->act(['action' => 'undo_batch', 'timestamp' => $at]);
+        $response = $this->act(['action' => 'undo_batch', 'id' => \strtotime($at)]);
 
         $this->assertTrue($response['ok'], $response['error'] ?? '');
         $this->assertSame(2, $response['body']['reverted']);
@@ -303,16 +303,55 @@ class ProductPriceHistoryControllerTest extends ShopDatabaseTestCase
         $this->change($a, 'import', $at, old: 100.00, new: 90.00);
         $manual = $this->change($manualProduct, 'manual', $at, old: 40.00, new: 33.00);
 
-        $this->act(['action' => 'undo_batch', 'timestamp' => $at]);
+        $this->act(['action' => 'undo_batch', 'id' => \strtotime($at)]);
 
         $this->assertSame([33.0, 120.0], $this->price($manualProduct));
         $this->assertNull($this->undoneAt($manual));
     }
 
-    public function test_a_batch_needs_a_timestamp_and_some_records(): void
+    public function test_a_batch_needs_an_id_and_some_records(): void
     {
-        $this->assertSame('Missing timestamp', $this->act(['action' => 'undo_batch'])['error']);
-        $this->assertSame('No records found for this batch', $this->act(['action' => 'undo_batch', 'timestamp' => '2001-01-01 00:00:00'])['error']);
+        $this->assertSame('Missing batch', $this->act(['action' => 'undo_batch'])['error']);
+        $this->assertSame('No records found for this batch', $this->act(['action' => 'undo_batch', 'id' => \strtotime('2001-01-01 00:00:00')])['error']);
+    }
+
+    public function test_a_batch_cannot_be_undone_once_a_product_in_it_has_a_newer_change(): void
+    {
+        $a = $this->product(price: 90.00, model: 'Overtaken');
+        $at = '2026-04-01 09:00:00';
+        $this->change($a, 'import', $at, old: 100.00, new: 90.00);
+        $this->change($a, 'manual', '2026-04-02 09:00:00', old: 90.00, new: 85.00);
+
+        $response = $this->act(['action' => 'undo_batch', 'id' => \strtotime($at)]);
+
+        $this->assertFalse($response['ok']);
+        $this->assertSame("Cannot undo: 1 product(s) have been modified since: Brand {$this->runTag} Overtaken", $response['error']);
+        $this->assertSame([90.0, 120.0], $this->price($a), 'nothing was reverted');
+    }
+
+    // ---- a batch's products (the list's row expander) -----------------------------
+
+    public function test_a_batchs_products_are_returned_as_plain_text_without_a_token(): void
+    {
+        $productId = $this->product(model: 'Tom & Jerry <b>');
+        $this->change($productId, 'import', '2099-02-01 08:00:00', old: 1234.5, new: 99.0, oldRrp: null, newRrp: 150.0);
+        $this->change($this->product(), 'import', '2099-02-02 08:00:00', old: 5.0, new: 4.0);
+
+        $response = $this->act(['action' => 'get_items', 'id' => \strtotime('2099-02-01 08:00:00')], validToken: false);
+
+        $this->assertTrue($response['ok'], $response['error'] ?? '');
+        $this->assertCount(1, $response['body']['items'], 'only that batch');
+        $item = $response['body']['items'][0];
+        $this->assertSame("Brand {$this->runTag} Tom & Jerry <b>", $item['product_label'], 'the expander writes it as text');
+        $this->assertSame('£1,234.50', $item['price_old']);
+        $this->assertSame('£99.00', $item['price_new']);
+        $this->assertSame('-', $item['rrp_old'], 'no old RRP');
+        $this->assertSame('£150.00', $item['rrp_new']);
+    }
+
+    public function test_an_unknown_batch_has_no_products(): void
+    {
+        $this->assertSame('No records found for this batch', $this->act(['action' => 'get_items', 'id' => \strtotime('2001-01-01 00:00:00')], validToken: false)['error']);
     }
 
     // ---- one product's history ----------------------------------------------------
@@ -350,24 +389,9 @@ class ProductPriceHistoryControllerTest extends ShopDatabaseTestCase
         $this->assertSame('2 Jan 2099, 08:00', $batches[0]['changedAtFormatted']);
         $this->assertTrue($data['admin']['importBatches'][0]['canUndo']);
         $this->assertSame([], \array_filter(\array_slice($data['admin']['importBatches'], 1), fn ($b) => $b['canUndo']), 'older batches stay');
-        $this->assertCount(2, $data['admin']['importDetails']['2099-01-02 08:00:00']);
+        $this->assertSame(\strtotime('2099-01-02 08:00:00'), $batches[0]['id'], 'the row id is the batch time');
         $this->assertTrue($data['admin']['hasHistory']);
         $this->assertSame('app/core/admin/views/products/price-history.phtml', $data['adminContent']);
-    }
-
-    public function test_the_page_formats_a_change_with_the_product_named_and_prices_in_pounds(): void
-    {
-        $productId = $this->product(model: 'Tom & Jerry <b>');
-        $this->change($productId, 'import', '2099-02-01 08:00:00', old: 1234.5, new: 99.0, oldRrp: null, newRrp: 150.0);
-
-        $data = $this->page();
-
-        $detail = $data['admin']['importDetails']['2099-02-01 08:00:00'][0];
-        $this->assertSame("Brand {$this->runTag} Tom &amp; Jerry &lt;b&gt;", $detail['productLabelHtml'], 'a product name is escaped');
-        $this->assertSame('&pound;1,234.50', $detail['priceOldHtml']);
-        $this->assertSame('&pound;99.00', $detail['priceNewHtml']);
-        $this->assertSame('-', $detail['rrpOldDisplay'], 'no old RRP');
-        $this->assertSame('&pound;150.00', $detail['rrpNewDisplay']);
     }
 
     public function test_a_change_to_a_product_that_has_gone_is_labelled_by_its_number(): void
