@@ -24,7 +24,7 @@ class ShopProductLookup
         $noDatabase = !($db instanceof OsmiumPDO);
         if ($noDatabase) return null;
 
-        $row = (new Product($db))->getForLookup((int) ($payload['productId'] ?? 0));
+        $row = (new Product($db, 'products'))->getForLookup((int) ($payload['productId'] ?? 0));
 
         return $row === null ? null : self::shape($row);
     }

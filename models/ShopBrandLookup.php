@@ -23,7 +23,7 @@ class ShopBrandLookup
         $noDatabase = !($db instanceof OsmiumPDO);
         if ($noDatabase) return null;
 
-        return self::shape((new Brand($db))->getActive());
+        return self::shape((new Brand($db, 'productbrands'))->getActive());
     }
 
     /**
