@@ -76,6 +76,18 @@ class Product extends AdminModel
         return $this->fetchOne('product-get-for-lookup.sql', [':id' => $id]);
     }
 
+    /** @return array<int, array<string, mixed>> Live products with the category each is listed under first, for the shop.product.files hook */
+    public function listForFiles(): array
+    {
+        return $this->database->prepare(sql: $this->loadSqlFile('product-files-list.sql'), bindings: [])->resultset();
+    }
+
+    /** @return array<int, array<string, mixed>> Every live category (id, parent_id, label, sort) */
+    public function listCategoriesForFiles(): array
+    {
+        return $this->database->prepare(sql: $this->loadSqlFile('category-list-for-files.sql'), bindings: [])->resultset();
+    }
+
     public function setRestockAt(int $id, ?string $date): void
     {
         $this->run('product-set-restock.sql', [':id' => $id, ':restock_at' => $date]);
