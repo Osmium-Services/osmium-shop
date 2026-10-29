@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.38.0",
+  "version": "0.39.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -87,6 +87,9 @@
     ],
     "shop.product.get": [
       "Osmium\\Modules\\Admin\\Services\\ShopProductLookup::get"
+    ],
+    "shop.brands": [
+      "Osmium\\Modules\\Admin\\Services\\ShopBrandLookup::brands"
     ]
   },
   "admin": {
