@@ -70,6 +70,12 @@ class Product extends AdminModel
      * Changes only the expected restock date (null clears it); the rest of the product is left alone, unlike the
      * admin form, which saves every field at once.
      */
+    /** @return array<string, mixed>|null A live product as the shop.product.get hook shows it */
+    public function getForLookup(int $id): ?array
+    {
+        return $this->fetchOne('product-get-for-lookup.sql', [':id' => $id]);
+    }
+
     public function setRestockAt(int $id, ?string $date): void
     {
         $this->run('product-set-restock.sql', [':id' => $id, ':restock_at' => $date]);

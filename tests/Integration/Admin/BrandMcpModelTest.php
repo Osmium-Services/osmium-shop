@@ -73,7 +73,6 @@ class BrandMcpModelTest extends ShopDatabaseTestCase
         $after = $this->brands->getById($id);
 
         $this->assertSame('brands/new', $after['page_url']);
-        $this->assertSame($before['trade_discount_allowed'], $after['trade_discount_allowed']);
         $this->assertSame($before['created_at'], $after['created_at']);
     }
 

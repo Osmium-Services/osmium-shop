@@ -10,6 +10,7 @@ require_once __DIR__ . '/../models/StoreFinance.php';
 
 require_once __DIR__ . '/../models/ShopPageLinks.php';
 require_once __DIR__ . '/../models/ShopDashboardLinks.php';
+require_once __DIR__ . '/../models/ShopProductLookup.php';
 require_once __DIR__ . '/../models/TechspecParser.php';
 require_once __DIR__ . '/../models/ShopSpecRebuild.php';
 require_once __DIR__ . '/../models/Order.php';
