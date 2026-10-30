@@ -1,10 +1,9 @@
 <?php
 
 use Osmium\Modules\Admin\Core\ListView;
-
-
-include __DIR__ . '/partials/breadcrumbs.phtml';
 ?>
+
+<?= ListView::page($admin['lists']['page'], ['adminUrl' => $adminUrl]) ?>
 
 <!-- Stats Cards -->
 <div class="row mb-4">

@@ -18,6 +18,10 @@ $check = static fn(string $key, string $falseClass): array => [
 require_once 'app/core/admin/services/ChangedByCell.php';
 
 return [
+    'page' => [
+        'title' => 'Shop Statuses',
+        'buttons' => [['label' => 'Create Status', 'href' => 'shop/statuses/edit/']],
+    ],
     'recent' => [
         'id' => 'statuses-recent',
         'title' => 'Recent Changes',

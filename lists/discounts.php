@@ -12,6 +12,10 @@ use Osmium\Modules\Admin\Core\ListView;
 require_once 'app/core/admin/services/ChangedByCell.php';
 
 return [
+    'page' => [
+        'title' => 'Shop Discounts',
+        'buttons' => [['label' => 'Create Discount', 'href' => 'shop/discounts/edit/']],
+    ],
     'recent' => [
         'id' => 'discounts-recent',
         'title' => 'Recent Changes',

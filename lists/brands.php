@@ -13,6 +13,10 @@ use Osmium\Modules\Admin\Core\ListView;
 require_once 'app/core/admin/services/ChangedByCell.php';
 
 return [
+    'page' => [
+        'title' => 'Shop Brands',
+        'buttons' => [['label' => 'Create Brand', 'href' => 'shop/brands/edit/']],
+    ],
     'recent' => [
         'id' => 'brands-recent',
         'title' => 'Recent Changes',

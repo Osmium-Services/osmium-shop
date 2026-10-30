@@ -9,14 +9,9 @@ $listContext = [
     'avatarUrl' => $admin['avatarUrl'] ?? '',
 ];
 $lists = $admin['lists'];
-
-$pageHeader = [
-    'title' => 'Shop Discounts',
-    'action' => '<a href="' . $adminUrl('shop/discounts/edit/') . '" class="btn btn-primary">'
-        . '<i class="bx bx-plus me-1"></i> Create Discount</a>',
-];
-include \Osmium\Core\Library\AdminPaths::view('partials/page-header.phtml');
 ?>
+
+<?= ListView::page($admin['lists']['page'], $listContext) ?>
 
 <?php if (!$admin['paymentProviderSupportsDiscounts']): ?>
     <div class="alert alert-warning" role="alert">

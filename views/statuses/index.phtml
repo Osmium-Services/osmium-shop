@@ -3,8 +3,6 @@
 use Osmium\Modules\Admin\Core\ListView;
 
 
-include __DIR__ . '/partials/breadcrumbs.phtml';
-
 $listContext = [
     'adminUrl' => $adminUrl,
     'isAdmin' => $admin['isAdmin'],
@@ -14,6 +12,7 @@ $listContext = [
 $lists = $admin['lists'];
 ?>
 
+<?= ListView::page($admin['lists']['page'], ['adminUrl' => $adminUrl]) ?>
 <?= ListView::render($lists['active'], $admin['statuses'], $listContext) ?>
 <?= ListView::render($lists['recent'], $admin['recentStatuses'], $listContext) ?>
 <?= ListView::render($lists['deleted'], $admin['deletedStatuses'], $listContext) ?>

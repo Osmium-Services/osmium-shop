@@ -65,6 +65,7 @@ $deleteAction = [
 ];
 
 return [
+    'page' => ['title' => 'Shop Baskets'],
     'active' => \array_merge($common, [
         'id' => 'active-baskets',
         'title' => 'Active Baskets',
