@@ -42,6 +42,7 @@ return [
             'titleKey' => 'seoTitle',
         ],
     ],
+    'actionsAt' => 'bottom-end',
     'actions' => [
         ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/products/edit/?id={id}'],
         ['label' => 'Price History', 'icon' => 'bx-line-chart', 'href' => 'shop/products/price-history/?product_id={id}'],
