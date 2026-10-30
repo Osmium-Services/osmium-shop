@@ -76,7 +76,7 @@ return [
         'id' => 'products',
         'title' => 'Product Management',
         'order' => null,
-        'grid' => true,
+        'grid' => require __DIR__ . '/../grids/products.php',
         'subtitle' => fn(array $context): string => $context['productCount'] === (int) $context['totalProductCount']
             ? ''
             : $context['productCount'] . ' of ' . $context['totalProductCount'] . ' products',
@@ -100,18 +100,17 @@ return [
         'columns' => [
             $cartColumn,
             $seoColumn,
-            ['key' => 'thumbnail', 'label' => 'Image', 'type' => 'image', 'altKey' => 'productTitle', 'sortable' => false, 'card' => 'image'],
+            ['key' => 'thumbnail', 'label' => 'Image', 'type' => 'image', 'altKey' => 'productTitle', 'sortable' => false],
             [
                 'key' => 'productTitle',
                 'label' => 'Product',
                 'type' => 'text',
                 'strong' => true,
                 'fill' => true,
-                'card' => 'title',
                 'sub' => ['key' => 'reference', 'style' => 'code'],
             ],
             $priceColumn,
-            ['key' => 'created_at', 'label' => 'Added', 'type' => 'date', 'nowrap' => true, 'card' => 'hide'],
+            ['key' => 'created_at', 'label' => 'Added', 'type' => 'date', 'nowrap' => true],
         ],
         'actions' => [
             ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/products/edit/?id={id}'],
