@@ -272,7 +272,7 @@ class ShopProduct extends ShopModel
      * Sanitize a string to create a URL/filesystem-safe path.
      * Only allows a-z, 0-9, and hyphens.
      */
-    private function sanitizePath(string $input): string
+    public static function sanitizePath(string $input): string
     {
         return $input
             |> trim(...)

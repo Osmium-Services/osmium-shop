@@ -273,4 +273,74 @@ class ShopProductCategoryTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertNull($result[0]['link']);
     }
+
+    // =========================================================================
+    // topLevel(), hasProductsBeneath() - home page cards and category tree
+    // =========================================================================
+
+    private function mockDbWithSql(): MockObject
+    {
+        $mockDb = $this->createMock(OsmiumPDO::class);
+        DatabaseMockHelper::mockTablePrefix($mockDb);
+
+        $mockSqlLoader = $this->createMock(SqlLoader::class);
+        $mockSqlLoader->method('load')->willReturn('SELECT 1');
+        $mockDb->sqlLoader = $mockSqlLoader;
+
+        return $mockDb;
+    }
+
+    /**
+     * @test
+     * Each top-level category gets its page URL; one without an image of its own borrows its first product's
+     */
+    public function test_top_level_adds_link_and_fallback_image(): void
+    {
+        $mockDb = $this->mockDbWithSql();
+        $mockDb->method('resultset')->willReturnOnConsecutiveCalls(
+            [
+                ['id' => 1, 'label' => 'Bolts', 'title' => '', 'image' => '', 'page_id' => 10],
+                ['id' => 2, 'label' => 'Screws', 'title' => '', 'image' => '/cat/screws.jpg', 'page_id' => 11],
+                ['id' => 3, 'label' => 'Washers', 'title' => '', 'image' => '', 'page_id' => 99],
+            ],
+            [
+                ['category_id' => 1, 'brand_name' => 'Timco', 'model_name' => 'M8 Bolt'],
+                ['category_id' => 1, 'brand_name' => 'Abracs', 'model_name' => 'Older'],
+                ['category_id' => 2, 'brand_name' => 'JCP', 'model_name' => 'Screw'],
+            ],
+        );
+
+        $category = $this->createCategoryWithPages(mockDb: $mockDb, mockPages: [
+            10 => ['url' => 'bolts', 'deleted_at' => null],
+            11 => ['url' => 'screws', 'deleted_at' => null],
+        ]);
+
+        $rows = $category->topLevel();
+
+        $this->assertSame('bolts', $rows[0]['link']);
+        $this->assertSame('/shop/timco/m8-bolt/medium/timco-m8-bolt', $rows[0]['fallback_image']); // First (newest) product wins
+        $this->assertSame('', $rows[1]['fallback_image']); // Has its own image
+        $this->assertNull($rows[2]['link']); // Page row missing
+        $this->assertSame('', $rows[2]['fallback_image']); // Nothing to borrow
+    }
+
+    /**
+     * @test
+     * A category with a product of its own, or a descendant with one, has products beneath it
+     */
+    public function test_has_products_beneath_checks_own_products_then_children(): void
+    {
+        $mockDb = $this->mockDbWithSql();
+        $mockDb->method('resultset')->willReturnOnConsecutiveCalls(
+            [['category_id' => 5]], // Categories with a product assigned directly
+            [['id' => 5, 'label' => 'Child', 'title' => '', 'image' => '', 'page_id' => 1]], // Children of 6
+            [], // Children of 7
+        );
+
+        $category = $this->createCategoryWithPages(mockDb: $mockDb, mockPages: []);
+
+        $this->assertTrue($category->hasProductsBeneath(5));
+        $this->assertTrue($category->hasProductsBeneath(6)); // Its child 5 has a product
+        $this->assertFalse($category->hasProductsBeneath(7)); // No product, no children
+    }
 }
