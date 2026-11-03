@@ -65,6 +65,8 @@ $this->data['category']['summary'] = ShopProductPageData::categorySummary(
     $this->data['subcategoryCount']
 ); // summarise category
 
+$this->data['category']['products'] = []; // A category with only subcategories has none, and the view counts them
+
 $this->data['shop']['listLimit'] = $controls['limit'];
 $this->data['shop']['listLimitOptions'] = ShopListControls::LIMIT_OPTIONS;
 $this->data['shop']['listSort'] = $controls['sort'];
