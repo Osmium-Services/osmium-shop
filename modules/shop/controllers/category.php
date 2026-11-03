@@ -1,7 +1,9 @@
 <?php
+use Osmium\Modules\Shop\Services\ShopListControls;
 use Osmium\Modules\Shop\Services\ShopProductCard;
 use Osmium\Modules\Shop\Services\ShopProductPageData;
 
+require_once __DIR__ . '/../services/ShopListControls.php';
 require_once __DIR__ . '/../services/ShopProductCard.php';
 require_once __DIR__ . '/../services/ShopProductPageData.php';
 
@@ -28,11 +30,26 @@ foreach ($this->data['subcategories'] as &$category) {
     $category['image'] = $this->osmium->imagePath('/shop/categories/' . $category['image'] . '/' . $category['image']); // subcategory images
 }
 
+// Sidebar category tree, with this category's node flagged active
+$this->data['shop']['categoryTree'] = $productCategory->tree(activeCategoryID: (int) $this->data['category']['ID']);
+
+// ?show=&sort=&stock[]=&page= are stashed in the session, since the querystring is stripped before a controller runs
+$controls = ShopListControls::resolve(
+    limit: $this->osmium->getStashedParam(key: 'show', default: ShopListControls::DEFAULT_LIMIT),
+    sort: $this->osmium->getStashedParam(key: 'sort', default: ShopListControls::DEFAULT_SORT),
+    stock: $this->osmium->getStashedParam(key: 'stock', default: []),
+    page: $this->osmium->getStashedParam(key: 'page', default: 1),
+);
+$this->osmium->clearStashedQuerystring();
+
+// The untouched "Newest" default keeps the category's own admin-set order (PC.sort)
+$categorySortColumn = $controls['sort'] === ShopListControls::DEFAULT_SORT ? 'PC.sort' : $controls['sortColumn'];
+
 $this->data['category']['range'] =
     $this->shop->model->product->rangeByCategory(
-        $categoryIDs = $this->data['category']['ID'],
-        $includeOutOfStock = true,
-        $sortColumn = 'PC.sort'
+        categoryIDs: (string) $this->data['category']['ID'],
+        sortColumn: $categorySortColumn,
+        stock: $controls['stock'],
     ); // products in category
 
 $this->data['category']['productCount'] = 0;
@@ -48,6 +65,14 @@ $this->data['category']['summary'] = ShopProductPageData::categorySummary(
     $this->data['subcategoryCount']
 ); // summarise category
 
+$this->data['shop']['listLimit'] = $controls['limit'];
+$this->data['shop']['listLimitOptions'] = ShopListControls::LIMIT_OPTIONS;
+$this->data['shop']['listSort'] = $controls['sort'];
+$this->data['shop']['listSortOptions'] = ShopListControls::SORT_OPTIONS;
+$this->data['shop']['listStock'] = $controls['stock'];
+$this->data['shop']['listTotal'] = $this->data['category']['productCount'];
+$this->data['shop']['listPage'] = $controls['page'];
+
 $noProducts = !$this->data['category']['productCount'];
 if ($noProducts) {
     return;
@@ -55,6 +80,8 @@ if ($noProducts) {
 
 $productRange = $this->data['category']['range']['products'];
 $productIDs = \explode(separator: ',', string: $productRange);
+[$productIDs, $page] = ShopListControls::paginate($productIDs, $controls['page'], $controls['limit']);
+$this->data['shop']['listPage'] = $page; // clamped to the last real page
 $productsData = $this->shop->model->product->loadMultipleByIDs($productIDs); // load product range in category - batch load all products at once
 
 foreach ($productIDs as $productID) {

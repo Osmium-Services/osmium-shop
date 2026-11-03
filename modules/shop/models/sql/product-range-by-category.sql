@@ -7,8 +7,10 @@ SELECT
 FROM
     { TABLE } AS P
     INNER JOIN { PREFIX } products_productcategories AS PC ON P.id = PC.product_id
+    INNER JOIN { PREFIX } productstatus AS PS ON PS.id = P.status_id
 WHERE
     PC.deleted_at IS NULL
     AND PC.category_id IN (:categoryIDs)
     AND P.deleted_at IS NULL
-    AND P.status_id != 3;
+    AND P.status_id != 3
+    {STOCK_FILTER};

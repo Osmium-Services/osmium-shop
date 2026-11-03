@@ -192,18 +192,39 @@ class ShopProduct extends ShopModel
         return $productsById;
     }
 
-    public function all(?string $categoryId = null): array
+    public function all(?string $categoryId = null, string $sortColumn = 'P.created_at DESC, P.id ASC', array $stock = []): array
     {
+        $replacements = ['{SORT_COLUMN}' => $sortColumn, '{STOCK_FILTER}' => self::stockFilterClause($stock)];
+
         if ($categoryId) {
             $query = $this->loadSqlFile('product-list-by-category.sql');
             $this->database->query($query);
             $this->database->bind(':categoryId', $categoryId);
         } else {
-            $query = $this->loadSqlFile('product-list-all.sql');
+            $query = $this->loadSqlFile('product-list-all.sql', $replacements);
             $this->database->query($query);
         }
 
         return $this->database->resultset();
+    }
+
+    /**
+     * SQL fragment for the In Stock / Pre-order / Out of Stock checkboxes. Empty or all three selected means no
+     * filter; only a partial selection narrows the query.
+     *
+     * Buckets by the status row's product_available and restocking flags rather than status ids: available now,
+     * available to pre-order, or not available. "Out of Stock" also catches the other unavailable statuses.
+     */
+    private static function stockFilterClause(array $stock): string
+    {
+        $clauses = [];
+        if (\in_array('in', $stock, true)) $clauses[] = '(PS.product_available = 1 AND PS.restocking = 0)';
+        if (\in_array('preorder', $stock, true)) $clauses[] = '(PS.product_available = 1 AND PS.restocking = 1)';
+        if (\in_array('out', $stock, true)) $clauses[] = 'PS.product_available = 0';
+
+        if (!$clauses || \count($clauses) === 3) return '';
+
+        return 'AND (' . \implode(' OR ', $clauses) . ')';
     }
 
     public function count(): int
@@ -218,10 +239,12 @@ class ShopProduct extends ShopModel
     public function rangeByCategory(
         string $categoryIDs,
         bool $includeOutOfStock = true,
-        string $sortColumn = 'product_model'
+        string $sortColumn = 'product_model',
+        array $stock = []
     ): array|false {
         $query = $this->loadSqlFile('product-range-by-category.sql', [
             '{SORT_COLUMN}' => $sortColumn,
+            '{STOCK_FILTER}' => self::stockFilterClause($stock),
         ]);
         if (!$includeOutOfStock) $query .= ' AND P.product_status_id NOT IN (3,4)';
         $this->database->query($query);

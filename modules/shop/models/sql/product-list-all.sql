@@ -1,8 +1,10 @@
 SELECT
     P.id
 FROM
-    { TABLE } AS P
+    {TABLE} AS P
+    INNER JOIN {PREFIX} productstatus AS PS ON PS.id = P.status_id
 WHERE
     P.deleted_at IS NULL
+    {STOCK_FILTER}
 ORDER BY
-    P.created_at DESC;
+    {SORT_COLUMN};
