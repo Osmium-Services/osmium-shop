@@ -35,13 +35,14 @@ class ShopSearchService
         'P.descr' => ['exact' => 0, 'starts' => 0, 'word' => 5, 'contains' => 1],
     ];
 
-    private array $synonyms = [];
-
+    /**
+     * @param array<string, string[]> $synonyms a term mapped to the words it should also match, as collected from
+     *                                          the `search.synonyms` hook; empty when no service supplies any
+     */
     public function __construct(
         private ShopSearch $search,
-        private string $synonymsPath,
+        private array $synonyms = [],
     ) {
-        $this->synonyms = require $this->synonymsPath;
     }
 
     /**

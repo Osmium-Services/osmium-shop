@@ -15,22 +15,9 @@ use PHPUnit\Framework\TestCase;
  */
 final class ShopSearchServiceFlowTest extends TestCase
 {
-    private string $synonymsFile;
-
-    protected function setUp(): void
-    {
-        $this->synonymsFile = \tempnam(\sys_get_temp_dir(), 'syn');
-        \file_put_contents($this->synonymsFile, "<?php\nreturn ['panel' => ['module']];");
-    }
-
-    protected function tearDown(): void
-    {
-        \unlink($this->synonymsFile);
-    }
-
     private function service(ShopSearch $model): ShopSearchService
     {
-        return new ShopSearchService($model, $this->synonymsFile);
+        return new ShopSearchService($model, ['panel' => ['module']]);
     }
 
     private function product(array $overrides = []): array

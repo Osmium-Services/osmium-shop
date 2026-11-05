@@ -19,33 +19,16 @@ use PHPUnit\Framework\TestCase;
  */
 class ShopSearchServiceTest extends TestCase
 {
-    private string $tempSynonymsFile;
-
-    protected function setUp(): void
-    {
-        $synonymsArray = [
-            'panel' => ['module'],
-            'charger' => ['controller', 'regulator'],
-            'inverter' => ['invertor'],
-        ];
-
-        $this->tempSynonymsFile = sys_get_temp_dir() . '/test_synonyms_' . uniqid() . '.php';
-        file_put_contents(
-            filename: $this->tempSynonymsFile,
-            data: '<?php return ' . var_export($synonymsArray, return: true) . ';'
-        );
-    }
-
-    protected function tearDown(): void
-    {
-        $fileExists = file_exists($this->tempSynonymsFile);
-        if ($fileExists) unlink($this->tempSynonymsFile);
-    }
+    private const SYNONYMS = [
+        'panel' => ['module'],
+        'charger' => ['controller', 'regulator'],
+        'inverter' => ['invertor'],
+    ];
 
     private function createService(): ShopSearchService
     {
         $mockSearch = $this->createMock(ShopSearch::class);
-        return new ShopSearchService($mockSearch, synonymsPath: $this->tempSynonymsFile);
+        return new ShopSearchService($mockSearch, synonyms: self::SYNONYMS);
     }
 
     // =========================================================================

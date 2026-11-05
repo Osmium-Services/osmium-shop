@@ -28,10 +28,8 @@ if (\strlen($query) < 2) {
 }
 
 try {
-    $searchService = new ShopSearchService(
-        search: new ShopSearch($this->osmium->dataSource, 'products'),
-        synonymsPath: $_SERVER['DOCUMENT_ROOT'] . '/app/modules/shop/config/search-synonyms.php', // Site data, kept in the site's module folder so an update never overwrites it
-    ); // Initialize service
+    $hooks = new ServiceHooks(new ServiceLoader(new ServiceModel($this->osmium->dataSource)));
+    $search = new ShopSearch($this->osmium->dataSource, 'products');
 
     $cache = new Cache(namespace: 'search', ttl: 60);
     $cacheKey = \strtolower($query); // Initialize cache (60s TTL)
@@ -42,7 +40,15 @@ try {
     $osmium = $this->osmium;
     $results = $cache->get(
         key: $cacheKey,
-        fallback: fn() => $searchService->search(query: $query, taxRate: $taxRate),
+        fallback: function () use ($hooks, $search, $query, $taxRate) {
+            // Synonyms come from whichever service supplies them (search.synonyms), only when the search really runs
+            $synonyms = [];
+            foreach ($hooks->collect(event: 'search.synonyms', payload: ['dataSource' => $this->osmium->dataSource]) as $map) {
+                foreach ($map as $term => $targets) $synonyms[$term] = \array_values(\array_unique(\array_merge($synonyms[$term] ?? [], $targets)));
+            }
+
+            return (new ShopSearchService(search: $search, synonyms: $synonyms))->search(query: $query, taxRate: $taxRate);
+        },
     ); // Get from cache or execute search
 
     foreach ($results as &$result) {
@@ -52,7 +58,6 @@ try {
 
     // Tell services a search happened (search analytics records it). Runs every time, not just on a cache miss.
     // Hooks are best-effort: a failing handler is logged and skipped, so it can never break the customer's search.
-    $hooks = new ServiceHooks(new ServiceLoader(new ServiceModel($this->osmium->dataSource)));
     $hooks->dispatch(
         event: 'search.performed',
         payload: ['term' => $query, 'resultCount' => \count($results), 'dataSource' => $this->osmium->dataSource],
