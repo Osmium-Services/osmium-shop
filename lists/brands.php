@@ -30,7 +30,7 @@ return [
         'columns' => [
             ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
         ],
     ],
@@ -48,7 +48,7 @@ return [
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'page_url', 'label' => 'Page URL', 'type' => 'link', 'href' => '/{page_url}/', 'nowrap' => true],
             ['key' => 'info_host', 'label' => 'External Info', 'type' => 'link', 'href' => '{info_external}', 'external' => true, 'nowrap' => true],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
             ['key' => 'created_at', 'label' => 'Added', 'type' => 'date', 'nowrap' => true],
         ],
         'actions' => [
@@ -80,7 +80,7 @@ return [
         'columns' => [
             ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
             ['key' => 'deleted_at', 'label' => 'Deleted', 'type' => 'date', 'nowrap' => true],
         ],
     ]),

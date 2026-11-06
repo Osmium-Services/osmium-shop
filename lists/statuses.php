@@ -35,7 +35,7 @@ return [
         'columns' => [
             ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'descr_short', 'label' => 'Short', 'type' => 'text', 'strong' => true, 'fill' => true],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
             ['key' => 'updatedFormatted', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
         ],
     ],
@@ -63,7 +63,7 @@ return [
                     ? '<span class="badge bg-success">Yes</span>'
                     : '<span class="badge bg-secondary">No</span>',
             ],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
         ],
         'actions' => [
             ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/statuses/edit/?id={id}'],
@@ -90,7 +90,7 @@ return [
         'columns' => [
             ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             ['key' => 'descr_short', 'label' => 'Short Description', 'type' => 'text', 'strong' => true, 'fill' => true],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'badge'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
             ['key' => 'deleted_at', 'label' => 'Deleted', 'type' => 'date', 'nowrap' => true],
         ],
     ]),
