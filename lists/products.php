@@ -140,7 +140,6 @@ return [
                 'sub' => ['key' => 'reference', 'style' => 'code'],
             ],
             $priceColumn,
-            ['key' => 'created_at', 'label' => 'Added', 'type' => 'date', 'nowrap' => true],
         ],
         'actions' => [
             ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/products/edit/?id={id}'],

@@ -41,7 +41,7 @@ return [
         'query' => 'discount-list-with-counts.sql',
         'endpoint' => 'shop/discounts/action/',
         'presence' => 'discount',
-        'order' => [8, 'desc'],
+        'order' => [0, 'asc'],
         'columns' => [
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             [
@@ -62,7 +62,6 @@ return [
             ['key' => 'scopeLabel', 'label' => 'Covers', 'type' => 'text', 'small' => true],
             ['key' => 'ordersLabel', 'label' => 'Orders', 'type' => 'text', 'nowrap' => true],
             ['key' => 'givenLabel', 'label' => 'Given (ex VAT)', 'type' => 'text', 'nowrap' => true],
-            ['key' => 'created_at', 'label' => 'Added', 'type' => 'date', 'nowrap' => true],
         ],
         'actions' => [
             [
