@@ -63,7 +63,7 @@ return [
                     ? '<span class="badge bg-success">Yes</span>'
                     : '<span class="badge bg-secondary">No</span>',
             ],
-            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill'],
+            ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill', 'href' => 'shop/products/?status={id}'],
         ],
         'actions' => [
             ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/statuses/edit/?id={id}'],

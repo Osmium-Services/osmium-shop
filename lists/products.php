@@ -111,6 +111,21 @@ return [
                     return $options;
                 },
             ],
+            [
+                'key' => 'status',
+                'label' => 'Filter by Status',
+                'server' => true,
+                'param' => 'status',
+                'selected' => fn(array $context): ?string => $context['selectedStatus'],
+                'options' => function (array $rows, array $context): array {
+                    $options = [['', 'All']];
+                    foreach ($context['statuses'] as $status) {
+                        $options[] = [$status['id'], $status['descr_long']];
+                    }
+
+                    return $options;
+                },
+            ],
         ],
         'columns' => [
             $cartColumn,
