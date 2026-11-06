@@ -44,6 +44,14 @@ class Brand extends AdminModel
         ]);
     }
 
+    public function setLogo(int $id, ?string $logo): void
+    {
+        $this->run('brand-set-logo.sql', [
+            ':id' => $id,
+            ':logo' => $logo,
+        ]);
+    }
+
     public function softDelete(int $id): void
     {
         $this->run('brand-soft-delete.sql', [':id' => $id]);

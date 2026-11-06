@@ -24,7 +24,7 @@
     </div>
 <?php endif; ?>
 
-<form method="POST" action="<?= $adminUrl('shop/brands/edit/') ?>" id="brand-form">
+<form method="POST" action="<?= $adminUrl('shop/brands/edit/') ?>" id="brand-form" enctype="multipart/form-data">
     <input type="hidden" name="token" value="<?= $template['formToken'] ?>">
     <?php if (!$admin['isNew']): ?>
         <input type="hidden" name="id" value="<?= $admin['brand']['id'] ?>">
@@ -62,6 +62,24 @@
                         value="<?= \htmlspecialchars($admin['brand']['info_external']) ?>" maxlength="255"
                         placeholder="https://example.com/brand-info">
                     <small class="text-muted">External URL for brand information (optional)</small>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="logo" class="form-label">Logo</label>
+                    <?php if (!empty($admin['brand']['logo'])): ?>
+                        <div class="mb-2">
+                            <img src="<?= \htmlspecialchars('/assets/images/shop/brands/' . $admin['brand']['logo']) ?>"
+                                alt="<?= \htmlspecialchars($admin['brand']['name']) ?> logo"
+                                style="max-height: 80px; max-width: 240px;" class="border rounded p-1 bg-white">
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="remove_logo" name="remove_logo" value="1">
+                            <label class="form-check-label" for="remove_logo">Remove the current logo</label>
+                        </div>
+                    <?php endif; ?>
+                    <input type="file" class="form-control" id="logo" name="logo" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
+                    <small class="text-muted">JPG, PNG, GIF, WebP or SVG, up to 10MB. Choosing a file replaces the current logo (optional)</small>
                 </div>
             </div>
         </div>

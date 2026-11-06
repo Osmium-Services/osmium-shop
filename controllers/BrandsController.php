@@ -6,6 +6,7 @@ namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Core\Library\Input;
 use Osmium\Modules\Admin\Core\AdminController;
+use Osmium\Core\Library\ImageUpload;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 
@@ -20,6 +21,9 @@ require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 class BrandsController extends AdminController
 {
     private const RECORD_TYPE = 'brand';
+    private const LOGO_DIR = '/assets/images/shop/brands';
+    private const LOGO_TYPES = ['jpg', 'png', 'gif', 'webp', 'svg'];
+    private const LOGO_MAX_BYTES = 10 * 1024 * 1024;
 
     // =========================================================================
     // Public Actions (called from entry point files)
@@ -144,6 +148,7 @@ class BrandsController extends AdminController
             'name' => '',
             'page_url' => '',
             'info_external' => '',
+            'logo' => null,
         ];
     }
 
@@ -195,18 +200,28 @@ class BrandsController extends AdminController
         $isWebLink = $this->isWebLink($infoExternal);
         if (!$isWebLink) return 'The external info link must be a web address starting with http:// or https://';
 
+        $upload = $_FILES['logo'] ?? null;
+        $hasUpload = ImageUpload::wasUploaded($upload);
+        $uploadError = $hasUpload ? $this->logoUpload()->problem($upload) : null;
+        if ($uploadError) return $uploadError;
+
+        $removeLogo = $input->string(key: 'remove_logo') === '1';
+        $logoChange = ['upload' => $hasUpload ? $upload : null, 'remove' => $removeLogo];
+
         if ($brandId) {
             $this->updateBrand(
                 brandId: $brandId,
                 name: $name,
                 pageUrl: $pageUrl,
                 infoExternal: $infoExternal,
+                logoChange: $logoChange,
             );
         } else {
             $this->insertBrand(
                 name: $name,
                 pageUrl: $pageUrl,
                 infoExternal: $infoExternal,
+                logoChange: $logoChange,
             );
         }
 
@@ -229,8 +244,10 @@ class BrandsController extends AdminController
         string $name,
         ?string $pageUrl,
         ?string $infoExternal,
+        array $logoChange,
     ) {
         $this->admin->model->brand->update($brandId, $name, $pageUrl, $infoExternal);
+        $this->applyLogoChange($brandId, $logoChange);
 
         $this->admin->model->changelog->log(
             description: "Updated brand: {$name}",
@@ -246,8 +263,10 @@ class BrandsController extends AdminController
         string $name,
         ?string $pageUrl,
         ?string $infoExternal,
+        array $logoChange,
     ) {
         $newBrandId = $this->admin->model->brand->insert($name, $pageUrl, $infoExternal);
+        $this->applyLogoChange($newBrandId, $logoChange);
 
         $this->admin->model->changelog->log(
             description: "Created brand: {$name}",
@@ -257,6 +276,45 @@ class BrandsController extends AdminController
 
         $_SESSION['brand_saved'] = true;
         $this->redirect("shop/brands/edit/?id={$newBrandId}");
+    }
+
+    /**
+     * Store a newly uploaded logo (replacing any old one) or remove the current one.
+     *
+     * @param array{upload: ?array<string, mixed>, remove: bool} $logoChange
+     */
+    private function applyLogoChange(int $brandId, array $logoChange): void
+    {
+        $upload = $logoChange['upload'];
+        $nothingToDo = $upload === null && !$logoChange['remove'];
+        if ($nothingToDo) return;
+
+        $directory = $_SERVER['DOCUMENT_ROOT'] . self::LOGO_DIR;
+        $oldLogo = $this->admin->model->brand->getById($brandId)['logo'] ?? null;
+
+        $newLogo = null;
+        if ($upload !== null) {
+            try {
+                $newLogo = $this->logoUpload()->store($upload['tmp_name'], $directory, 'brand-' . $brandId . '-' . \bin2hex(\random_bytes(4))); // The name changes with every upload, so a replaced logo is never served from a browser's cache
+            } catch (\RuntimeException $e) {
+                $_SESSION['brand_saved'] = true;
+                $this->redirect("shop/brands/edit/?id={$brandId}"); // The brand is saved; only the logo failed
+            }
+        }
+
+        $this->admin->model->brand->setLogo($brandId, $newLogo);
+        ImageUpload::delete($directory, $oldLogo);
+
+        $this->admin->model->changelog->log(
+            description: $newLogo ? 'Changed the logo of brand #' . $brandId : 'Removed the logo of brand #' . $brandId,
+            recordType: self::RECORD_TYPE,
+            recordId: $brandId,
+        );
+    }
+
+    private function logoUpload(): ImageUpload
+    {
+        return new ImageUpload(self::LOGO_TYPES, self::LOGO_MAX_BYTES);
     }
 
     // =========================================================================
