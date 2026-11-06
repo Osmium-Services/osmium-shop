@@ -1,5 +1,6 @@
 SELECT
     P.id,
+    P.brand_id,
     P.reference,
     P.model_name,
     P.price_exc_tax,

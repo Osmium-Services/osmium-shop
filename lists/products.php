@@ -96,6 +96,21 @@ return [
                     return $options;
                 },
             ],
+            [
+                'key' => 'brand',
+                'label' => 'Filter by Brand',
+                'server' => true,
+                'param' => 'brand',
+                'selected' => fn(array $context): ?string => $context['selectedBrand'],
+                'options' => function (array $rows, array $context): array {
+                    $options = [['', 'All']];
+                    foreach ($context['brands'] as $brand) {
+                        $options[] = [$brand['id'], $brand['name']];
+                    }
+
+                    return $options;
+                },
+            ],
         ],
         'columns' => [
             $cartColumn,

@@ -66,10 +66,11 @@ class ProductsController extends AdminController
     {
         $categories = $this->fetchCategoriesForFilter();
         $selectedCategory = $this->getSelectedCategoryFilter();
+        $selectedBrand = Input::get()->nullableString(key: 'brand');
         $totalProductCount = $this->shop->model->product->count();
         $pagesById = Model::pagesById();
 
-        $products = $this->fetchActiveProducts(selectedCategory: $selectedCategory, pagesById: $pagesById);
+        $products = $this->fetchActiveProducts(selectedCategory: $selectedCategory, selectedBrand: $selectedBrand, pagesById: $pagesById);
         $recentProducts = $this->fetchRecentProducts($pagesById);
         $deletedProducts = $this->fetchDeletedProducts();
         $activeEditors = $this->admin->presence->list(
@@ -98,6 +99,8 @@ class ProductsController extends AdminController
         $this->data['admin']['deletedProducts'] = $formattedDeletedProducts;
         $this->data['admin']['categories'] = $categories;
         $this->data['admin']['selectedCategory'] = $selectedCategory;
+        $this->data['admin']['brands'] = $this->admin->model->brand->getActive();
+        $this->data['admin']['selectedBrand'] = $selectedBrand;
         $this->data['admin']['totalProductCount'] = $totalProductCount;
         $this->data['admin']['activeEditors'] = $activeEditors;
         $this->data['admin']['lists'] = $this->loadListDefinitions('products', __DIR__ . '/../lists');
@@ -230,7 +233,7 @@ class ProductsController extends AdminController
         return $selectedCategory;
     }
 
-    private function fetchActiveProducts(?string $selectedCategory, array $pagesById): array
+    private function fetchActiveProducts(?string $selectedCategory, ?string $selectedBrand, array $pagesById): array
     {
         $productsRaw = $selectedCategory
             ? $this->admin->model->product->getActiveByCategory((int)$selectedCategory)
@@ -238,6 +241,7 @@ class ProductsController extends AdminController
 
         $products = [];
         foreach ($productsRaw as $row) {
+            if ($selectedBrand && (string)$row['brand_id'] !== $selectedBrand) continue;
             $entry = $this->buildProductEntry(row: $row, pagesById: $pagesById);
             if ($entry) $products[] = $entry;
         }
