@@ -42,8 +42,9 @@ return [
         'query' => 'brand-list-with-counts.sql',
         'endpoint' => 'shop/brands/action/',
         'presence' => 'brand',
-        'order' => [0, 'asc'],
+        'order' => [1, 'asc'],
         'columns' => [
+            ['key' => 'logo_url', 'label' => 'Logo', 'type' => 'image', 'altKey' => 'name', 'sortable' => false],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             ['key' => 'page_url', 'label' => 'Page URL', 'type' => 'link', 'href' => '/{page_url}/', 'nowrap' => true],
             ['key' => 'info_host', 'label' => 'External Info', 'type' => 'link', 'href' => '{info_external}', 'external' => true, 'nowrap' => true],
