@@ -128,8 +128,6 @@ return [
             ],
         ],
         'columns' => [
-            $cartColumn,
-            $seoColumn,
             ['key' => 'thumbnail', 'label' => 'Image', 'type' => 'image', 'altKey' => 'productTitle', 'sortable' => false],
             [
                 'key' => 'productTitle',
@@ -139,6 +137,8 @@ return [
                 'fill' => true,
                 'sub' => ['key' => 'reference', 'style' => 'code'],
             ],
+            $cartColumn,
+            $seoColumn,
             $priceColumn,
         ],
         'actions' => [
