@@ -162,7 +162,7 @@ const CategoryManager = {
         const hiddenClass = isHidden ? 'category-hidden' : '';
 
         const productBadge = productCount > 0 ?
-            `<a href="${window.adminBasePath}shop/products/?category=${item.id}" class="badge bg-warning rounded-pill" title="View ${productCount} product${productCount !== 1 ? 's' : ''}"><i class="bx bx-package" style="color: #8B4513;"></i> ${productCount}</a>` :
+            `<a href="${window.adminBasePath}shop/products/?category=${item.id}" class="badge bg-warning rounded-pill count-pill" title="View ${productCount} product${productCount !== 1 ? 's' : ''}"><i class="bx bx-package"></i> ${productCount}</a>` :
             '';
         const subcatBadge = childCount > 0 ?
             `<span class="badge bg-info rounded-pill" title="${childCount} subcategor${childCount !== 1 ? 'ies' : 'y'}"><i class="bx bx-category"></i> ${childCount}</span>` :
