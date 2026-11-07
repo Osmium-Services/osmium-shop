@@ -128,7 +128,7 @@ return [
             ],
         ],
         'columns' => [
-            ['key' => 'thumbnail', 'label' => 'Image', 'type' => 'image', 'altKey' => 'productTitle', 'sortable' => false],
+            ['key' => 'thumbnail', 'label' => 'Image', 'type' => 'image', 'altKey' => 'productTitle', 'sortable' => false, 'hideBelow' => 'md'],
             [
                 'key' => 'productTitle',
                 'label' => 'Product',
