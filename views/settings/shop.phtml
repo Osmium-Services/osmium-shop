@@ -114,6 +114,7 @@
                 </div>
                 <div class="card-body">
                     <p class="form-text mt-0">Choose how customers are told about their order. Production only for texts.</p>
+                    <div class="table-responsive">
                     <table class="table table-sm align-middle mb-2">
                         <thead>
                             <tr>
@@ -147,6 +148,7 @@
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
 
                     <?php if ($smsProvider === null): ?>
                         <div class="form-text">No SMS service found, so texts are unavailable. Install one from the Osmium Store to switch them on.</div>
