@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once 'app/core/admin/services/ChangedByCell.php';
+
 /**
  * Price history lists, rendered by Osmium\Modules\Admin\Core\ListView. Rows are shaped by
  * ProductPriceHistoryController (formatBatch(), formatDetail(), formatManualChange()).
@@ -48,9 +50,9 @@ return [
             ],
         ],
         'columns' => [
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
+            ['key' => 'productCount', 'label' => 'Prices changed', 'type' => 'text', 'nowrap' => true, 'fill' => true],
             ['key' => 'changedAtFormatted', 'label' => 'Date', 'type' => 'text', 'nowrap' => true, 'sortKey' => 'changed_at'],
-            ['key' => 'productCount', 'label' => 'Prices changed', 'type' => 'text', 'nowrap' => true],
-            ['key' => 'username', 'label' => 'User', 'type' => 'text', 'fill' => true, 'fallback' => 'Unknown'],
         ],
         'actions' => [
             [
@@ -73,19 +75,20 @@ return [
         'emptyText' => 'No manual price changes recorded yet.',
         'order' => null,
         'columns' => [
-            ['key' => 'productLabelHtml', 'label' => 'Product', 'type' => 'html', 'render' => $productLink],
+            ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
+            ['key' => 'productLabelHtml', 'label' => 'Product', 'type' => 'html', 'fill' => true, 'render' => $productLink],
             ['key' => 'priceNewHtml', 'label' => 'Price (ex VAT)', 'type' => 'html', 'nowrap' => true, 'render' => $change('priceOldHtml', 'priceNewHtml')],
             [
                 'key' => 'rrpNewHtml',
                 'label' => 'RRP (ex VAT)',
+                'hideBelow' => 'md',
                 'type' => 'html',
                 'nowrap' => true,
                 'render' => fn(array $row, array $context): string => $row['hasRrp']
                     ? $change('rrpOldHtml', 'rrpNewHtml')($row, $context)
                     : '<span class="text-muted">-</span>',
             ],
-            ['key' => 'changedAtFormatted', 'label' => 'Date', 'type' => 'text', 'nowrap' => true, 'sortKey' => 'changed_at'],
-            ['key' => 'username', 'label' => 'User', 'type' => 'text', 'fill' => true, 'fallback' => 'Unknown'],
+            ['key' => 'changedAtFormatted', 'label' => 'Date', 'type' => 'text', 'nowrap' => true, 'sortKey' => 'changed_at', 'hideBelow' => 'md'],
         ],
         'actions' => [
             [

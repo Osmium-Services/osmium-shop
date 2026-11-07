@@ -6,8 +6,8 @@ SELECT
     h.rrp_exc_tax_old,
     h.rrp_exc_tax_new,
     h.changed_at,
-    h.changed_by,
-    u.username,
+    u.username AS changed_by,
+    u.avatar AS changed_by_avatar,
     b.name AS brand_name,
     p.model_name
 FROM { PREFIX }product_price_history h

@@ -70,7 +70,13 @@ return [
         'id' => 'active-baskets',
         'title' => 'Active Baskets',
         'order' => [4, 'desc'],
-        'columns' => [$session, $items, $value, $date('created_at_formatted', 'Created', 'created_at'), $date('updated_at_formatted', 'Last Activity', 'updated_at')],
+        'columns' => [
+            $session,
+            $items,
+            $value,
+            $date('created_at_formatted', 'Created', 'created_at') + ['hideBelow' => 'md'],
+            $date('updated_at_formatted', 'Last Activity', 'updated_at') + ['hideBelow' => 'md'],
+        ],
         'actions' => $deleteAction,
     ]),
     'abandoned' => \array_merge($common, [
@@ -81,7 +87,7 @@ return [
         'hideWhenEmpty' => true,
         'rowClass' => 'table-danger',
         'order' => [3, 'desc'],
-        'columns' => [$session, $items, $value, $date('updated_at_formatted', 'Abandoned', 'updated_at')],
+        'columns' => [$session, $items, $value, $date('updated_at_formatted', 'Abandoned', 'updated_at') + ['hideBelow' => 'md']],
         'actions' => $deleteAction,
     ]),
     'converted' => \array_merge($common, [

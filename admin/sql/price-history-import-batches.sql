@@ -1,7 +1,7 @@
 SELECT
     h.changed_at,
-    h.changed_by,
-    u.username,
+    u.username AS changed_by,
+    u.avatar AS changed_by_avatar,
     COUNT(*) as product_count
 FROM { PREFIX }product_price_history h
 LEFT JOIN { PREFIX }users u ON h.changed_by = u.id
