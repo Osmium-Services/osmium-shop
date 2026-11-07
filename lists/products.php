@@ -26,6 +26,7 @@ $cartColumn = [
 $seoColumn = [
     'key' => 'seoLabel',
     'label' => 'SEO',
+    'hideBelow' => 'md',
     'type' => 'badge',
     'text' => true,
     'classKey' => 'seoClass',
