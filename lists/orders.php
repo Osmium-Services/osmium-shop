@@ -41,11 +41,19 @@ return [
             [
                 'key' => 'provider_logo',
                 'label' => '',
+                'hideBelow' => 'md',
                 'type' => 'html',
                 'nowrap' => true,
                 'sortable' => false,
                 'render' => function (array $row, array $context): string {
-                    if (empty($row['provider_logo'])) return '';
+                    if (empty($row['provider_logo'])) {
+                        $provider = (string) ($row['provider_label'] ?? '—');
+                        $title = $provider === '—' ? 'No payment provider recorded' : 'Paid with ' . $provider;
+
+                        return '<span class="d-inline-flex justify-content-center align-items-center rounded bg-label-secondary" style="width: 28px; height: 28px;" title="'
+                            . \htmlspecialchars($title) . '">'
+                            . '<i class="bx bx-credit-card text-secondary"></i></span>';
+                    }
 
                     $label = \htmlspecialchars((string) $row['provider_label']);
                     $img = '<img src="' . \htmlspecialchars((string) $row['provider_logo']) . '" alt="' . $label
@@ -89,6 +97,7 @@ return [
             ],
             [
                 'key' => 'delivery_postcode',
+                'hideBelow' => 'md',
                 'label' => 'Delivery',
                 'type' => 'text',
                 'nowrap' => true,
@@ -96,6 +105,7 @@ return [
             ],
             [
                 'key' => 'total_formatted',
+                'hideBelow' => 'md',
                 'label' => 'Total',
                 'type' => 'raw',
                 'align' => 'end',
@@ -104,6 +114,7 @@ return [
             ],
             [
                 'key' => 'created_at_formatted',
+                'hideBelow' => 'md',
                 'label' => 'Placed',
                 'type' => 'text',
                 'small' => true,

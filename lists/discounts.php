@@ -42,6 +42,7 @@ return [
         'endpoint' => 'shop/discounts/action/',
         'presence' => 'discount',
         'order' => [0, 'asc'],
+        'grid' => require __DIR__ . '/../grids/discounts.php',
         'columns' => [
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
             [
@@ -53,15 +54,16 @@ return [
             [
                 'key' => 'valueLabel',
                 'label' => 'Value',
+                'hideBelow' => 'md',
                 'type' => 'text',
                 'nowrap' => true,
                 'sub' => ['key' => 'usageLabel', 'style' => 'muted'],
             ],
-            ['key' => 'windowLabel', 'label' => 'Window', 'type' => 'text', 'small' => true, 'nowrap' => true],
+            ['key' => 'windowLabel', 'label' => 'Window', 'type' => 'text', 'small' => true, 'nowrap' => true, 'hideBelow' => 'md'],
             ['key' => 'statusBadge', 'label' => 'Status', 'type' => 'raw'],
-            ['key' => 'scopeLabel', 'label' => 'Covers', 'type' => 'text', 'small' => true],
-            ['key' => 'ordersLabel', 'label' => 'Orders', 'type' => 'text', 'nowrap' => true],
-            ['key' => 'givenLabel', 'label' => 'Given (ex VAT)', 'type' => 'text', 'nowrap' => true],
+            ['key' => 'scopeLabel', 'label' => 'Covers', 'type' => 'text', 'small' => true, 'hideBelow' => 'md'],
+            ['key' => 'ordersLabel', 'label' => 'Orders', 'type' => 'text', 'nowrap' => true, 'hideBelow' => 'md'],
+            ['key' => 'givenLabel', 'label' => 'Given (ex VAT)', 'type' => 'text', 'nowrap' => true, 'hideBelow' => 'md'],
         ],
         'actions' => [
             [
