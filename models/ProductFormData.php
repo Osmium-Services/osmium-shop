@@ -167,7 +167,7 @@ class ProductFormData
         foreach (AdminShop::PDF_TYPES as $type) {
             $brandPath = $product->brandPath;
             $modelPath = $product->modelPath;
-            $pdfDir = 'assets/images/shop/' . $brandPath . '/' . $modelPath . '/' . $type;
+            $pdfDir = \ltrim(ShopPaths::productDir($brandPath, $modelPath), '/') . '/' . $type;
             $pdfFile = $brandPath . '-' . $modelPath . '-' . $type . '.pdf';
             $fullPath = $pdfDir . '/' . $pdfFile;
             $pdfPaths[$type] = \file_exists($fullPath) ? '/' . $fullPath : null;
@@ -214,26 +214,7 @@ class ProductFormData
 
     public function checkImageDerivations($product): array
     {
-        $brandPath = $product->brandPath;
-        $modelPath = $product->modelPath;
-        $baseImagePath = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/shop/' . $brandPath . '/' . $modelPath;
-        $baseFilename = $brandPath . '-' . $modelPath;
-
-        $findImage = function (string $dir) use ($baseFilename): bool {
-            foreach (['.jpg', '.png', '.webp'] as $ext) {
-                $imageExists = \file_exists(filename: $dir . '/' . $baseFilename . $ext);
-                if ($imageExists) return true;
-            }
-            return false;
-        };
-
-        return [
-            'large' => $findImage($baseImagePath . '/large'),
-            'medium' => $findImage($baseImagePath . '/medium'),
-            'thumb' => $findImage($baseImagePath . '/thumb'),
-            'webp' => \file_exists(filename: $baseImagePath . '/large/webp/' . $baseFilename . '.webp'),
-            'avif' => \file_exists(filename: $baseImagePath . '/large/avif/' . $baseFilename . '.avif'),
-        ];
+        return ProductImageFiles::derivations(brandPath: $product->brandPath, modelPath: $product->modelPath);
     }
 
     public function shouldShowRegenerateButton(array $imageDerivations): bool

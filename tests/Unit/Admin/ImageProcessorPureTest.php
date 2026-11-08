@@ -94,48 +94,4 @@ final class ImageProcessorPureTest extends TestCase
         $this->assertStringNotContainsString('&amp;', $sanitized);
         $this->assertStringNotContainsString('&', $sanitized);
     }
-
-    // ========================================
-    // normalizePath() Tests
-    // ========================================
-
-    public function test_normalizePath_accepts_the_slugs_the_shop_generates(): void
-    {
-        $ref = new ReflectionClass(ImageProcessor::class);
-        $instance = $ref->newInstanceWithoutConstructor();
-        $method = $ref->getMethod('normalizePath');
-
-        $this->assertSame('acme-co', $method->invoke($instance, 'acme-co'));
-        $this->assertSame('x2', $method->invoke($instance, 'x2'));
-    }
-
-    #[\PHPUnit\Framework\Attributes\DataProvider('unsafePaths')]
-    public function test_normalizePath_refuses_anything_that_could_leave_the_product_folder(string $path): void
-    {
-        $ref = new ReflectionClass(ImageProcessor::class);
-        $instance = $ref->newInstanceWithoutConstructor();
-        $method = $ref->getMethod('normalizePath');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $method->invoke($instance, $path);
-    }
-
-    /** @return array<string, array{string}> */
-    public static function unsafePaths(): array
-    {
-        return [
-            'empty' => [''],
-            'parent folder' => ['..'],
-            'parent in the middle' => ['a/../b'],
-            'encoded parent' => ['&period;&period;'],
-            'slash' => ['path/to/dir'],
-            'backslash' => ['a\\b'],
-            'encoded slash' => ['acme&#x2F;co'],
-            'upper case' => ['Brand'],
-            'space' => ['Brand Co'],
-            'leading hyphen' => ['-a'],
-            'double hyphen' => ['a--b'],
-            'null byte' => ["a\0b"],
-        ];
-    }
 }

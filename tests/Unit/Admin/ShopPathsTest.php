@@ -73,4 +73,44 @@ class ShopPathsTest extends TestCase
 
         $this->assertEquals('smartsolar-bmv', $result);
     }
+
+    public function test_normalize_accepts_the_slugs_the_shop_generates(): void
+    {
+        $this->assertSame('acme-co', ShopPaths::normalize('acme-co'));
+        $this->assertSame('x2', ShopPaths::normalize('x2'));
+        $this->assertSame('brand', ShopPaths::normalize('brand'));
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('unsafePaths')]
+    public function test_normalize_refuses_anything_that_could_leave_the_product_folder(string $path): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        ShopPaths::normalize($path);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function unsafePaths(): array
+    {
+        return [
+            'empty' => [''],
+            'parent folder' => ['..'],
+            'parent in the middle' => ['a/../b'],
+            'encoded parent' => ['&period;&period;'],
+            'slash' => ['path/to/dir'],
+            'slashes' => ['a/b/c'],
+            'backslash' => ['a\\b'],
+            'encoded slash' => ['acme&#x2F;co'],
+            'upper case' => ['Brand'],
+            'space' => ['Brand Co'],
+            'leading hyphen' => ['-a'],
+            'double hyphen' => ['a--b'],
+            'null byte' => ["a\0b"],
+        ];
+    }
+
+    public function test_product_dir_is_the_site_relative_folder_for_a_brand_and_model(): void
+    {
+        $this->assertSame('/assets/images/shop/acme/widget', ShopPaths::productDir('acme', 'widget'));
+    }
 }

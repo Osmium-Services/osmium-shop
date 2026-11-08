@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Admin\Services;
 
+use Osmium\Core\Library\UploadErrors;
 use Osmium\Modules\Admin\Models\Brand;
 use Osmium\Modules\Admin\Models\Page;
 use Osmium\Modules\Admin\Models\Product;
@@ -25,7 +26,6 @@ class AdminShop
 {
     public const PDF_TYPES = ['brochure', 'datasheet', 'instructions'];
     public const PRODUCT_DELETE_GRACE_PERIOD = 3600; // 1 hour in seconds: a product this new can be deleted for good
-    private const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB
 
     private string $basePath;
 
@@ -49,23 +49,6 @@ class AdminShop
      * Decodes HTML entities and replaces forward slashes
      */
     /**
-     * Brand and model paths come from the client, so only the shape the shop itself generates is accepted
-     * (lower-case letters, digits and single hyphens). That rules out '..', separators and anything else
-     * that could step outside the product image folder.
-     *
-     * @throws \InvalidArgumentException when the path is not of that shape
-     */
-    private function normalizePath(string $path): string
-    {
-        $decoded = \html_entity_decode(string: $path, flags: ENT_QUOTES | ENT_HTML5);
-
-        $unsafe = \preg_match('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $decoded) !== 1;
-        if ($unsafe) throw new \InvalidArgumentException('Invalid brand or model path');
-
-        return $decoded;
-    }
-
-    /**
      * Upload a PDF file for a product
      * @return array ['pdfType' => string, 'pdfPath' => string]
      * @throws \Exception on validation or save failure
@@ -79,16 +62,7 @@ class AdminShop
         $uploadFailed = !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK;
         if ($uploadFailed) {
             $errorCode = $file['error'] ?? UPLOAD_ERR_NO_FILE;
-            $errorMessages = [
-                UPLOAD_ERR_INI_SIZE => 'File exceeds server upload limit',
-                UPLOAD_ERR_FORM_SIZE => 'File exceeds form upload limit',
-                UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
-                UPLOAD_ERR_NO_FILE => 'No file was uploaded',
-                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
-                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-                UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the upload',
-            ];
-            throw new \Exception($errorMessages[$errorCode] ?? 'Unknown upload error'); // Validate upload
+            throw new \Exception(UploadErrors::message((int) $errorCode)); // Validate upload
         }
 
         $validTypes = self::PDF_TYPES;
@@ -104,13 +78,13 @@ class AdminShop
         $isNotPdf = $mimeType !== 'application/pdf';
         if ($isNotPdf) throw new \Exception('Invalid file type. Only PDF files allowed');
 
-        $tooLarge = $file['size'] > self::MAX_UPLOAD_SIZE;
+        $tooLarge = $file['size'] > OsmiumAdmin::MAX_UPLOAD_SIZE;
         if ($tooLarge) throw new \Exception('File too large. Maximum 10MB allowed'); // Validate file size
 
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
+        $brandPath = ShopPaths::normalize($brandPath);
+        $modelPath = ShopPaths::normalize($modelPath); // Normalize paths for consistent directory matching
 
-        $relativeDir = '/assets/images/shop/' . $brandPath . '/' . $modelPath . '/' . $pdfType;
+        $relativeDir = ShopPaths::productDir($brandPath, $modelPath) . '/' . $pdfType;
         $pdfDir = $this->basePath . $relativeDir;
         $pdfFilename = $brandPath . '-' . $modelPath . '-' . $pdfType . '.pdf';
         $fullPath = $pdfDir . '/' . $pdfFilename; // Build paths with absolute base path
@@ -143,10 +117,10 @@ class AdminShop
         $missingPaths = empty($brandPath) || empty($modelPath);
         if ($missingPaths) throw new \Exception('Brand and model paths are required');
 
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
+        $brandPath = ShopPaths::normalize($brandPath);
+        $modelPath = ShopPaths::normalize($modelPath); // Normalize paths for consistent directory matching
 
-        $pdfDir = $this->basePath . '/assets/images/shop/' . $brandPath . '/' . $modelPath . '/' . $pdfType;
+        $pdfDir = $this->basePath . ShopPaths::productDir($brandPath, $modelPath) . '/' . $pdfType;
         $pdfFilename = $brandPath . '-' . $modelPath . '-' . $pdfType . '.pdf';
         $fullPath = $pdfDir . '/' . $pdfFilename;
 
@@ -164,12 +138,12 @@ class AdminShop
      */
     public function getPdfPaths(string $brandPath, string $modelPath): array
     {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
+        $brandPath = ShopPaths::normalize($brandPath);
+        $modelPath = ShopPaths::normalize($modelPath); // Normalize paths for consistent directory matching
 
         $pdfPaths = [];
         foreach (self::PDF_TYPES as $type) {
-            $relativeDir = '/assets/images/shop/' . $brandPath . '/' . $modelPath . '/' . $type;
+            $relativeDir = ShopPaths::productDir($brandPath, $modelPath) . '/' . $type;
             $pdfFile = $brandPath . '-' . $modelPath . '-' . $type . '.pdf';
             $fullPath = $this->basePath . $relativeDir . '/' . $pdfFile;
             $pdfPaths[$type] = \file_exists($fullPath) ? $relativeDir . '/' . $pdfFile : null;

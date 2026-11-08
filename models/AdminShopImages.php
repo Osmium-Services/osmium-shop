@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Admin\Services;
 
+use Osmium\Core\Library\UploadErrors;
 use Osmium\Modules\Admin\Models\Product;
 use Osmium\Modules\Admin\Services\OsmiumAdmin;
 use Osmium\Modules\Admin\Services\ImageProcessor;
@@ -26,10 +27,10 @@ class AdminShopImages
      */
     public function upload(int $productId, array $file, array $input): array
     {
-        $this->debugLog('=== IMAGE UPLOAD START ===');
-        $this->debugLog('Product ID: ' . $productId);
-        $this->debugLog('Input: ' . \json_encode($input));
-        $this->debugLog('File info: ' . \json_encode([
+        ImageUploadLog::write('=== IMAGE UPLOAD START ===');
+        ImageUploadLog::write('Product ID: ' . $productId);
+        ImageUploadLog::write('Input: ' . \json_encode($input));
+        ImageUploadLog::write('File info: ' . \json_encode([
             'name' => $file['name'] ?? 'N/A',
             'type' => $file['type'] ?? 'N/A',
             'size' => $file['size'] ?? 'N/A',
@@ -61,10 +62,7 @@ class AdminShopImages
 
         $isMainSlot = $slot === 'main';
         if ($isMainSlot) {
-            $response['derivations'] = $this->checkDerivations(
-                brandPath: $brandPath,
-                modelPath: $modelPath,
-            ); // For main image uploads, include derivation status for badge refresh
+            $response['derivations'] = ProductImageFiles::derivations(brandPath: $brandPath, modelPath: $modelPath); // For main image uploads, include derivation status for badge refresh
         }
 
         return $response;
@@ -78,21 +76,12 @@ class AdminShopImages
         $uploadFailed = !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK;
         if ($uploadFailed) {
             $errorCode = $file['error'] ?? UPLOAD_ERR_NO_FILE;
-            $errorMessages = [
-                UPLOAD_ERR_INI_SIZE => 'File exceeds server upload limit',
-                UPLOAD_ERR_FORM_SIZE => 'File exceeds form upload limit',
-                UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
-                UPLOAD_ERR_NO_FILE => 'No file was uploaded',
-                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
-                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-                UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the upload',
-            ];
-            $message = $errorMessages[$errorCode] ?? 'Unknown upload error';
-            $this->debugLog('Upload error: ' . $errorCode . ' - ' . $message);
+            $message = UploadErrors::message((int) $errorCode);
+            ImageUploadLog::write('Upload error: ' . $errorCode . ' - ' . $message);
             throw new \Exception($message); // Validate upload
         }
 
-        $this->debugLog('Upload validation passed');
+        ImageUploadLog::write('Upload validation passed');
     }
 
     /**
@@ -100,16 +89,16 @@ class AdminShopImages
      */
     private function validateMimeType(array $file): void
     {
-        $this->debugLog('Checking MIME type...');
+        ImageUploadLog::write('Checking MIME type...');
         $finfo = \finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = \finfo_file($finfo, $file['tmp_name']);
         //\finfo_close($finfo); deprecated
-        $this->debugLog('MIME type: ' . $mimeType); // Validate file type
+        ImageUploadLog::write('MIME type: ' . $mimeType); // Validate file type
 
         $allowedTypes    = self::ALLOWED_IMAGE_TYPES;
         $invalidMimeType = !\in_array(needle: $mimeType, haystack: $allowedTypes);
         if ($invalidMimeType) {
-            $this->debugLog('MIME type rejected');
+            ImageUploadLog::write('MIME type rejected');
             throw new \Exception('Invalid file type. Allowed: JPG, PNG, GIF, WebP');
         }
     }
@@ -119,10 +108,10 @@ class AdminShopImages
      */
     private function validateFileSize(array $file): void
     {
-        $this->debugLog('Checking file size: ' . $file['size'] . ' bytes');
+        ImageUploadLog::write('Checking file size: ' . $file['size'] . ' bytes');
         $fileTooLarge = $file['size'] > OsmiumAdmin::MAX_UPLOAD_SIZE;
         if ($fileTooLarge) {
-            $this->debugLog('File too large');
+            ImageUploadLog::write('File too large');
             throw new \Exception('File too large. Maximum 10MB allowed'); // Validate file size
         }
     }
@@ -132,13 +121,13 @@ class AdminShopImages
      */
     private function validateDimensions(array $file): void
     {
-        $this->debugLog('Checking dimensions...');
+        ImageUploadLog::write('Checking dimensions...');
         $dimensions = \getimagesize($file['tmp_name']);
-        $this->debugLog('Dimensions: ' . \json_encode($dimensions));
+        ImageUploadLog::write('Dimensions: ' . \json_encode($dimensions));
 
         $dimensionsFailed = $dimensions === false;
         if ($dimensionsFailed) {
-            $this->debugLog('Could not read dimensions');
+            ImageUploadLog::write('Could not read dimensions');
             throw new \Exception('Could not read image dimensions'); // Validate image dimensions
         }
 
@@ -146,7 +135,7 @@ class AdminShopImages
         if ($wrongDimensions) {
             $width  = $dimensions[0];
             $height = $dimensions[1];
-            $this->debugLog("Wrong dimensions: {$width}×{$height}");
+            ImageUploadLog::write("Wrong dimensions: {$width}×{$height}");
             throw new \Exception("Image must be 900×900 pixels. Uploaded: {$width}×{$height}.");
         }
     }
@@ -161,12 +150,12 @@ class AdminShopImages
         string $modelPath,
         string $imageType,
     ): array {
-        $this->debugLog("Processing image - imageType: {$imageType}");
-        $this->debugLog('DOCUMENT_ROOT: ' . $_SERVER['DOCUMENT_ROOT']); // Determine image type based on slot
+        ImageUploadLog::write("Processing image - imageType: {$imageType}");
+        ImageUploadLog::write('DOCUMENT_ROOT: ' . $_SERVER['DOCUMENT_ROOT']); // Determine image type based on slot
 
         require_once __DIR__ . '/ImageProcessor.php';
         $processor = new ImageProcessor($_SERVER['DOCUMENT_ROOT']);
-        $this->debugLog('Calling ImageProcessor::processProductImage()');
+        ImageUploadLog::write('Calling ImageProcessor::processProductImage()');
         $result = $processor->processProductImage(
             tempPath: $file['tmp_name'],
             brandPath: $brandPath,
@@ -174,15 +163,15 @@ class AdminShopImages
             imageType: $imageType,
         ); // Process the image
 
-        $this->debugLog('ImageProcessor result: ' . \json_encode($result));
+        ImageUploadLog::write('ImageProcessor result: ' . \json_encode($result));
 
         $failed = !$result['success'];
         if ($failed) {
-            $this->debugLog('Image processing FAILED');
+            ImageUploadLog::write('Image processing FAILED');
             throw new \Exception($result['error'] ?? 'Image processing failed');
         }
 
-        $this->debugLog('Image processing SUCCESS');
+        ImageUploadLog::write('Image processing SUCCESS');
 
         return $result;
     }
@@ -197,33 +186,6 @@ class AdminShopImages
         if (!$isDescrField) return;
 
         $this->product->updateDescrImageField($productId, $slot, $imagePath);
-    }
-
-    /**
-     * Check existence of image derivations (large, medium, thumb)
-     */
-    private function checkDerivations(string $brandPath, string $modelPath): array
-    {
-        $basePath = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/shop/' . $brandPath . '/' . $modelPath;
-        $baseFilename = $brandPath . '-' . $modelPath;
-        $webpFilename = $baseFilename . '.webp';
-        $avifFilename = $baseFilename . '.avif';
-
-        $findImage = function (string $dir) use ($baseFilename): bool {
-            foreach (['.jpg', '.png', '.webp'] as $ext) {
-                $imageExists = \file_exists(filename: $dir . '/' . $baseFilename . $ext);
-                if ($imageExists) return true; // Check for any supported image extension (jpg, png, webp)
-            }
-            return false;
-        };
-
-        return [
-            'large' => $findImage($basePath . '/large'),
-            'medium' => $findImage($basePath . '/medium'),
-            'thumb' => $findImage($basePath . '/thumb'),
-            'webp' => \file_exists(filename: $basePath . '/large/webp/' . $webpFilename),
-            'avif' => \file_exists(filename: $basePath . '/large/avif/' . $avifFilename),
-        ];
     }
 
     /**
@@ -364,22 +326,22 @@ class AdminShopImages
         $oldDir = $baseDir . '/' . $oldModelPath;
         $newDir = $baseDir . '/' . $newModelPath;
 
-        $this->debugLog("=== RENAME PRODUCT IMAGES ===");
-        $this->debugLog("Brand: {$brandName} -> {$brandPath}");
-        $this->debugLog("Old model: {$oldModelName} -> {$oldModelPath}");
-        $this->debugLog("New model: {$newModelName} -> {$newModelPath}");
-        $this->debugLog("Old dir: {$oldDir}");
-        $this->debugLog("New dir: {$newDir}");
+        ImageUploadLog::write("=== RENAME PRODUCT IMAGES ===");
+        ImageUploadLog::write("Brand: {$brandName} -> {$brandPath}");
+        ImageUploadLog::write("Old model: {$oldModelName} -> {$oldModelPath}");
+        ImageUploadLog::write("New model: {$newModelName} -> {$newModelPath}");
+        ImageUploadLog::write("Old dir: {$oldDir}");
+        ImageUploadLog::write("New dir: {$newDir}");
 
         $oldDirMissing = !\is_dir($oldDir);
         if ($oldDirMissing) {
-            $this->debugLog("Old dir does not exist - skipping rename");
+            ImageUploadLog::write("Old dir does not exist - skipping rename");
             return ['success' => true, 'renamed' => 0, 'skipped' => true]; // Skip if old folder doesn't exist (no images uploaded yet)
         }
 
         $newDirExists = \is_dir($newDir);
         if ($newDirExists) {
-            $this->debugLog("ERROR: New dir already exists");
+            ImageUploadLog::write("ERROR: New dir already exists");
             return [
                 'success' => false,
                 'renamed' => 0,
@@ -389,21 +351,21 @@ class AdminShopImages
 
         $folderRenamed = @\rename(from: $oldDir, to: $newDir);
         if (!$folderRenamed) {
-            $this->debugLog("ERROR: Failed to rename folder");
+            ImageUploadLog::write("ERROR: Failed to rename folder");
             return [
                 'success' => false,
                 'renamed' => 0,
                 'error' => "Failed to rename folder from {$oldModelPath} to {$newModelPath}",
             ]; // Step 1: Rename the folder
         }
-        $this->debugLog("Folder renamed successfully");
+        ImageUploadLog::write("Folder renamed successfully");
 
         $renamedCount = $this->renameFilesRecursively(
             dir: $newDir,
             oldBaseName: $oldBaseName,
             newBaseName: $newBaseName,
         );
-        $this->debugLog("Renamed {$renamedCount} files"); // Step 2: Rename all files inside (recursively)
+        ImageUploadLog::write("Renamed {$renamedCount} files"); // Step 2: Rename all files inside (recursively)
 
         return ['success' => true, 'renamed' => $renamedCount];
     }
@@ -448,13 +410,13 @@ class AdminShopImages
             );
             $newPath = $dir . '/' . $newFilename; // Now rename them
 
-            $this->debugLog("Renaming: {$filename} -> {$newFilename}");
+            ImageUploadLog::write("Renaming: {$filename} -> {$newFilename}");
 
             $fileRenamed = @\rename(from: $oldPath, to: $newPath);
             if ($fileRenamed) {
                 $renamed++;
             } else {
-                $this->debugLog("WARNING: Failed to rename {$filename}");
+                ImageUploadLog::write("WARNING: Failed to rename {$filename}");
             }
         }
 
@@ -492,21 +454,5 @@ class AdminShopImages
         }
 
         throw new \Exception("Unknown image slot: {$slot}"); // Fail loudly — never silently fall back to the main image ('')
-    }
-
-    /**
-     * Debug logging for image uploads - writes to app/logs/image-upload.log
-     */
-    private function debugLog(string $message): void
-    {
-        $logDir = \dirname(path: __DIR__, levels: 3) . '/logs';
-        $logDirMissing = !\is_dir($logDir);
-        if ($logDirMissing) @\mkdir(directory: $logDir, permissions: 0755, recursive: true);
-
-        $logFile = $logDir . '/image-upload.log';
-        $timestamp = \date('Y-m-d H:i:s');
-        $entry = "[{$timestamp}] {$message}\n";
-
-        @\file_put_contents(filename: $logFile, data: $entry, flags: FILE_APPEND);
     }
 }

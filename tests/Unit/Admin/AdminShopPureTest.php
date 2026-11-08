@@ -43,38 +43,6 @@ class AdminShopPureTest extends TestCase
         return $method->invoke($instance, ...$args);
     }
 
-    // normalizePath() tests
-
-    public function test_normalize_path_accepts_a_generated_slug(): void
-    {
-        $this->assertEquals('brand-model', $this->callMethod('normalizePath', ['brand-model']));
-    }
-
-    public function test_normalize_path_decodes_html_entities_before_checking(): void
-    {
-        $this->assertEquals('brand', $this->callMethod('normalizePath', ['brand']));
-        $this->expectException(\InvalidArgumentException::class);
-        $this->callMethod('normalizePath', ['brand&#x2F;model']);
-    }
-
-    public function test_normalize_path_refuses_an_empty_string(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->callMethod('normalizePath', ['']);
-    }
-
-    public function test_normalize_path_refuses_slashes_and_parent_segments(): void
-    {
-        foreach (['a/b/c', 'brand/model', '..', 'a/../b'] as $path) {
-            try {
-                $this->callMethod('normalizePath', [$path]);
-                $this->fail("{$path} should be refused");
-            } catch (\InvalidArgumentException) {
-                $this->addToAssertionCount(1);
-            }
-        }
-    }
-
     // duplicateGenerateUrlStub() tests
 
     public function test_duplicate_generate_url_stub_generates_hyphenated_lowercase_url(): void

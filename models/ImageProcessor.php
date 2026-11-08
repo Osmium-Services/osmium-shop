@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Admin\Services;
 
+use Osmium\Core\Library\ImageTools;
+
 /**
  * Image Processor Service
  * Handles product image processing and variant generation
@@ -16,6 +18,8 @@ class ImageProcessor
         'large'  => ['width' => 450, 'height' => 450],
         'extra'  => ['width' => 450, 'height' => 450],
     ];
+
+    private const SOURCE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
     private const QUALITY = [
         'jpg'  => 85,
@@ -39,8 +43,7 @@ class ImageProcessor
         string $modelPath,
         string $imageType = ''
     ): array {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths - decode HTML entities for consistent directory paths
+        ['brand' => $brandPath, 'model' => $modelPath, 'dir' => $baseDir, 'baseName' => $baseName] = $this->locate($brandPath, $modelPath, $imageType);
 
         $this->debugLogStart($tempPath, $brandPath, $modelPath, $imageType);
 
@@ -51,9 +54,6 @@ class ImageProcessor
 
         $srcWidth = imagesx($sourceImage);
         $srcHeight = imagesy($sourceImage);
-        $baseDir = $this->basePath . '/assets/images/shop/' . $brandPath . '/' . $modelPath;
-        $baseName = $this->buildBaseName($brandPath, $modelPath, $imageType);
-
         $this->debugLog("Source dimensions: {$srcWidth}x{$srcHeight}");
         $this->debugLog("baseDir: {$baseDir}");
         $this->debugLog("baseName (sanitized): {$baseName}");
@@ -86,11 +86,7 @@ class ImageProcessor
         string $modelPath,
         string $imageType = ''
     ): array {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
-
-        $baseDir = $this->basePath . '/assets/images/shop/' . $brandPath . '/' . $modelPath;
-        $baseName = $this->buildBaseName($brandPath, $modelPath, $imageType);
+        ['brand' => $brandPath, 'model' => $modelPath, 'dir' => $baseDir, 'baseName' => $baseName] = $this->locate($brandPath, $modelPath, $imageType);
 
         $deletedFiles = [];
         $errors = [];
@@ -129,11 +125,7 @@ class ImageProcessor
         string $modelPath,
         string $imageType = ''
     ): bool {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
-
-        $baseDir = $this->basePath . '/assets/images/shop/' . $brandPath . '/' . $modelPath;
-        $baseName = $this->buildBaseName($brandPath, $modelPath, $imageType);
+        ['brand' => $brandPath, 'model' => $modelPath, 'dir' => $baseDir, 'baseName' => $baseName] = $this->locate($brandPath, $modelPath, $imageType);
 
         $checkPath = $baseDir . '/large/' . $baseName . '.jpg';
         $exists = \file_exists($checkPath); // Check for the large JPG as the canonical file
@@ -153,8 +145,8 @@ class ImageProcessor
      */
     public function getProductImages(string $brandPath, string $modelPath): array
     {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
+        $brandPath = ShopPaths::normalize($brandPath);
+        $modelPath = ShopPaths::normalize($modelPath);
 
         $images = [];
         $imageSlots = ['main', 'extra1', 'extra2', 'extra3', 'extra4', 'extra5'];
@@ -174,8 +166,7 @@ class ImageProcessor
 
         $baseName = $this->buildBaseName($brandPath, $modelPath, $imageType);
 
-        return '/assets/images/shop/' . $brandPath . '/' . $modelPath
-            . '/large/' . $baseName . '.jpg';
+        return ShopPaths::productDir($brandPath, $modelPath) . '/large/' . $baseName . '.jpg';
     }
 
     /**
@@ -187,14 +178,10 @@ class ImageProcessor
         string $modelPath,
         string $imageType = ''
     ): ?string {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
-
-        $baseDir = $this->basePath . '/assets/images/shop/' . $brandPath . '/' . $modelPath . '/large';
-        $baseName = $this->buildBaseName($brandPath, $modelPath, $imageType);
+        ['brand' => $brandPath, 'model' => $modelPath, 'dir' => $baseDir, 'baseName' => $baseName] = $this->locate($brandPath, $modelPath, $imageType);
 
         foreach (['.jpg', '.png', '.webp'] as $ext) {
-            $path = $baseDir . '/' . $baseName . $ext;
+            $path = $baseDir . '/large/' . $baseName . $ext;
             $pathExists = \file_exists($path);
             if ($pathExists) return $path; // Check for each supported extension
         }
@@ -210,8 +197,7 @@ class ImageProcessor
         string $modelPath,
         string $imageType = ''
     ): array {
-        $brandPath = $this->normalizePath($brandPath);
-        $modelPath = $this->normalizePath($modelPath); // Normalize paths for consistent directory matching
+        ['brand' => $brandPath, 'model' => $modelPath, 'dir' => $baseDir, 'baseName' => $baseName] = $this->locate($brandPath, $modelPath, $imageType);
 
         $sourcePath = $this->findLargeImage($brandPath, $modelPath, $imageType);
         if (!$sourcePath) return ['success' => false, 'error' => 'Large image not found']; // Find the source large image
@@ -221,9 +207,6 @@ class ImageProcessor
 
         $srcWidth = imagesx($sourceImage);
         $srcHeight = imagesy($sourceImage);
-
-        $baseDir = $this->basePath . '/assets/images/shop/' . $brandPath . '/' . $modelPath;
-        $baseName = $this->buildBaseName($brandPath, $modelPath, $imageType);
 
         $generatedFiles = [];
 
@@ -276,6 +259,25 @@ class ImageProcessor
 
         $this->debugLog('Source image loaded OK');
         return $sourceImage;
+    }
+
+    /**
+     * Check the brand and model paths and work out where a product image lives
+     *
+     * @return array{brand: string, model: string, dir: string, baseName: string}
+     * @throws \InvalidArgumentException when a path is not a-z, 0-9 and hyphens
+     */
+    private function locate(string $brandPath, string $modelPath, string $imageType): array
+    {
+        $brand = ShopPaths::normalize($brandPath);
+        $model = ShopPaths::normalize($modelPath);
+
+        return [
+            'brand' => $brand,
+            'model' => $model,
+            'dir' => $this->basePath . ShopPaths::productDir($brand, $model),
+            'baseName' => $this->buildBaseName($brand, $model, $imageType),
+        ];
     }
 
     /**
@@ -392,22 +394,16 @@ class ImageProcessor
     }
 
     /**
-     * Load an image from file
+     * Load an image from file, upright and within the pixel limit. Null when it can't be used.
      */
     private function loadImage(string $path): ?\GdImage
     {
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($path);
-
-        $image = match ($mimeType) {
-            'image/jpeg' => imagecreatefromjpeg($path),
-            'image/png' => imagecreatefrompng($path),
-            'image/gif' => imagecreatefromgif($path),
-            'image/webp' => imagecreatefromwebp($path),
-            default => false
-        };
-
-        return $image ?: null;
+        try {
+            return (new ImageTools())->load(path: $path, allowedTypes: self::SOURCE_TYPES);
+        } catch (\InvalidArgumentException $e) {
+            $this->debugLog('Could not load the image: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -492,23 +488,6 @@ class ImageProcessor
      * - Replaces forward slashes with dashes to prevent directory splitting
      */
     /**
-     * Brand and model paths come from the client, so only the shape the shop itself generates is accepted
-     * (lower-case letters, digits and single hyphens). That rules out '..', separators and anything else
-     * that could step outside the product image folder.
-     *
-     * @throws \InvalidArgumentException when the path is not of that shape
-     */
-    private function normalizePath(string $path): string
-    {
-        $decoded = \html_entity_decode(string: $path, flags: ENT_QUOTES | ENT_HTML5);
-
-        $unsafe = \preg_match('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $decoded) !== 1;
-        if ($unsafe) throw new \InvalidArgumentException('Invalid brand or model path');
-
-        return $decoded;
-    }
-
-    /**
      * Sanitize a path segment for use in filenames
      * Removes/replaces characters that are problematic in filenames
      */
@@ -534,14 +513,6 @@ class ImageProcessor
      */
     private function debugLog(string $message): void
     {
-        $logDir = \dirname(path: __DIR__, levels: 3) . '/logs';
-        $logDirMissing = !\is_dir($logDir);
-        if ($logDirMissing) @\mkdir(directory: $logDir, permissions: 0755, recursive: true);
-
-        $logFile = $logDir . '/image-upload.log';
-        $timestamp = \date('Y-m-d H:i:s');
-        $entry = "[{$timestamp}] [ImageProcessor] {$message}\n";
-
-        @\file_put_contents(filename: $logFile, data: $entry, flags: FILE_APPEND);
+        ImageUploadLog::write($message, 'ImageProcessor');
     }
 }
