@@ -202,7 +202,7 @@ class BrandsController extends AdminController
 
         $upload = $_FILES['logo'] ?? null;
         $hasUpload = ImageUpload::wasUploaded($upload);
-        $uploadError = $hasUpload ? $this->logoUpload()->problem($upload) : null;
+        $uploadError = $hasUpload ? $this->logoUpload()->errorFor($upload) : null;
         if ($uploadError) return $uploadError;
 
         $removeLogo = $input->string(key: 'remove_logo') === '1';
