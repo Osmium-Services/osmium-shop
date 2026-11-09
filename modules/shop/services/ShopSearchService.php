@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Shop\Services;
 
+use Osmium\Modules\Shop\Models\ShopProduct;
 use Osmium\Modules\Shop\Models\ShopSearch;
 
 /**
@@ -333,15 +334,11 @@ class ShopSearchService
         ];
     }
 
+    /** The same folder slugs the product page and listings use, so the thumbnail path matches the file on disk */
     private function buildImagePath(string $brandName, string $modelName): string
     {
-        $brandPath = \mb_strtolower(
-            \str_replace(search: [' '], replace: ['-'], subject: \trim($brandName))
-        );
-
-        $modelPath = \mb_strtolower(
-            \str_replace(search: [' ', '.'], replace: ['-', '_'], subject: \trim($modelName))
-        );
+        $brandPath = ShopProduct::sanitizePath($brandName);
+        $modelPath = ShopProduct::sanitizePath($modelName);
 
         return "/shop/{$brandPath}/{$modelPath}/thumb/{$brandPath}-{$modelPath}"; // No extension - optimised format selected after cache retrieval
     }

@@ -143,14 +143,14 @@ final class ShopSearchServiceSqlTest extends TestCase
         $this->assertSame(expected: $expected, actual: $result);
     }
 
-    public function test_buildImagePath_replaces_dots_in_model_name(): void
+    public function test_buildImagePath_matches_the_product_page_slug(): void
     {
         $result = $this->callMethod(
             method: 'buildImagePath',
-            args: ['Renogy', 'RNG-100D.30']
+            args: ['Renogy', 'RNG-100D.30 (TEST)']
         );
 
-        $expected = '/shop/renogy/rng-100d_30/thumb/renogy-rng-100d_30';
+        $expected = '/shop/renogy/rng-100d-30-test/thumb/renogy-rng-100d-30-test';
         $this->assertSame(expected: $expected, actual: $result);
     }
 
