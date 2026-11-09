@@ -205,6 +205,8 @@ class ProductsController extends AdminController
         $isImportPost = $this->isPost();
         $hasCsvFile = isset($_FILES['csv_file']);
         $shouldProcessImport = $isImportPost && $hasCsvFile;
+        $csrfInvalid = $shouldProcessImport && !$this->admin->auth->validateCsrf();
+        if ($csrfInvalid) $this->redirect('shop/products/import/');
         if ($shouldProcessImport) {
             $results = (new ProductPriceCsv($this->admin))->import($_FILES['csv_file']);
         }
@@ -321,6 +323,12 @@ class ProductsController extends AdminController
 
     private function handleAddSubmit()
     {
+        $csrfInvalid = !$this->admin->auth->validateCsrf();
+        if ($csrfInvalid) {
+            $_SESSION['product_error'] = 'Invalid form submission. Please try again.';
+            $this->redirect('shop/products/add/');
+        }
+
         try {
             $newProductId = $this->insertProduct();
             $_SESSION['product_saved'] = true;

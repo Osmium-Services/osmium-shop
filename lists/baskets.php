@@ -17,7 +17,7 @@ $session = [
     'label' => 'Session',
     'type' => 'html',
     'fill' => true,
-    'render' => fn(array $row, array $context): string => '<code title="' . \htmlspecialchars((string) ($row['session_id'] ?? '')) . '">'
+    'render' => fn(array $row, array $context): string => '<code>'
         . \htmlspecialchars((string) $row['session_id_short']) . '...</code>',
 ];
 $items = [

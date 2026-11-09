@@ -76,14 +76,14 @@ class ShopSearchService
 
     private function parseQueryWords(string $query): array
     {
-        $words = \preg_split(pattern: '/\s+/', subject: $query);
+        $words = \preg_split(pattern: '/\s+/', subject: \substr($query, 0, 100));
 
         $filtered = \array_filter(
             array: $words,
             callback: fn($w) => $this->isValidSearchWord($w),
         );
 
-        return \array_values($filtered);
+        return \array_slice(\array_values($filtered), 0, 8); // A long query would otherwise build a huge SQL statement
     }
 
     private function isValidSearchWord(string $word): bool

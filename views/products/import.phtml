@@ -70,7 +70,7 @@ $results = $admin['importResults'] ?? null;
     </div>
     <div class="card-body">
         <form method="POST" action="<?= $adminUrl('shop/products/import/') ?>" enctype="multipart/form-data">
-            <input type="hidden" name="token" value="void">
+            <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
             <div class="mb-3">
                 <label for="csv_file" class="form-label fw-semibold">CSV File</label>
                 <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>

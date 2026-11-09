@@ -58,6 +58,7 @@
             </div>
 
             <form method="POST" action="<?= $adminUrl('shop/products/add/') ?>" id="wizard-form">
+                <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
                 <div class="modal-body pt-2">
 
                     <!-- Step 1: Identity -->

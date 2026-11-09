@@ -45,8 +45,7 @@ $input = $this->osmium->getJsonInput();
 $action = $input['action'] ?? null;
 $sessionId = \session_id();
 
-$subdomain = (string)($this->osmium->config->site->subdomain ?? '');
-$isStaging = $subdomain !== '' && $subdomain !== 'www';
+$isStaging = ($this->osmium->config->site->environment ?? 'live') !== 'live'; // Diagnostics are for non-live sites only
 
 if (!$sessionId) {
     $response = ['success' => false, 'error' => 'Your session has expired. Please reload the page and try again.'];
