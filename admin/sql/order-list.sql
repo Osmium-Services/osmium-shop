@@ -26,4 +26,5 @@ LEFT JOIN {PREFIX}shop_order_items AS oi ON oi.order_id = o.id
 {STATUS_FILTER}
 GROUP BY o.id
 ORDER BY o.created_at DESC, o.id DESC
-LIMIT 200
+LIMIT :limit
+OFFSET :offset

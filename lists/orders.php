@@ -9,7 +9,9 @@ declare(strict_types=1);
  * OrdersController::formatOrder(). The status filter is server-side
  * (reloads with ?status=); the controller validates it against a whitelist.
  *
- * Context: statusFilter, statuses.
+ * Server-paginated ('pagination' => true, fed by $context['pagination']).
+ *
+ * Context: statusFilter, statuses, pagination.
  */
 return [
     'orders' => [
@@ -19,6 +21,7 @@ return [
         'noun' => ['order', 'orders'],
         'endpoint' => 'shop/orders/action/',
         'order' => null,
+        'pagination' => true,
         'emptyText' => 'No orders',
         'filters' => [
             [

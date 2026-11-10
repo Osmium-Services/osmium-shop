@@ -9,14 +9,29 @@ class Order extends AdminModel
     protected ?string $sqlDir = __DIR__ . '/../admin/sql';
 
     /**
+     * One page of orders, newest first.
+     *
      * @param string $filterClause Safe WHERE clause — caller must validate against a whitelist before passing.
      * @return array<int, array<string, mixed>>
      */
-    public function getList(string $filterClause = ''): array
+    public function getList(string $filterClause, int $page, int $perPage): array
     {
         $sql = $this->loadSqlFile('order-list.sql', ['{STATUS_FILTER}' => $filterClause]);
         $this->database->query($sql);
+        $this->database->bind(param: ':limit', value: $perPage);
+        $this->database->bind(param: ':offset', value: ($page - 1) * $perPage);
         return $this->database->resultset();
+    }
+
+    /**
+     * @param string $filterClause Safe WHERE clause — caller must validate against a whitelist before passing.
+     */
+    public function getCount(string $filterClause = ''): int
+    {
+        $sql = $this->loadSqlFile('order-count.sql', ['{STATUS_FILTER}' => $filterClause]);
+        $this->database->query($sql);
+        $result = $this->database->single();
+        return (int)($result['total'] ?? 0);
     }
 
     public function getStats(): ?array

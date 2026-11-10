@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
+use Osmium\Modules\Admin\Core\ListView;
 use Osmium\Modules\Checkout\Services\ShopOrderMailer;
 use Osmium\Modules\Checkout\Services\ShopOrderPdfService;
 use Osmium\Core\Library\PaymentProviders;
@@ -15,6 +16,7 @@ use Osmium\Core\Library\ServiceLoader;
 use Osmium\Core\Models\ServiceModel;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
+require_once \Osmium\Core\Library\AdminPaths::path('core/ListView.php');
 
 /**
  * Orders controller - order fulfilment.
@@ -49,12 +51,17 @@ class OrdersController extends AdminController
     public function index(): void
     {
         $status = (string)$this->osmium->getStashedParam(key: 'status', default: '');
+        $page = \max(1, (int)$this->osmium->getStashedParam(key: 'page', default: 1));
+        $perPage = ListView::pageSize($this->osmium->getStashedParam(key: 'perPage', default: null));
         $this->osmium->clearStashedQuerystring();
 
         $statusIsFilterable = \in_array(needle: $status, haystack: self::FILTERABLE_STATUSES, strict: true);
         $filterClause = $statusIsFilterable ? "WHERE o.status = '{$status}'" : '';
 
-        $orders = $this->admin->model->order->getList($filterClause);
+        $totalCount = $this->admin->model->order->getCount($filterClause);
+        $totalPages = \max(1, (int)\ceil($totalCount / $perPage));
+        $page = \min($page, $totalPages);
+        $orders = $this->admin->model->order->getList($filterClause, $page, $perPage);
         $stats = $this->admin->model->order->getStats();
 
         $this->data['admin']['lists'] = $this->loadListDefinitions('orders', __DIR__ . '/../lists');
@@ -63,6 +70,13 @@ class OrdersController extends AdminController
         $this->data['admin']['orderStats'] = $this->formatStats($stats ?? []);
         $this->data['admin']['statusFilter'] = $statusIsFilterable ? $status : '';
         $this->data['admin']['statuses'] = self::FILTERABLE_STATUSES;
+        $this->data['admin']['pagination'] = [
+            'page' => $page,
+            'pages' => $totalPages,
+            'perPage' => $perPage,
+            'total' => $totalCount,
+            'query' => $statusIsFilterable ? '&status=' . \urlencode($status) : '',
+        ];
 
         $this->setView('orders/index.phtml');
     }
