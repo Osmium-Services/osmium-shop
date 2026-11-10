@@ -24,6 +24,7 @@
     </div>
 <?php endif; ?>
 
+<div class="row justify-content-center"><div class="col-lg-6">
 <form method="POST" action="<?= $adminUrl('shop/statuses/edit/') ?>" id="status-form">
     <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
     <?php if (!$admin['isNew']): ?>
@@ -103,6 +104,7 @@
         </div>
     </div>
 </form>
+</div></div>
 
 <script src="/assets/services/osmium-shop/statuses-edit.js<?= $adminAssetVersion('/assets/services/osmium-shop/statuses-edit.js') ?>"></script>
 

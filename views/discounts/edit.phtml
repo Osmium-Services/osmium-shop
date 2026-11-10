@@ -41,14 +41,13 @@ $discount = $admin['discount'];
 $form = $admin['discountForm'];
 ?>
 
+<div class="row justify-content-center"><div class="col-lg-6">
 <form method="POST" action="<?= $adminUrl('shop/discounts/edit/') ?>" id="discount-form">
     <input type="hidden" name="token" value="<?= $template['formToken'] ?>">
     <?php if (!$admin['isNew']): ?>
         <input type="hidden" name="id" value="<?= $discount['id'] ?>">
     <?php endif; ?>
 
-    <div class="row">
-    <div class="col-lg-6">
     <div class="card mb-4">
         <div class="card-header">
             <h5 class="mb-0">Discount</h5>
@@ -190,8 +189,6 @@ $form = $admin['discountForm'];
         </div>
     </div>
 
-    </div>
-    <div class="col-lg-6">
     <div class="card mb-4">
         <div class="card-header">
             <h5 class="mb-0">Schedule</h5>
@@ -213,8 +210,6 @@ $form = $admin['discountForm'];
             </div>
         </div>
     </div>
-    </div>
-    </div>
 
     <div class="d-flex justify-content-end gap-2 mb-4">
         <a href="<?= $adminUrl('shop/discounts/') ?>" class="btn btn-outline-secondary">Cancel</a>
@@ -223,6 +218,7 @@ $form = $admin['discountForm'];
         </button>
     </div>
 </form>
+</div></div>
 
 <?php if (!$admin['isNew']): ?>
     <script nonce="<?= $cspNonce ?>">
