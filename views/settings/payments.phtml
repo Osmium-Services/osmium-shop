@@ -40,7 +40,7 @@ $providerOptions = $admin['providerOptions'];
 <form method="POST" action="<?= $adminUrl('settings/payments/') ?>" id="settings-form">
     <input type="hidden" name="token" value="<?= $template['formToken'] ?? '' ?>">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bx bx-credit-card me-2"></i>Payment Provider</h5>
@@ -88,7 +88,7 @@ $providerOptions = $admin['providerOptions'];
 
     <div class="row justify-content-center">
         <?php foreach ($externalProviders as $provider): ?>
-            <div class="col-lg-6" data-provider-card="<?= \htmlspecialchars($provider['id']) ?>">
+            <div class="col-lg-4" data-provider-card="<?= \htmlspecialchars($provider['id']) ?>">
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0"><i class="bx bx-credit-card-front me-2"></i><?= \htmlspecialchars($provider['label']) ?></h5>
