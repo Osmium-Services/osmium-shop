@@ -121,6 +121,7 @@ class BasketActionTest extends ShopDatabaseTestCase
         $this->assertEqualsWithDelta(200.00, (float) $response['body']['subtotal_exc_tax'], 0.001);
         $this->assertSame(2, (int) $response['body']['item_count']);
         $this->assertArrayHasKey('thumbImage', $response['body']['lines'][0]);
+        $this->assertArrayHasKey('productUrl', $response['body']['lines'][0]);
     }
 
     public function test_a_quantity_below_one_is_treated_as_one(): void

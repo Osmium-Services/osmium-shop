@@ -61,6 +61,8 @@ $priceAndDecorate = function (array $lines) use ($totalsService, $discountsSuppo
         $line['thumbImage'] = $loaded
             ? $this->osmium->imagePath(ShopProduct::imagePathFor($loaded['brand_path'], $loaded['model_path'], 'medium'))
             : null;
+        $productStub = (string)($loaded['url'] ?? '');
+        $line['productUrl'] = $productStub !== '' ? '/' . $productStub . '/' : null; // Lets a theme link a basket line back to its product page
         $line['thumbImageRetina'] = $loaded
             ? $this->osmium->imagePath(ShopProduct::imagePathFor($loaded['brand_path'], $loaded['model_path'], 'medium', '', '@2x'))
             : null;
