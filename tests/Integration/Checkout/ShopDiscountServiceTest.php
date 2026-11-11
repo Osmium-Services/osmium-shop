@@ -101,6 +101,46 @@ class ShopDiscountServiceTest extends ShopDatabaseTestCase
         $this->assertSame($discountId, (int)$found[$inCategory]['id']);
     }
 
+    public function test_a_parent_category_discount_covers_products_in_its_subcategories(): void
+    {
+        $inChild = $this->createTestProduct();
+        $inGrandchild = $this->createTestProduct();
+        $outside = $this->createTestProduct();
+        $prefix = $this->db->tablePrefix();
+        $discountId = $this->createDiscount(['type' => 'product', 'value_type' => 'percent', 'value' => 15.00]);
+
+        $this->db->insert(tableName: $prefix . 'productcategories', data: ['label' => 'Parent ' . \substr(\uniqid(), -8)]);
+        $parent = (int)$this->db->lastInsertId();
+        $this->db->insert(tableName: $prefix . 'productcategories', data: ['label' => 'Child ' . \substr(\uniqid(), -8), 'parent_id' => $parent]);
+        $child = (int)$this->db->lastInsertId();
+        $this->db->insert(tableName: $prefix . 'productcategories', data: ['label' => 'Grandchild ' . \substr(\uniqid(), -8), 'parent_id' => $child]);
+        $grandchild = (int)$this->db->lastInsertId();
+        $this->db->insert(tableName: $prefix . 'products_productcategories', data: ['product_id' => $inChild, 'category_id' => $child]);
+        $this->db->insert(tableName: $prefix . 'products_productcategories', data: ['product_id' => $inGrandchild, 'category_id' => $grandchild]);
+        $this->scopeDiscount('discount_categories', 'category_id', $discountId, $parent);
+
+        $found = $this->productDiscountsFor([$inChild, $inGrandchild, $outside]);
+
+        $this->assertEqualsCanonicalizing([$inChild, $inGrandchild], \array_keys($found)); // The product outside the branch is untouched
+        $this->assertSame($discountId, (int)$found[$inChild]['id']);
+    }
+
+    public function test_a_discount_on_a_subcategory_does_not_cover_its_parent(): void
+    {
+        $inParent = $this->createTestProduct();
+        $prefix = $this->db->tablePrefix();
+        $discountId = $this->createDiscount(['type' => 'product', 'value_type' => 'percent', 'value' => 15.00]);
+
+        $this->db->insert(tableName: $prefix . 'productcategories', data: ['label' => 'Parent ' . \substr(\uniqid(), -8)]);
+        $parent = (int)$this->db->lastInsertId();
+        $this->db->insert(tableName: $prefix . 'productcategories', data: ['label' => 'Child ' . \substr(\uniqid(), -8), 'parent_id' => $parent]);
+        $child = (int)$this->db->lastInsertId();
+        $this->db->insert(tableName: $prefix . 'products_productcategories', data: ['product_id' => $inParent, 'category_id' => $parent]);
+        $this->scopeDiscount('discount_categories', 'category_id', $discountId, $child);
+
+        $this->assertSame([], $this->productDiscountsFor([$inParent]));
+    }
+
     public function test_a_product_added_to_the_category_later_is_discounted_without_editing_the_discount(): void
     {
         $product = $this->createTestProduct();
