@@ -57,8 +57,7 @@ class ShopProductCategory extends ShopModel
 
     /**
      * Top-level categories with their page URL, for the shop landing page and the home page cards. A category
-     * with no image of its own gets `fallback_image`: the path of the first orderable product's image in it or
-     * any category beneath it
+     * with no image of its own gets `fallback_image`: the path of its first orderable product's image
      * ('' when it has neither), to be resolved with imagePath().
      */
     public function topLevel(): array
@@ -73,7 +72,7 @@ class ShopProductCategory extends ShopModel
             $page = $this->pagesById()[$row['page_id']] ?? null;
             $row['link'] = ($page && $page['deleted_at'] === null) ? $page['url'] : null;
 
-            $fallback = $this->firstProductBeneath((int)$row['id'], $firstProducts);
+            $fallback = $firstProducts[(int)$row['id']] ?? null;
             $needsFallback = empty($row['image']) && $fallback !== null;
             $row['fallback_image'] = $needsFallback
                 ? ShopProduct::imagePathFor(ShopProduct::sanitizePath($fallback['brand_name']), ShopProduct::sanitizePath($fallback['model_name']))
@@ -109,25 +108,6 @@ class ShopProductCategory extends ShopModel
         }
 
         return $firstByCategory;
-    }
-
-    /**
-     * The first orderable product in a category, else in the first of its subcategories that has one: a parent
-     * category usually has no products assigned directly.
-     *
-     * @param array<int, array{brand_name: string, model_name: string}> $firstProducts from firstProductByCategory()
-     * @return array{brand_name: string, model_name: string}|null
-     */
-    private function firstProductBeneath(int $categoryID, array $firstProducts): ?array
-    {
-        if (isset($firstProducts[$categoryID])) return $firstProducts[$categoryID];
-
-        foreach ($this->subcategoriesOf($categoryID) as $child) {
-            $product = $this->firstProductBeneath((int)$child['id'], $firstProducts);
-            if ($product !== null) return $product;
-        }
-
-        return null;
     }
 
     /**
