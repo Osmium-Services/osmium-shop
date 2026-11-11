@@ -30,36 +30,43 @@ $(document).ready(function() {
         });
     }
 
-    if (!productSelect || !chipsContainer) return;
+    // Selected options in a long multi-select are easy to miss, so each list gets removable chips above it
+    function mirrorAsChips(select, container, emptyText) {
+        if (!select || !container) return;
 
-    function renderChips() {
-        const selectedOptions = [...productSelect.selectedOptions];
+        function renderChips() {
+            const selectedOptions = [...select.selectedOptions];
 
-        chipsContainer.innerHTML = selectedOptions.length
-            ? ''
-            : '<span class="text-muted">No products selected yet</span>';
+            container.innerHTML = selectedOptions.length
+                ? ''
+                : `<span class="text-muted">${emptyText}</span>`;
 
-        selectedOptions.forEach(option => {
-            const chip = document.createElement('span');
-            chip.className = 'badge bg-label-primary d-inline-flex align-items-center gap-1';
-            chip.style.fontSize = '0.9rem';
-            chip.textContent = option.text;
+            selectedOptions.forEach(option => {
+                const chip = document.createElement('span');
+                chip.className = 'badge bg-label-primary d-inline-flex align-items-center gap-1';
+                chip.style.fontSize = '0.9rem';
+                chip.textContent = option.text.trim();
 
-            const removeButton = document.createElement('button');
-            removeButton.type = 'button';
-            removeButton.className = 'btn-close btn-close-sm';
-            removeButton.style.fontSize = '0.6rem';
-            removeButton.setAttribute('aria-label', `Remove ${option.text}`);
-            removeButton.addEventListener('click', function() {
-                option.selected = false;
-                renderChips();
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn-close btn-close-sm';
+                removeButton.style.fontSize = '0.6rem';
+                removeButton.setAttribute('aria-label', `Remove ${option.text.trim()}`);
+                removeButton.addEventListener('click', function() {
+                    option.selected = false;
+                    renderChips();
+                });
+
+                chip.appendChild(removeButton);
+                container.appendChild(chip);
             });
+        }
 
-            chip.appendChild(removeButton);
-            chipsContainer.appendChild(chip);
-        });
+        select.addEventListener('change', renderChips);
+        renderChips();
     }
 
-    productSelect.addEventListener('change', renderChips);
-    renderChips();
+    mirrorAsChips(productSelect, chipsContainer, 'No products selected yet');
+    mirrorAsChips(document.getElementById('category_ids'), document.getElementById('selected-categories-chips'), 'No categories selected');
+    mirrorAsChips(document.getElementById('brand_ids'), document.getElementById('selected-brands-chips'), 'No brands selected');
 });

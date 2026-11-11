@@ -142,6 +142,7 @@ $form = $admin['discountForm'];
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="category_ids" class="form-label">Categories</label>
+                    <div id="selected-categories-chips" class="d-flex flex-wrap gap-2 mb-2"></div>
                     <select class="form-select" id="category_ids" name="category_ids[]" multiple size="6">
                         <?php foreach ($admin['categories'] as $category): ?>
                             <option value="<?= $category['id'] ?>" <?= \in_array((int)$category['id'], $form['selectedCategoryIds'], true) ? 'selected' : '' ?>>
@@ -153,6 +154,7 @@ $form = $admin['discountForm'];
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="brand_ids" class="form-label">Brands</label>
+                    <div id="selected-brands-chips" class="d-flex flex-wrap gap-2 mb-2"></div>
                     <select class="form-select" id="brand_ids" name="brand_ids[]" multiple size="6">
                         <?php foreach ($admin['brands'] as $brand): ?>
                             <option value="<?= $brand['id'] ?>" <?= \in_array((int)$brand['id'], $form['selectedBrandIds'], true) ? 'selected' : '' ?>>
