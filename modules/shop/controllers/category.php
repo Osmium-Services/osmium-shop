@@ -45,8 +45,16 @@ $this->osmium->clearStashedQuerystring();
 // The untouched "Newest" default keeps the category's own admin-set order (PC.sort)
 $categorySortColumn = $controls['sort'] === ShopListControls::DEFAULT_SORT ? 'PC.sort' : $controls['sortColumn'];
 
-$this->data['category']['range'] =
-    $this->shop->model->product->rangeByCategory(
+// Opt-in: with "categoryListsBranch": true in the shop config a category lists the products of every category
+// beneath it too, not only those assigned to it directly. Off (the default) for sites that don't set it.
+$listsBranch = (bool) ($shopConfig->categoryListsBranch ?? false);
+$this->data['category']['range'] = $listsBranch
+    ? $this->shop->model->product->rangeByBranch(
+        categoryIDs: $productCategory->idsBeneath((int) $this->data['category']['ID']),
+        sortColumn: $categorySortColumn,
+        stock: $controls['stock'],
+    )
+    : $this->shop->model->product->rangeByCategory(
         categoryIDs: (string) $this->data['category']['ID'],
         sortColumn: $categorySortColumn,
         stock: $controls['stock'],

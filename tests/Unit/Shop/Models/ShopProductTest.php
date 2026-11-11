@@ -610,6 +610,31 @@ class ShopProductTest extends TestCase
         );
     }
 
+    /**
+     * @test
+     * rangeByBranch() binds the category ids as one comma list, as integers only
+     */
+    public function test_range_by_branch_binds_integer_id_list(): void
+    {
+        $mockDb = $this->createMock(OsmiumPDO::class);
+        DatabaseMockHelper::mockTablePrefix($mockDb);
+
+        $mockSqlLoader = $this->createMock(SqlLoader::class);
+        $mockSqlLoader->method('load')->willReturn('SELECT 1 WHERE FIND_IN_SET(PC.category_id, :categoryIDs) {STOCK_FILTER}');
+        $mockDb->sqlLoader = $mockSqlLoader;
+
+        $mockDb->expects($this->once())
+            ->method('bind')
+            ->with(':categoryIDs', '4,5,6');
+        $mockDb->method('single')->willReturn(['products' => '1,2']);
+
+        $product = $this->createProductWithPages(mockDb: $mockDb, mockPages: []);
+
+        $result = $product->rangeByBranch(categoryIDs: [4, '5', 6]);
+
+        $this->assertSame(['products' => '1,2'], $result);
+    }
+
     // =========================================================================
     // imagePath() - Pattern 9: String Construction
     // =========================================================================

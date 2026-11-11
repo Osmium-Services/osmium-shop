@@ -343,4 +343,40 @@ class ShopProductCategoryTest extends TestCase
         $this->assertTrue($category->hasProductsBeneath(6)); // Its child 5 has a product
         $this->assertFalse($category->hasProductsBeneath(7)); // No product, no children
     }
+
+    /**
+     * @test
+     * idsBeneath() returns the category followed by every descendant, depth first
+     */
+    public function test_ids_beneath_returns_category_and_all_descendants(): void
+    {
+        $mockDb = $this->mockDbWithSql();
+        $mockDb->method('resultset')->willReturnOnConsecutiveCalls(
+            [
+                ['id' => 2, 'label' => 'A', 'title' => '', 'image' => '', 'page_id' => 1],
+                ['id' => 3, 'label' => 'B', 'title' => '', 'image' => '', 'page_id' => 2],
+            ], // Children of 1
+            [['id' => 4, 'label' => 'C', 'title' => '', 'image' => '', 'page_id' => 3]], // Children of 2
+            [], // Children of 4
+            [], // Children of 3
+        );
+
+        $category = $this->createCategoryWithPages(mockDb: $mockDb, mockPages: []);
+
+        $this->assertSame([1, 2, 4, 3], $category->idsBeneath(1));
+    }
+
+    /**
+     * @test
+     * A category with nothing beneath it is just itself
+     */
+    public function test_ids_beneath_of_a_leaf_is_itself(): void
+    {
+        $mockDb = $this->mockDbWithSql();
+        $mockDb->method('resultset')->willReturn([]);
+
+        $category = $this->createCategoryWithPages(mockDb: $mockDb, mockPages: []);
+
+        $this->assertSame([9], $category->idsBeneath(9));
+    }
 }

@@ -253,6 +253,27 @@ class ShopProduct extends ShopModel
         return $this->database->single();
     }
 
+    /**
+     * Like rangeByCategory() but across several categories, e.g. a category and everything beneath it
+     * (see ShopProductCategory::idsBeneath()). A product assigned to more than one of them is listed once.
+     *
+     * @param int[] $categoryIDs
+     */
+    public function rangeByBranch(
+        array $categoryIDs,
+        string $sortColumn = 'product_model',
+        array $stock = []
+    ): array|false {
+        $query = $this->loadSqlFile('product-range-by-branch.sql', [
+            '{SORT_COLUMN}' => $sortColumn,
+            '{STOCK_FILTER}' => self::stockFilterClause($stock),
+        ]);
+        $this->database->query($query);
+        $this->database->bind(':categoryIDs', \implode(',', \array_map('intval', $categoryIDs)));
+
+        return $this->database->single();
+    }
+
     public function newArrivals(int $limit): array
     {
         $query = $this->loadSqlFile('product-new-arrivals.sql');

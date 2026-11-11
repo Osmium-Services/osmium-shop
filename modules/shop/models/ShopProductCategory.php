@@ -160,6 +160,22 @@ class ShopProductCategory extends ShopModel
     }
 
     /**
+     * A category's id followed by the ids of every category beneath it, for listing the products of a whole branch.
+     *
+     * @return int[]
+     */
+    public function idsBeneath(int $categoryID): array
+    {
+        $ids = [$categoryID];
+
+        foreach ($this->subcategoriesOf($categoryID) as $child) {
+            \array_push($ids, ...$this->idsBeneath((int)$child['id']));
+        }
+
+        return $ids;
+    }
+
+    /**
      * Whether a category or any category beneath it has an orderable product: the rule the tree uses, reused by
      * the home page cards so an empty category is not linked.
      */
