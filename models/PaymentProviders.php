@@ -40,6 +40,19 @@ class PaymentProviders
      */
     public const PLANNED = [];
 
+    /**
+     * Payment types a provider may declare it accepts, as id => label. Themes map the ids to
+     * their own badges; anything outside this list is dropped from a descriptor.
+     */
+    public const METHODS = [
+        'visa' => 'Visa',
+        'mastercard' => 'Mastercard',
+        'amex' => 'American Express',
+        'paypal' => 'PayPal',
+        'apple-pay' => 'Apple Pay',
+        'google-pay' => 'Google Pay',
+    ];
+
     /** @var array<string, array>|null per-request memo of external() */
     private static ?array $externalMemo = null;
 
@@ -49,7 +62,7 @@ class PaymentProviders
      * Each `payment.providers` handler returns one descriptor:
      *   id (string), label (string), ready (bool: switched on and usable),
      *   frontend (array: whatever the checkout page needs, e.g. a publishable
-     *   key), settingsRoute (?string: admin path of its settings page), and optionally
+     *   key), methods (string[] of METHODS ids the site accepts through it; omit when unknown), settingsRoute (?string: admin path of its settings page), and optionally
      *   logo (site-relative /assets/ path) and paymentUrl (['test' => ?string, 'live' => ?string]:
      *   https dashboard link templates using {order_ref} / {capture_ref}).
      * Best-effort: a broken handler is skipped and its provider is simply
@@ -119,10 +132,38 @@ class PaymentProviders
                 'settingsRoute' => $descriptor['settingsRoute'] ?? null,
                 'logo' => self::cleanLogo($descriptor['logo'] ?? null),
                 'paymentUrl' => self::cleanPaymentUrl($descriptor['paymentUrl'] ?? null),
+                'methods' => self::cleanMethods($descriptor['methods'] ?? null),
             ];
         }
 
         return $providers;
+    }
+
+    /**
+     * The payment types a provider declares, limited to METHODS and de-duplicated, or null when it
+     * declares none (so a theme can tell "unknown" from "accepts nothing").
+     *
+     * @return string[]|null
+     */
+    private static function cleanMethods(mixed $methods): ?array
+    {
+        if (!\is_array($methods)) return null;
+
+        $known = \array_filter($methods, static fn($id) => \is_string($id) && \array_key_exists($id, self::METHODS));
+
+        return \array_values(\array_unique($known));
+    }
+
+    /**
+     * The payment types the selected provider accepts, or null when no provider is selected or it
+     * declares none.
+     *
+     * @param array<string, array> $external From external()
+     * @return string[]|null
+     */
+    public static function methods(string $provider, array $external): ?array
+    {
+        return $external[$provider]['methods'] ?? null;
     }
 
     /**

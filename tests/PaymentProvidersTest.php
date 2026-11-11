@@ -92,7 +92,7 @@ class PaymentProvidersTest extends TestCase
 
         $providers = PaymentProviders::fromDescriptors([$descriptor]);
 
-        $this->assertSame(expected: ['stripe' => $descriptor + ['logo' => null, 'paymentUrl' => null]], actual: $providers);
+        $this->assertSame(expected: ['stripe' => $descriptor + ['logo' => null, 'paymentUrl' => null, 'methods' => null]], actual: $providers);
     }
 
     public function test_a_sparse_descriptor_gets_safe_defaults(): void
@@ -100,9 +100,24 @@ class PaymentProvidersTest extends TestCase
         $providers = PaymentProviders::fromDescriptors([['id' => 'square']]);
 
         $this->assertSame(
-            expected: ['id' => 'square', 'label' => 'Square', 'ready' => false, 'frontend' => [], 'settingsRoute' => null, 'logo' => null, 'paymentUrl' => null],
+            expected: ['id' => 'square', 'label' => 'Square', 'ready' => false, 'frontend' => [], 'settingsRoute' => null, 'logo' => null, 'paymentUrl' => null, 'methods' => null],
             actual: $providers['square'],
         ); // Not ready until the service says so
+    }
+
+    public function test_declared_methods_are_limited_to_the_known_set(): void
+    {
+        $providers = PaymentProviders::fromDescriptors([['id' => 'stripe', 'methods' => ['visa', 'visa', 'bitcoin', 'apple-pay', 7]]]);
+
+        $this->assertSame(expected: ['visa', 'apple-pay'], actual: PaymentProviders::methods('stripe', $providers));
+    }
+
+    public function test_a_provider_that_declares_no_methods_gives_null(): void
+    {
+        $providers = PaymentProviders::fromDescriptors([['id' => 'stripe']]);
+
+        $this->assertNull(PaymentProviders::methods('stripe', $providers)); // Unknown, not "accepts nothing"
+        $this->assertNull(PaymentProviders::methods('none', $providers));
     }
 
     public function test_a_logo_under_assets_is_kept(): void
