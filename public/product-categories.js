@@ -258,7 +258,7 @@ const CategoryManager = {
                                 <i class="bx bx-plus me-1"></i> Add Subcategory
                             </a>
                             ${hasProducts ? `<a class="dropdown-item" href="#" data-call="CategoryManager.showProductOrderModal" ${dataArgs(item.id, item.label)}>
-                                <i class="bx bx-sort-alt-2 me-1"></i> Order Products
+                                <i class="bx bx-sort-alt-2 me-1"></i> Sort Products
                             </a>` : ''}
                             ${categoryUrls[item.id] ? `<a class="dropdown-item" href="${categoryUrls[item.id]}" target="_blank">
                                 <i class="bx bx-link-external me-1"></i> View on Website
