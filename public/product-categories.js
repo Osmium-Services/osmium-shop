@@ -66,29 +66,84 @@ const CategoryManager = {
         return `/assets/images/social/${name}.jpg`;
     },
 
-    updateImagePreview(inputId, previewId, buildPath = true) {
-        const value = document.getElementById(inputId).value.trim();
-        const preview = document.getElementById(previewId);
-        const img = preview.querySelector('img');
+    // Drop zone for one image. The hidden input holds the stored name; uploading puts a new name there at once,
+    // removing clears it, and Save writes it to the category (and deletes the replaced files).
+    setupImageZone(zoneId, inputId, kind) {
+        const zone = document.getElementById(zoneId);
+        const field = document.getElementById(inputId);
+        const fileInput = zone.parentElement.querySelector('input[type=file]');
+        const preview = zone.querySelector('.logo-preview');
+        const empty = zone.querySelector('.logo-empty');
+        const removeBtn = zone.querySelector('.btn-remove-logo');
+        const buildPath = kind === 'image' ? (n) => this.buildImagePath(n) : (n) => this.buildSocialImagePath(n);
 
-        if (value) {
-            const src = buildPath ? this.buildImagePath(value) : this.buildSocialImagePath(value);
-            img.src = src;
-            preview.style.display = 'block';
-            img.onerror = () => preview.style.display = 'none';
-        } else {
-            preview.style.display = 'none';
-        }
+        const render = () => {
+            const name = field.value.trim();
+            const src = name ? buildPath(name) : '';
+            preview.classList.toggle('d-none', !src);
+            empty.classList.toggle('d-none', !!src);
+            removeBtn.classList.toggle('d-none', !src);
+            if (src) {
+                preview.src = src + (src.includes('?') ? '&' : '?') + 'r=' + Date.now();
+            }
+            preview.onerror = () => {
+                preview.classList.add('d-none');
+                empty.classList.remove('d-none');
+                removeBtn.classList.toggle('d-none', !name);
+            };
+        };
+
+        const upload = async (file) => {
+            if (!file || !/^image\/(jpeg|png|gif|webp)$/.test(file.type)) {
+                adminAlert('Choose a JPG, PNG, GIF or WebP image');
+                return;
+            }
+            const body = new FormData();
+            body.append('action', 'upload_image');
+            body.append('kind', kind);
+            body.append('image', file);
+            body.append('csrf_token', window.csrfToken);
+            zone.classList.add('drag-active');
+            try {
+                const response = await fetch(window.adminBasePath + 'shop/categories/action/', { method: 'POST', body });
+                const data = await response.json();
+                if (!data.success) {
+                    adminAlert('Error: ' + data.error);
+                    return;
+                }
+                field.value = data.name;
+                render();
+            } catch (error) {
+                adminAlert('Error uploading image');
+                console.error(error);
+            } finally {
+                zone.classList.remove('drag-active');
+                fileInput.value = '';
+            }
+        };
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((name) => {
+            zone.addEventListener(name, (e) => { e.preventDefault(); e.stopPropagation(); });
+        });
+        ['dragenter', 'dragover'].forEach((name) => zone.addEventListener(name, () => zone.classList.add('drag-active')));
+        ['dragleave', 'drop'].forEach((name) => zone.addEventListener(name, () => zone.classList.remove('drag-active')));
+        zone.addEventListener('drop', (e) => upload(e.dataTransfer.files[0]));
+        zone.addEventListener('click', (e) => {
+            if (!e.target.closest('.btn-remove-logo')) fileInput.click();
+        });
+        fileInput.addEventListener('change', () => upload(fileInput.files[0]));
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            field.value = '';
+            render();
+        });
+
+        return render;
     },
 
     setupImagePreviews() {
-        document.getElementById('categoryImage').addEventListener('input', () => {
-            this.updateImagePreview('categoryImage', 'imagePreview', true);
-        });
-
-        document.getElementById('categorySocialImage').addEventListener('input', () => {
-            this.updateImagePreview('categorySocialImage', 'socialImagePreview', false);
-        });
+        this.renderImage = this.setupImageZone('categoryImageZone', 'categoryImage', 'image');
+        this.renderSocialImage = this.setupImageZone('categorySocialImageZone', 'categorySocialImage', 'social_image');
     },
 
     async loadCategories() {
@@ -327,8 +382,8 @@ const CategoryManager = {
         $('#categoryDescription').summernote('code', '');
         document.getElementById('categoryImage').value = '';
         document.getElementById('categorySocialImage').value = '';
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('socialImagePreview').style.display = 'none';
+        this.renderImage();
+        this.renderSocialImage();
 
         this.populateParentDropdown(null, parentId);
         this.modal.show();
@@ -349,8 +404,8 @@ const CategoryManager = {
         document.getElementById('categoryImage').value = category.image || '';
         document.getElementById('categorySocialImage').value = category.social_image || '';
 
-        this.updateImagePreview('categoryImage', 'imagePreview', true);
-        this.updateImagePreview('categorySocialImage', 'socialImagePreview', false);
+        this.renderImage();
+        this.renderSocialImage();
 
         this.populateParentDropdown(id, category.parent_id);
         this.modal.show();

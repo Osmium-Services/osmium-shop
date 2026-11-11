@@ -133,24 +133,36 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="categoryImage">Image URL</label>
-                        <input type="text" class="form-control" id="categoryImage" placeholder="e.g. rigid-panels">
+                        <label class="form-label">Image</label>
+                        <div class="logo-drop-zone" id="categoryImageZone">
+                            <button type="button" class="btn btn-sm btn-icon btn-danger btn-remove-logo d-none" title="Remove image">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                            <div class="logo-empty">
+                                <i class="bx bx-cloud-upload"></i>
+                                <p class="mb-1 mt-2 fw-medium">Drag &amp; drop or click to upload</p>
+                                <small class="text-muted">JPG, PNG, GIF or WebP, up to 10MB. Cropped to 450 x 338</small>
+                            </div>
+                            <img src="" alt="" class="logo-preview d-none">
+                        </div>
+                        <input type="file" class="d-none" accept="image/jpeg,image/png,image/gif,image/webp">
+                        <input type="hidden" id="categoryImage">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="categorySocialImage">Social Image URL</label>
-                        <input type="text" class="form-control" id="categorySocialImage" placeholder="e.g. panels-social">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div id="imagePreview" style="display: none;">
-                            <img src="" alt="Preview" class="img-thumbnail" style="width: 100%;">
+                        <label class="form-label">Social Image</label>
+                        <div class="logo-drop-zone" id="categorySocialImageZone">
+                            <button type="button" class="btn btn-sm btn-icon btn-danger btn-remove-logo d-none" title="Remove image">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                            <div class="logo-empty">
+                                <i class="bx bx-cloud-upload"></i>
+                                <p class="mb-1 mt-2 fw-medium">Drag &amp; drop or click to upload</p>
+                                <small class="text-muted">JPG, PNG, GIF or WebP, up to 10MB. Cropped to 1200 x 630</small>
+                            </div>
+                            <img src="" alt="" class="logo-preview d-none">
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div id="socialImagePreview" style="display: none;">
-                            <img src="" alt="Preview" class="img-thumbnail" style="width: 100%;">
-                        </div>
+                        <input type="file" class="d-none" accept="image/jpeg,image/png,image/gif,image/webp">
+                        <input type="hidden" id="categorySocialImage">
                     </div>
                 </div>
             </div>
@@ -191,6 +203,7 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="/assets/services/osmium-shop/brand-logo.css<?= $adminAssetVersion('/assets/services/osmium-shop/brand-logo.css') ?>">
 <link rel="stylesheet" href="/assets/services/osmium-shop/product-categories.css<?= $adminAssetVersion('/assets/services/osmium-shop/product-categories.css') ?>">
 
 <script nonce="<?= $cspNonce ?>">

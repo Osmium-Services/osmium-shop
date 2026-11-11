@@ -17,6 +17,7 @@ class AdminShopCategories
         private ProductCategory $category,
         private AdminPages $pages,
         private Strings $strings,
+        private ?CategoryImages $images = null,
     ) {}
 
     /**
@@ -246,6 +247,8 @@ class AdminShopCategories
         $existing = $this->category->getById($id);
         if (!$existing) throw new \Exception('Category not found');
 
+        $this->removeReplacedImages(existing: $existing, image: $image, socialImage: $socialImage);
+
         if ($parentId) {
             $parentId = (int)$parentId;
             $selfParent = $parentId === $id;
@@ -293,6 +296,18 @@ class AdminShopCategories
             'image' => $image,
             'social_image' => $socialImage,
         ]);
+    }
+
+    /** Delete the files of an image that was removed or swapped for another; the new names are saved just after. */
+    private function removeReplacedImages(array $existing, string $image, string $socialImage): void
+    {
+        if ($this->images === null) return;
+
+        $imageChanged = ($existing['image'] ?? '') !== $image;
+        if ($imageChanged) $this->images->delete('image', (string)($existing['image'] ?? ''));
+
+        $socialChanged = ($existing['social_image'] ?? '') !== $socialImage;
+        if ($socialChanged) $this->images->delete('social_image', (string)($existing['social_image'] ?? ''));
     }
 
     /**

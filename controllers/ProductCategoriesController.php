@@ -3,7 +3,9 @@
 namespace Osmium\Modules\Admin\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
+use Osmium\Core\Library\ImageTools;
 use Osmium\Modules\Admin\Services\AdminShopCategories;
+use Osmium\Modules\Admin\Services\CategoryImages;
 use Osmium\Modules\Admin\Services\ShopPaths;
 
 use const Osmium\Config\PAGES;
@@ -28,7 +30,13 @@ class ProductCategoriesController extends AdminController
             $this->admin->model->productCategory,
             $this->admin->pages,
             $this->osmium->strings,
+            $this->categoryImages(),
         );
+    }
+
+    private function categoryImages(): CategoryImages
+    {
+        return new CategoryImages(new ImageTools(), $_SERVER['DOCUMENT_ROOT'] . '/assets/images');
     }
 
     public function index(): void
@@ -88,6 +96,7 @@ class ProductCategoriesController extends AdminController
                     userName: $currentUserName,
                     input: $input,
                 ),
+                'upload_image' => $this->actionUploadImage(),
                 'delete' => $this->actionDelete(
                     userId: $currentUserId,
                     userName: $currentUserName,
@@ -387,6 +396,18 @@ class ProductCategoriesController extends AdminController
             recordId: $catId,
         );
         $this->admin->jsonSuccess(['success' => true]);
+    }
+
+    private function actionUploadImage(): void
+    {
+        $kind = (string)($_POST['kind'] ?? '');
+        $file = $_FILES['image'] ?? [];
+        try {
+            $name = $this->categoryImages()->store($kind, $file);
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            throw new \Exception($e->getMessage());
+        }
+        $this->admin->jsonSuccess(['success' => true, 'name' => $name]);
     }
 
     private function actionDelete(int $userId, string $userName, array $input): void
