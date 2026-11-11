@@ -91,9 +91,9 @@ final class ShopProductPageDataTest extends TestCase
         $this->assertSame('/shop/a/b/datasheet/a-b-datasheet.pdf', ShopProductPageData::pdfPathOrNull('/shop/a/b/datasheet/a-b-datasheet.pdf'));
     }
 
-    public function test_the_missing_file_placeholder_gives_no_link(): void
+    public function test_a_missing_file_gives_no_link(): void
     {
-        $this->assertNull(ShopProductPageData::pdfPathOrNull('/assets/data-error.png'));
+        $this->assertNull(ShopProductPageData::pdfPathOrNull(''));
     }
 
     // ── metaDescription() ────────────────────────────────────────────────────

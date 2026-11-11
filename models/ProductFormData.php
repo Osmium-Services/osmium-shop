@@ -93,12 +93,10 @@ class ProductFormData
         $fileName = $brandPath . '-' . $modelPath;
 
         $thumbnailPath = $this->osmium->imagePath($basePath . 'thumb/' . $fileName);
-        $thumbnailError = \str_contains(haystack: $thumbnailPath, needle: 'data-error');
-        if ($thumbnailError) {
+        if ($thumbnailPath === '') {
             $thumbnailPath = $this->osmium->imagePath($basePath . 'medium/' . $fileName);
         }
-        $stillMissing = \str_contains(haystack: $thumbnailPath, needle: 'data-error');
-        return $stillMissing ? '' : $thumbnailPath;
+        return $thumbnailPath;
     }
 
     public function fetchProductCategories(int $productId): array
@@ -179,8 +177,7 @@ class ProductFormData
     {
         $cacheBust = function (string $partial): string {
             $resolved = $this->osmium->imagePath($partial);
-            $isMissing = \str_contains(haystack: $resolved, needle: 'data-error');
-            if ($isMissing) return '';
+            if ($resolved === '') return '';
             return $this->admin->cacheBustedImagePath(imagePath: $resolved);
         };
         return [

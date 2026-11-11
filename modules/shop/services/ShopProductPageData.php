@@ -84,12 +84,11 @@ class ShopProductPageData
     }
 
     /**
-     * Return the document path, or null when imagePath() substituted its
-     * missing-file placeholder.
+     * Return the document path, or null when imagePath() found no file.
      */
     public static function pdfPathOrNull(string $path): ?string
     {
-        return \str_contains(haystack: $path, needle: 'data-error') ? null : $path;
+        return $path === '' ? null : $path;
     }
 
     /**

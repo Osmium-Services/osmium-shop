@@ -268,12 +268,9 @@ class ProductsController extends AdminController
         $fileName = $brandPath . '-' . $modelPath;
 
         $thumbnailPath = $this->osmium->imagePath($basePath . 'thumb/' . $fileName);
-        $thumbnailError = \str_contains(haystack: $thumbnailPath, needle: 'data-error');
-        if ($thumbnailError) {
+        if ($thumbnailPath === '') {
             $thumbnailPath = $this->osmium->imagePath($basePath . 'medium/' . $fileName);
         }
-        $stillMissing = \str_contains(haystack: $thumbnailPath, needle: 'data-error');
-        if ($stillMissing) $thumbnailPath = '';
 
         return [
             'id' => $row['id'],
