@@ -9,6 +9,7 @@ $(document).ready(function() {
     const typeSelect = document.getElementById('type');
     const productScopeRow = document.getElementById('product-scope-row');
     const couponScopeRow = document.getElementById('coupon-scope-row');
+    const minSpendRow = document.getElementById('min-spend-row');
     const productSelect = document.getElementById('product_ids');
     const chipsContainer = document.getElementById('selected-products-chips');
     const codeInput = document.getElementById('code');
@@ -19,6 +20,7 @@ $(document).ready(function() {
             const isCouponType = typeSelect.value === 'coupon';
             productScopeRow.style.display = isProductType ? '' : 'none';
             couponScopeRow.style.display = isCouponType ? '' : 'none';
+            if (minSpendRow) minSpendRow.style.display = isCouponType || typeSelect.value === 'sitewide' ? '' : 'none';
         });
     }
 

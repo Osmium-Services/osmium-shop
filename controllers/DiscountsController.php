@@ -85,6 +85,7 @@ class DiscountsController extends AdminController
         $this->data['admin']['discountForm'] = [
             'isProductType' => ($this->data['admin']['discount']['type'] ?? 'sitewide') === 'product',
             'isCouponType' => ($this->data['admin']['discount']['type'] ?? 'sitewide') === 'coupon',
+            'allowsMinSpend' => \in_array($this->data['admin']['discount']['type'] ?? 'sitewide', ['coupon', 'sitewide'], true),
             'currencySign' => \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencySign(),
             'selectedProductIds' => $selectedProductIds,
             'selectedCategoryIds' => $selectedCategoryIds,
@@ -268,7 +269,7 @@ class DiscountsController extends AdminController
         $usageLimit = DiscountRules::parseInt($input->string(key: 'usage_limit'));
         $perCustomerKey = 'usage_limit_per_customer';
         $usageLimitPerCustomer = DiscountRules::parseInt($input->string(key: $perCustomerKey));
-        $minSpendIncTax = $type === 'coupon' ? DiscountRules::parseMoney($input->string(key: 'min_spend_inc_tax')) : null;
+        $minSpendIncTax = \in_array($type, ['coupon', 'sitewide'], true) ? DiscountRules::parseMoney($input->string(key: 'min_spend_inc_tax')) : null;
         $active = (int) $input->has(key: 'active');
         $productIds = \array_map('intval', $input->array(key: 'product_ids'));
         $categoryIds = \array_map('intval', $input->array(key: 'category_ids'));
@@ -287,6 +288,7 @@ class DiscountsController extends AdminController
             minSpendIncTax: $minSpendIncTax,
             categoryIds: $categoryIds,
             brandIds: $brandIds,
+            freeDelivery: (bool) $freeDelivery,
         );
         if ($validationError) return $validationError;
 

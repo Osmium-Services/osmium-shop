@@ -109,7 +109,12 @@ class ShopTotalsService
      */
     public function calculate(array $lines, ?string $postcode = null, ?string $couponCode = null): array
     {
-        $sitewideDiscount = $this->discounts?->activeSitewideDiscount();
+        // A sitewide discount with a minimum spend only applies once the basket reaches it. A delivery-only one
+        // (value 0) never takes a price, so it neither blocks coupons nor is shown as the applied discount.
+        $reachedSitewide = $this->sitewideDiscountsReached($lines);
+        $priceSitewide = \array_values(\array_filter($reachedSitewide, static fn(array $discount): bool => (float)$discount['value'] > 0));
+        $sitewideDiscount = $priceSitewide[0] ?? null;
+        $sitewideWaivesDelivery = \array_filter($reachedSitewide, static fn(array $discount): bool => !empty($discount['free_delivery'])) !== [];
 
         $couponDiscount = $sitewideDiscount === null
             ? $this->discounts?->activeCouponByCode($couponCode)
@@ -135,6 +140,7 @@ class ShopTotalsService
 
         // Free delivery is a switch on any discount: the basket-wide one, or a per-product one on a line in the basket
         $waivesDelivery = !empty($basketDiscount['free_delivery'])
+            || $sitewideWaivesDelivery
             || \array_filter($productDiscounts, static fn(array $discount): bool => !empty($discount['free_delivery'])) !== [];
 
         $pricedLines = [];
@@ -225,6 +231,38 @@ class ShopTotalsService
     }
 
     /**
+     * The active sitewide discounts whose minimum spend (if any) the basket has reached, largest value first.
+     *
+     * @param array $lines Resolved basket lines
+     * @return array<int, array<string, mixed>>
+     */
+    private function sitewideDiscountsReached(array $lines): array
+    {
+        $active = $this->discounts?->activeSitewideDiscounts() ?? [];
+        if ($active === []) return [];
+
+        $basketIncTax = $this->basketIncTax($lines);
+
+        return \array_values(\array_filter($active, static function (array $discount) use ($basketIncTax): bool {
+            $min = $discount['min_spend_inc_tax'] ?? null;
+
+            return $min === null || $basketIncTax >= \round((float)$min, 2);
+        }));
+    }
+
+    /** The basket as the customer sees prices (inc VAT), before any discount and before delivery */
+    private function basketIncTax(array $lines): float
+    {
+        $basketIncTax = 0.0;
+        foreach ($lines as $line) {
+            $unitPrice = (float)$line['unit_price_exc_tax'];
+            $basketIncTax += ($unitPrice + $this->taxOn($unitPrice)) * (int)$line['quantity'];
+        }
+
+        return \round($basketIncTax, 2);
+    }
+
+    /**
      * Why a coupon is being held back, or null when it applies (or there is none). Only a minimum spend holds one
      * back: the amounts are inc VAT, the basket measured before the discount and before delivery.
      *
@@ -238,12 +276,7 @@ class ShopTotalsService
         if ($coupon === null || $min === null) return null;
 
         $minimum = \round((float)$min, 2);
-        $basketIncTax = 0.0;
-        foreach ($lines as $line) {
-            $unitPrice = (float)$line['unit_price_exc_tax'];
-            $basketIncTax += ($unitPrice + $this->taxOn($unitPrice)) * (int)$line['quantity'];
-        }
-        $basketIncTax = \round($basketIncTax, 2);
+        $basketIncTax = $this->basketIncTax($lines);
 
         $reachesMinimum = $basketIncTax >= $minimum;
         if ($reachesMinimum) return null;

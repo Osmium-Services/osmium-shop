@@ -148,6 +148,70 @@ class FreeDeliveryCouponTest extends DatabaseTestCase
         $this->assertFalse($with['free_delivery']);
     }
 
+    public function test_a_delivery_only_sitewide_discount_waits_for_its_minimum_spend(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 0, 'free_delivery' => 1, 'min_spend_inc_tax' => 200.00]);
+
+        $under = $this->totals()->calculate(lines: $this->lines(3), postcode: 'SW1A 1AA'); // £180 inc VAT
+        $over = $this->totals()->calculate(lines: $this->lines(4), postcode: 'SW1A 1AA'); // £240 inc VAT
+
+        $this->assertSame(4.99, $under['delivery_exc_tax']);
+        $this->assertFalse($under['free_delivery']);
+        $this->assertSame(0.0, $over['delivery_exc_tax']);
+        $this->assertTrue($over['free_delivery']);
+        $this->assertSame(0.0, $over['total_discount_amount']); // Takes nothing off the goods
+        $this->assertNull($over['discount']); // Not shown as an applied sale
+    }
+
+    public function test_the_minimum_spend_is_met_exactly_at_the_figure(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 0, 'free_delivery' => 1, 'min_spend_inc_tax' => 60.00]);
+
+        $at = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA'); // £60 inc VAT
+
+        $this->assertTrue($at['free_delivery']);
+    }
+
+    public function test_a_delivery_only_sitewide_discount_does_not_block_coupons(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 0, 'free_delivery' => 1, 'min_spend_inc_tax' => 200.00]);
+        $this->discount(['code' => 'ZZTENOFF', 'value' => 10, 'free_delivery' => 0]);
+
+        $with = $this->totals()->calculate(lines: $this->lines(4), postcode: 'SW1A 1AA', couponCode: 'ZZTENOFF');
+
+        $this->assertSame('coupon', $with['discount']['type']);
+        $this->assertSame(0.0, $with['delivery_exc_tax']); // Still free: over the spend
+        $this->assertNull($with['coupon_notice']);
+    }
+
+    public function test_a_plain_sitewide_percentage_and_a_free_delivery_threshold_work_together(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 15, 'free_delivery' => 0]);
+        $this->discount(['type' => 'sitewide', 'value' => 0, 'free_delivery' => 1, 'min_spend_inc_tax' => 200.00]);
+
+        $under = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA'); // £60 inc VAT before the sale
+        $over = $this->totals()->calculate(lines: $this->lines(4), postcode: 'SW1A 1AA'); // £240 inc VAT before the sale
+
+        $this->assertSame('sitewide', $under['discount']['type']);
+        $this->assertSame(42.50, $under['lines'][0]['unit_price_exc_tax']); // 15% off £50
+        $this->assertSame(4.99, $under['delivery_exc_tax']);
+        $this->assertSame(0.0, $over['delivery_exc_tax']);
+        $this->assertSame(42.50, $over['lines'][0]['unit_price_exc_tax']);
+    }
+
+    public function test_a_sitewide_percentage_with_a_minimum_spend_waits_for_it(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 15, 'free_delivery' => 0, 'min_spend_inc_tax' => 200.00]);
+
+        $under = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA');
+        $over = $this->totals()->calculate(lines: $this->lines(4), postcode: 'SW1A 1AA');
+
+        $this->assertNull($under['discount']);
+        $this->assertSame(50.00, $under['lines'][0]['unit_price_exc_tax']);
+        $this->assertSame('sitewide', $over['discount']['type']);
+        $this->assertSame(42.50, $over['lines'][0]['unit_price_exc_tax']);
+    }
+
     public function test_an_undeliverable_postcode_stays_undeliverable(): void
     {
         $this->discount(['code' => 'ZZFREEDEL']);

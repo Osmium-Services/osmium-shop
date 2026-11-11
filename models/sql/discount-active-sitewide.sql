@@ -1,4 +1,4 @@
-SELECT id, name, value_type, value, free_delivery
+SELECT id, name, value_type, value, free_delivery, min_spend_inc_tax
 FROM {PREFIX}discounts
 WHERE
     type = 'sitewide'
@@ -7,4 +7,3 @@ WHERE
     AND (starts_at IS NULL OR starts_at <= NOW())
     AND (ends_at IS NULL OR ends_at >= NOW())
 ORDER BY value DESC
-LIMIT 1

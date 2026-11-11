@@ -29,6 +29,7 @@ class DiscountRules
         ?float $minSpendIncTax = null,
         array $categoryIds = [],
         array $brandIds = [],
+        bool $freeDelivery = false,
     ): ?string {
         $nameEmpty = empty($name);
         if ($nameEmpty) return 'Discount name is required';
@@ -41,8 +42,12 @@ class DiscountRules
         $invalidValueType = !\in_array($valueType, $validValueTypes, true);
         if ($invalidValueType) return 'Invalid discount value type';
 
-        $valueNotPositive = $value <= 0;
+        $freeDeliveryOnly = $freeDelivery && $value == 0; // Waives delivery and takes nothing off the goods
+        $valueNotPositive = $value <= 0 && !$freeDeliveryOnly;
         if ($valueNotPositive) return 'Discount value must be greater than zero';
+
+        $valueNegative = $value < 0;
+        if ($valueNegative) return 'Discount value must be greater than zero';
 
         $percentTooHigh = $valueType === 'percent' && $value > 100;
         if ($percentTooHigh) return 'Percentage discount cannot exceed 100%';

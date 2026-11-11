@@ -6,9 +6,14 @@ namespace Osmium\Modules\Checkout\Models;
 
 class CheckoutDiscount extends CheckoutModel
 {
-    public function activeSitewide(): ?array
+    /**
+     * Every active sitewide discount, largest value first. The caller applies each one's minimum spend.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function activeSitewide(): array
     {
-        return $this->fetchOne('discount-active-sitewide.sql');
+        return $this->fetchAll('discount-active-sitewide.sql');
     }
 
     /**

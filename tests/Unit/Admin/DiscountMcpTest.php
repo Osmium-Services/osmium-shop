@@ -194,9 +194,12 @@ final class DiscountMcpTest extends TestCase
     {
         $base = ['name' => 'X', 'type' => 'sitewide', 'value_type' => 'percent', 'value' => 10];
 
-        foreach (['code' => 'ABC', 'usage_limit' => 5, 'usage_limit_per_customer' => 1, 'min_spend_inc_tax' => 20.0] as $field => $value) {
+        foreach (['code' => 'ABC', 'usage_limit' => 5, 'usage_limit_per_customer' => 1] as $field => $value) {
             $this->assertStringContainsString('only applies to a coupon', $this->refused([$field => $value] + $base));
         }
+        $perProduct = ['type' => 'product', 'product_ids' => [7]] + $base;
+        $this->assertStringContainsString('only applies to a coupon or a sitewide', $this->refused(['min_spend_inc_tax' => 20.0] + $perProduct));
+        $this->assertSame(20.0, $this->fields(['min_spend_inc_tax' => 20.0] + $base)['min_spend_inc_tax']); // A sitewide discount may have one
         $this->assertStringContainsString('only applies to a product', $this->refused(['product_ids' => [7]] + $base));
     }
 

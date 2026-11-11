@@ -129,4 +129,14 @@ class DiscountRulesTest extends TestCase
         $this->assertSame('Discount value must be greater than zero', $this->validate(['valueType' => 'fixed', 'value' => 0.0]));
         $this->assertSame('Discount value must be greater than zero', $this->validate(['valueType' => 'percent', 'value' => 0.0]));
     }
+
+    public function test_free_delivery_alone_may_have_a_zero_value(): void
+    {
+        $this->assertNull($this->validate(['value' => 0.0, 'freeDelivery' => true]));
+    }
+
+    public function test_a_negative_value_is_refused_even_with_free_delivery(): void
+    {
+        $this->assertSame('Discount value must be greater than zero', $this->validate(['value' => -5.0, 'freeDelivery' => true]));
+    }
 }

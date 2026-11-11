@@ -25,7 +25,8 @@ class DiscountMcp
     private const MAX_NAME_LENGTH = 255;
     private const CLEARABLE_FIELDS = ['starts_at', 'ends_at', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
     private const UPDATABLE_FIELDS = ['name', 'value_type', 'value', 'free_delivery', 'code', 'product_ids', 'starts_at', 'ends_at', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
-    private const COUPON_ONLY_FIELDS = ['code', 'usage_limit', 'usage_limit_per_customer', 'min_spend_inc_tax'];
+    private const COUPON_ONLY_FIELDS = ['code', 'usage_limit', 'usage_limit_per_customer'];
+    private const MIN_SPEND_TYPES = ['coupon', 'sitewide']; // A minimum spend gates a code or a basket-wide sale, not a per-product price
 
     /**
      * @param array<string, mixed> $payload
@@ -51,7 +52,7 @@ class DiscountMcp
             ],
             [
                 'name' => 'discount_create',
-                'description' => 'Create a discount. It is ALWAYS created switched off (disabled) and does nothing until someone enables it in the admin (Shop > Discounts); this tool cannot switch one on. type is sitewide (the whole basket), product (the products in product_ids) or coupon (a code the customer enters, needs code). value_type is percent (value 1 to 100) or fixed (value in pounds). Set free_delivery true to also waive the delivery charge while the discount applies (any type). Coupons can also have usage_limit, usage_limit_per_customer and min_spend_inc_tax (the basket total including VAT, before the discount and delivery). Dates are YYYY-MM-DD or YYYY-MM-DD HH:MM, UK time; a date alone starts at the start of that day and ends at the end of it. The same rules as the admin form apply. Undo with discount_delete.',
+                'description' => 'Create a discount. It is ALWAYS created switched off (disabled) and does nothing until someone enables it in the admin (Shop > Discounts); this tool cannot switch one on. type is sitewide (the whole basket), product (the products in product_ids) or coupon (a code the customer enters, needs code). value_type is percent (value 1 to 100) or fixed (value in pounds). Set free_delivery true to also waive the delivery charge while the discount applies (any type); with free_delivery the value may be 0, to waive delivery only. Coupons can also have usage_limit and usage_limit_per_customer. Coupons and sitewide discounts can have min_spend_inc_tax (the basket total including VAT, before the discount and delivery), for example free delivery over a spend. Dates are YYYY-MM-DD or YYYY-MM-DD HH:MM, UK time; a date alone starts at the start of that day and ends at the end of it. The same rules as the admin form apply. Undo with discount_delete.',
                 'inputSchema' => [
                     'type' => 'object',
                     'properties' => [
@@ -66,7 +67,7 @@ class DiscountMcp
                         'ends_at' => ['type' => 'string', 'description' => 'Optional end, YYYY-MM-DD or YYYY-MM-DD HH:MM'],
                         'usage_limit' => ['type' => 'integer', 'description' => 'Coupons only: total uses allowed, at least 1'],
                         'usage_limit_per_customer' => ['type' => 'integer', 'description' => 'Coupons only: uses allowed per customer, at least 1'],
-                        'min_spend_inc_tax' => ['type' => 'number', 'description' => 'Coupons only: minimum basket total in pounds including VAT'],
+                        'min_spend_inc_tax' => ['type' => 'number', 'description' => 'Coupons and sitewide discounts only: minimum basket total in pounds including VAT'],
                     ],
                     'required' => ['name', 'type', 'value_type'],
                 ],
@@ -91,7 +92,7 @@ class DiscountMcp
                         'ends_at' => ['type' => 'string', 'description' => 'YYYY-MM-DD or YYYY-MM-DD HH:MM'],
                         'usage_limit' => ['type' => 'integer', 'description' => 'Coupons only: total uses allowed, at least 1'],
                         'usage_limit_per_customer' => ['type' => 'integer', 'description' => 'Coupons only: uses allowed per customer, at least 1'],
-                        'min_spend_inc_tax' => ['type' => 'number', 'description' => 'Coupons only: minimum basket total in pounds including VAT'],
+                        'min_spend_inc_tax' => ['type' => 'number', 'description' => 'Coupons and sitewide discounts only: minimum basket total in pounds including VAT'],
                         'clear' => ['type' => 'array', 'items' => ['type' => 'string', 'enum' => self::CLEARABLE_FIELDS], 'description' => 'Optional fields to remove'],
                     ],
                     'required' => ['id', 'expected_name'],
@@ -157,6 +158,7 @@ class DiscountMcp
             productIds: $fields['product_ids'],
             codeInUse: fn(string $code): bool => $discounts->codeExistsAnywhere($code), // The bin counts: the database keeps codes unique across it
             minSpendIncTax: $fields['min_spend_inc_tax'],
+            freeDelivery: (bool) $fields['free_delivery'],
         );
         if ($error !== null) throw new McpToolException($error);
 
@@ -242,6 +244,7 @@ class DiscountMcp
             productIds: $after['product_ids'],
             codeInUse: fn(string $code): bool => $code !== (string) $before['code'] && $discounts->codeExistsAnywhere($code),
             minSpendIncTax: $after['min_spend_inc_tax'],
+            freeDelivery: (bool) $after['free_delivery'],
         );
         if ($error !== null) throw new McpToolException($error);
 
@@ -348,6 +351,7 @@ class DiscountMcp
                 if (\array_key_exists($field, $arguments)) throw new McpToolException("{$field} only applies to a coupon.");
             }
         }
+        if (!\in_array($type, self::MIN_SPEND_TYPES, true) && \array_key_exists('min_spend_inc_tax', $arguments)) throw new McpToolException('min_spend_inc_tax only applies to a coupon or a sitewide discount.');
         if ($type !== 'product' && \array_key_exists('product_ids', $arguments)) throw new McpToolException('product_ids only applies to a product discount.');
 
         $given = $arguments['value'] ?? null;

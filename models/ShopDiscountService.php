@@ -24,12 +24,16 @@ class ShopDiscountService
     public function __construct(private CheckoutDiscount $discount) {}
 
     /**
-     * The single active sitewide discount with the largest value, or null.
+     * Every active sitewide discount, largest value first. ShopTotalsService drops the ones whose minimum spend
+     * the basket has not reached, takes the price from the first that is left and waives delivery if any has the
+     * free delivery switch.
      *
      * Sitewide always wins over a per-product discount, so ShopTotalsService
-     * never needs to resolve per-product discounts once this returns one.
+     * never needs to resolve per-product discounts once one applies.
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function activeSitewideDiscount(): ?array
+    public function activeSitewideDiscounts(): array
     {
         return $this->discount->activeSitewide();
     }

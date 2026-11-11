@@ -330,11 +330,28 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $this->assertSame(0, (int) $this->stored($off)['free_delivery']);
     }
 
-    public function test_a_minimum_spend_is_only_kept_for_a_coupon(): void
+    public function test_a_sitewide_discount_keeps_its_minimum_spend(): void
     {
         $id = $this->createdId($this->submit($this->sitewide(['min_spend_inc_tax' => '40'])));
 
+        $this->assertSame(40.0, (float) $this->stored($id)['min_spend_inc_tax']);
+    }
+
+    public function test_a_per_product_discount_drops_a_minimum_spend(): void
+    {
+        $product = $this->createTestProduct();
+
+        $id = $this->createdId($this->submit($this->sitewide(['type' => 'product', 'product_ids' => [(string) $product], 'min_spend_inc_tax' => '40'])));
+
         $this->assertNull($this->stored($id)['min_spend_inc_tax']);
+    }
+
+    public function test_free_delivery_alone_can_be_saved_with_a_zero_value(): void
+    {
+        $id = $this->createdId($this->submit($this->sitewide(['value' => '0', 'free_delivery' => '1', 'min_spend_inc_tax' => '200'])));
+
+        $this->assertSame(0.0, (float) $this->stored($id)['value']);
+        $this->assertSame(1, (int) $this->stored($id)['free_delivery']);
     }
 
     public function test_a_per_product_discount_keeps_only_its_chosen_products(): void
