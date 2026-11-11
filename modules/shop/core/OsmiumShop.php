@@ -23,6 +23,9 @@ $paymentExternal = \Osmium\Core\Library\PaymentProviders::external($this->osmium
 $paymentProvider = \Osmium\Core\Library\PaymentProviders::configured($this->osmium->config->checkout, $paymentExternal);
 $this->data['shop']['paymentMethods']  = \Osmium\Core\Library\PaymentProviders::methods($paymentProvider, $paymentExternal); // Payment types the selected provider accepts, or null (none chosen / not declared); themes show badges from it
 
+require_once __DIR__ . '/../services/ShopProductDiscounts.php';
+$this->data['shop']['freeDeliveryOffer'] = \Osmium\Modules\Shop\Services\ShopProductDiscounts::freeDeliveryOffer($this->osmium, $finance->currencySign()); // {minSpendIncTax, label} or null; themes can advertise it
+
 $hasCategoryId = $this->shop->categoryID;
 if ($hasCategoryId) {
     $this->data['shop']['categoryID'] = $this->shop->categoryID;

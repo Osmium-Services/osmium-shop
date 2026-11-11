@@ -1,9 +1,11 @@
 <?php
 use Osmium\Modules\Shop\Services\ShopListControls;
 use Osmium\Modules\Shop\Services\ShopProductCard;
+use Osmium\Modules\Shop\Services\ShopProductDiscounts;
 
 require_once __DIR__ . '/../services/ShopListControls.php';
 require_once __DIR__ . '/../services/ShopProductCard.php';
+require_once __DIR__ . '/../services/ShopProductDiscounts.php';
 
 $shopConfig = $this->osmium->config->shop;
 
@@ -35,6 +37,7 @@ $this->data['shop']['listTotal'] = $total;
 $this->data['shop']['listPage'] = $page;
 
 $productsById = $this->shop->model->product->loadMultipleByIDs(productIDs: $productIDs);
+$productDiscounts = ShopProductDiscounts::forProducts($this->osmium, $productsById, (float) $shopConfig->taxRatePercent, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencySign());
 
 $this->data['shop']['products'] = [];
 foreach ($productIDs as $productID) {
@@ -52,6 +55,7 @@ foreach ($productIDs as $productID) {
     if (!$hasRrp) unset($card['savingsOnRRP']);
 
     $this->data['shop']['products'][] = $card + [
+        'activeDiscount' => $productDiscounts[(int) $productID] ?? null,
         'image' => $this->osmium->imagePath($imageBasePath),
         'image2x' => $this->osmium->imagePath($imageBasePath . '@2x'),
     ];

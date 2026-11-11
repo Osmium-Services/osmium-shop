@@ -212,6 +212,24 @@ class FreeDeliveryCouponTest extends DatabaseTestCase
         $this->assertSame(42.50, $over['lines'][0]['unit_price_exc_tax']);
     }
 
+    public function test_the_basket_says_how_far_it_is_from_free_delivery(): void
+    {
+        $this->discount(['type' => 'sitewide', 'value' => 0, 'free_delivery' => 1, 'min_spend_inc_tax' => 200.00]);
+
+        $under = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA'); // £60 inc VAT
+        $over = $this->totals()->calculate(lines: $this->lines(4), postcode: 'SW1A 1AA');
+
+        $this->assertSame(['min_spend_inc_tax' => 200.0, 'short_by_inc_tax' => 140.0], $under['free_delivery_offer']);
+        $this->assertNull($over['free_delivery_offer']); // Already free
+    }
+
+    public function test_no_free_delivery_offer_when_none_is_running(): void
+    {
+        $totals = $this->totals()->calculate(lines: $this->lines(), postcode: 'SW1A 1AA');
+
+        $this->assertNull($totals['free_delivery_offer']);
+    }
+
     public function test_an_undeliverable_postcode_stays_undeliverable(): void
     {
         $this->discount(['code' => 'ZZFREEDEL']);

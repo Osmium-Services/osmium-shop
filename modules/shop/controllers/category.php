@@ -1,10 +1,12 @@
 <?php
 use Osmium\Modules\Shop\Services\ShopListControls;
 use Osmium\Modules\Shop\Services\ShopProductCard;
+use Osmium\Modules\Shop\Services\ShopProductDiscounts;
 use Osmium\Modules\Shop\Services\ShopProductPageData;
 
 require_once __DIR__ . '/../services/ShopListControls.php';
 require_once __DIR__ . '/../services/ShopProductCard.php';
+require_once __DIR__ . '/../services/ShopProductDiscounts.php';
 require_once __DIR__ . '/../services/ShopProductPageData.php';
 
 $productCategory = $this->shop->model->productCategory;
@@ -93,6 +95,7 @@ $productIDs = \explode(separator: ',', string: $productRange);
 [$productIDs, $page] = ShopListControls::paginate($productIDs, $controls['page'], $controls['limit']);
 $this->data['shop']['listPage'] = $page; // clamped to the last real page
 $productsData = $this->shop->model->product->loadMultipleByIDs($productIDs); // load product range in category - batch load all products at once
+$productDiscounts = ShopProductDiscounts::forProducts($this->osmium, $productsData, (float)$shopConfig->taxRatePercent, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencySign());
 
 foreach ($productIDs as $productID) {
     $productID = (int)$productID;
@@ -111,6 +114,7 @@ foreach ($productIDs as $productID) {
     if (!$hasRrp) unset($card['savingsOnRRP']); // Nothing to save against
 
     $this->data['category']['products'][$productID] = $card + [
+        'activeDiscount' => $productDiscounts[$productID] ?? null,
         'image' => $this->osmium->imagePath($imageBasePath),
         'image2x' => $this->osmium->imagePath($imageBasePath . '@2x'),
     ];

@@ -111,7 +111,8 @@ class ShopTotalsService
     {
         // A sitewide discount with a minimum spend only applies once the basket reaches it. A delivery-only one
         // (value 0) never takes a price, so it neither blocks coupons nor is shown as the applied discount.
-        $reachedSitewide = $this->sitewideDiscountsReached($lines);
+        $activeSitewide = $this->discounts?->activeSitewideDiscounts() ?? [];
+        $reachedSitewide = $this->sitewideDiscountsReached($activeSitewide, $lines);
         $priceSitewide = \array_values(\array_filter($reachedSitewide, static fn(array $discount): bool => (float)$discount['value'] > 0));
         $sitewideDiscount = $priceSitewide[0] ?? null;
         $sitewideWaivesDelivery = \array_filter($reachedSitewide, static fn(array $discount): bool => !empty($discount['free_delivery'])) !== [];
@@ -201,6 +202,7 @@ class ShopTotalsService
             'delivery_exc_tax' => $delivery,
             'delivery_tax_amount' => $deliveryTax,
             'free_delivery' => $waivesDelivery, // A discount is waiving the delivery charge
+            'free_delivery_offer' => $waivesDelivery ? null : $this->freeDeliveryOffer($activeSitewide, $lines), // The nearest free delivery spend not yet reached, else null
             'delivery_configured' => $deliveryConfigured, // False means £0.00 is "we cannot quote", not "free delivery". Checkout must refuse to take money on this.
             'tax_amount' => $taxAmount,
             'tax_rate_percent' => $this->taxRatePercent,
@@ -236,9 +238,8 @@ class ShopTotalsService
      * @param array $lines Resolved basket lines
      * @return array<int, array<string, mixed>>
      */
-    private function sitewideDiscountsReached(array $lines): array
+    private function sitewideDiscountsReached(array $active, array $lines): array
     {
-        $active = $this->discounts?->activeSitewideDiscounts() ?? [];
         if ($active === []) return [];
 
         $basketIncTax = $this->basketIncTax($lines);
@@ -248,6 +249,32 @@ class ShopTotalsService
 
             return $min === null || $basketIncTax >= \round((float)$min, 2);
         }));
+    }
+
+    /**
+     * The nearest minimum spend that would waive delivery, and how far the basket is from it, or null when no
+     * sitewide free-delivery discount has a spend left to reach.
+     *
+     * @param array<int, array<string, mixed>> $active Every active sitewide discount
+     * @return array{min_spend_inc_tax: float, short_by_inc_tax: float}|null
+     */
+    private function freeDeliveryOffer(array $active, array $lines): ?array
+    {
+        $basketIncTax = $this->basketIncTax($lines);
+        $unreached = [];
+        foreach ($active as $discount) {
+            $min = $discount['min_spend_inc_tax'] ?? null;
+            $isFreeDelivery = !empty($discount['free_delivery']);
+            if (!$isFreeDelivery || $min === null) continue;
+
+            $minimum = \round((float)$min, 2);
+            if ($basketIncTax < $minimum) $unreached[] = $minimum;
+        }
+        if ($unreached === []) return null;
+
+        $nearest = \min($unreached);
+
+        return ['min_spend_inc_tax' => $nearest, 'short_by_inc_tax' => \round($nearest - $basketIncTax, 2)];
     }
 
     /** The basket as the customer sees prices (inc VAT), before any discount and before delivery */
@@ -373,8 +400,7 @@ class ShopTotalsService
         $productId = (int)($line['product_id'] ?? 0);
 
         $discount = $basketDiscount ?? ($productDiscounts[$productId] ?? null);
-        $discountPerUnit = $discount !== null ? $this->discountPerUnit(unitPrice: $unitPrice, discount: $discount) : 0.0;
-        $discountedUnitPrice = \max(0.0, \round(num: $unitPrice - $discountPerUnit, precision: 2));
+        $discountedUnitPrice = $discount !== null ? self::discountedUnitPrice($unitPrice, $discount) : \max(0.0, \round(num: $unitPrice, precision: 2));
 
         $lineTotal = \round(num: $discountedUnitPrice * $quantity, precision: 2);
 
@@ -401,7 +427,16 @@ class ShopTotalsService
         return $priced;
     }
 
-    private function discountPerUnit(float $unitPrice, array $discount): float
+    /**
+     * A unit price (exc VAT) after a discount. The one rule for what a discount takes off, shared with the product
+     * and listing pages so the price they advertise is the price the basket charges.
+     */
+    public static function discountedUnitPrice(float $unitPrice, array $discount): float
+    {
+        return \max(0.0, \round(num: $unitPrice - self::discountPerUnit(unitPrice: $unitPrice, discount: $discount), precision: 2));
+    }
+
+    private static function discountPerUnit(float $unitPrice, array $discount): float
     {
         $isPercent = $discount['value_type'] === 'percent';
         if ($isPercent) return \round(num: $unitPrice * ((float)$discount['value'] / 100), precision: 2);

@@ -9,10 +9,12 @@ use Osmium\Modules\Shop\Services\ShopProductPageData;
 use Osmium\Modules\Shop\Services\ShopProductFaq;
 use Osmium\Modules\Shop\Services\ShopKitAvailability;
 use Osmium\Modules\Shop\Services\ShopProductService;
+use Osmium\Modules\Shop\Services\ShopProductDiscounts;
 
 require_once __DIR__ . '/../services/ShopProductPageData.php';
 require_once __DIR__ . '/../services/ShopProductFaq.php';
 require_once __DIR__ . '/../services/ShopProductService.php';
+require_once __DIR__ . '/../services/ShopProductDiscounts.php';
 require_once __DIR__ . '/../services/ShopKitAvailability.php';
 
 $product = $this->shop->model->product;
@@ -145,6 +147,12 @@ $savings = $productService->calculateSavings(
 );
 $this->data['product']['discount'] = $savings;
 $this->data['product']['getSavingsOnRRP'] = $savings;
+$this->data['product']['activeDiscount'] = ShopProductDiscounts::forProducts(
+    $this->osmium,
+    [(int)$product->id => ['price_exc_tax' => $priceExcTax]],
+    (float)$shopConfig->taxRatePercent,
+    \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencySign(),
+)[(int)$product->id] ?? null; // The per-product discount on offer for the base price, or null; options are priced by the theme
 $this->data['product']['quantityDiscounts'] = $product->discounts;
 
 $checkoutConfig = $this->osmium->config->checkout;
