@@ -173,7 +173,8 @@ class BrandsControllerTest extends ShopDatabaseTestCase
         $redirect = null;
 
         try {
-            $this->controller($data)->edit();
+            $isCreate = empty($fields['id']);
+            $isCreate ? $this->controller($data)->add() : $this->controller($data)->edit();
         } catch (\RuntimeException $e) {
             $redirect = $e->getMessage();
         }
@@ -356,9 +357,8 @@ class BrandsControllerTest extends ShopDatabaseTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $data = $this->signInAs('admin');
 
-        $this->controller($data)->edit();
+        $this->controller($data)->add();
 
-        $this->assertTrue($data['admin']['isNew']);
         $this->assertSame('', $data['admin']['brand']['name']);
         $this->assertFalse($data['admin']['showSavedMessage']);
     }
@@ -371,13 +371,26 @@ class BrandsControllerTest extends ShopDatabaseTestCase
 
         $data = $this->signInAs('admin');
         $this->controller($data)->edit();
-        $this->assertFalse($data['admin']['isNew']);
         $this->assertSame("{$this->runTag} Victron", $data['admin']['brand']['name']);
         $this->assertTrue($data['admin']['showSavedMessage']);
 
         $data = $this->signInAs('admin');
         $this->controller($data)->edit();
         $this->assertFalse($data['admin']['showSavedMessage']);
+    }
+
+    public function test_refreshing_an_edit_page_that_lost_its_id_goes_back_to_the_list(): void
+    {
+        $this->stashedId = 0;
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $data = $this->signInAs('admin');
+
+        try {
+            $this->controller($data)->edit();
+            $this->fail('expected a redirect');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('/admin/shop/brands/', $e->getMessage());
+        }
     }
 
     public function test_asking_for_a_brand_that_does_not_exist_goes_back_to_the_list(): void

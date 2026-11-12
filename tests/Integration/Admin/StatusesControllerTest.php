@@ -178,7 +178,8 @@ class StatusesControllerTest extends ShopDatabaseTestCase
         $redirect = null;
 
         try {
-            $this->controller($data)->edit();
+            $isCreate = empty($fields['id']);
+            $isCreate ? $this->controller($data)->add() : $this->controller($data)->edit();
         } catch (\RuntimeException $e) {
             $redirect = $e->getMessage();
         }
@@ -361,9 +362,8 @@ class StatusesControllerTest extends ShopDatabaseTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $data = $this->signInAs('admin');
 
-        $this->controller($data)->edit();
+        $this->controller($data)->add();
 
-        $this->assertTrue($data['admin']['isNew']);
         $this->assertNull($data['admin']['status']);
         $this->assertFalse($data['admin']['showSavedMessage']);
     }
@@ -376,13 +376,26 @@ class StatusesControllerTest extends ShopDatabaseTestCase
 
         $data = $this->signInAs('admin');
         $this->controller($data)->edit();
-        $this->assertFalse($data['admin']['isNew']);
         $this->assertSame("{$this->runTag} Available", $data['admin']['status']['descr_short']);
         $this->assertTrue($data['admin']['showSavedMessage']);
 
         $data = $this->signInAs('admin');
         $this->controller($data)->edit();
         $this->assertFalse($data['admin']['showSavedMessage']);
+    }
+
+    public function test_refreshing_an_edit_page_that_lost_its_id_goes_back_to_the_list(): void
+    {
+        $this->stashedId = 0;
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $data = $this->signInAs('admin');
+
+        try {
+            $this->controller($data)->edit();
+            $this->fail('expected a redirect');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('/admin/shop/statuses/', $e->getMessage());
+        }
     }
 
     public function test_asking_for_a_status_that_does_not_exist_goes_back_to_the_list(): void

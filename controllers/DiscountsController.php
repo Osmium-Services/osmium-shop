@@ -57,9 +57,8 @@ class DiscountsController extends AdminController
         $this->setView('discounts/index.phtml');
     }
 
-    public function edit(): void
+    public function add(): void
     {
-        $discountId = (int) $this->osmium->getStashedParam(key: 'id', default: 0);
         $this->osmium->clearStashedQuerystring();
 
         $isPost = $this->isPost();
@@ -68,14 +67,38 @@ class DiscountsController extends AdminController
             if ($error) $this->data['admin']['error'] = $error;
         }
 
+        $this->prepareFormData(discountId: 0, discount: null);
+        $this->setView('discounts/add.phtml');
+    }
+
+    public function edit(): void
+    {
+        $stashedId = (int) $this->osmium->getStashedParam(key: 'id', default: 0);
+        $this->osmium->clearStashedQuerystring();
+
+        $isPost = $this->isPost();
+        $discountId = $isPost ? Input::post()->int(key: 'id') : $stashedId; // The form posts to the clean address, so its id is in the body
+        $noTarget = !$discountId;
+        if ($noTarget) $this->redirect('shop/discounts/');
+
+        if ($isPost) {
+            $error = $this->handleFormSubmit();
+            if ($error) $this->data['admin']['error'] = $error;
+        }
+
         $discount = $this->loadDiscountForEdit($discountId);
+        $this->prepareFormData(discountId: $discountId, discount: $discount);
+        $this->setView('discounts/edit.phtml');
+    }
+
+    private function prepareFormData(int $discountId, ?array $discount): void
+    {
         $selectedProductIds = $discountId ? $this->loadSelectedProductIds($discountId) : [];
         $selectedCategoryIds = $discountId ? $this->admin->model->discount->getCategoryIds($discountId) : [];
         $selectedBrandIds = $discountId ? $this->admin->model->discount->getBrandIds($discountId) : [];
 
         $this->data['admin']['discount'] = $discount ?? $this->getEmptyDiscount();
         $this->data['admin']['discountId'] = $discountId;
-        $this->data['admin']['isNew'] = !$discountId;
         $this->data['admin']['showSavedMessage'] = $this->consumeSavedFlag();
         $this->data['admin']['error'] = $this->data['admin']['error'] ?? null;
         $this->data['admin']['products'] = $this->admin->model->product->listForPicker();
@@ -96,8 +119,6 @@ class DiscountsController extends AdminController
         $this->data['admin']['paymentProviderSupportsDiscounts'] = $this->paymentProviderSupportsDiscounts();
         $this->data['admin']['currentPaymentProviderLabel'] = $this->currentPaymentProviderLabel();
         $this->data['admin']['hostedPayments'] = PaymentProviders::hosted($this->osmium);
-
-        $this->setView('discounts/edit.phtml');
     }
 
     public function action()
@@ -210,10 +231,8 @@ class DiscountsController extends AdminController
         ];
     }
 
-    private function loadDiscountForEdit(int $discountId): ?array
+    private function loadDiscountForEdit(int $discountId): array
     {
-        if (!$discountId) return null;
-
         $discount = $this->admin->model->discount->getById($discountId);
 
         if (!$discount) $this->redirect('shop/discounts/');

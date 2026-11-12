@@ -14,7 +14,8 @@ require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
  *
  * Routes:
  *   - index()  → /admin/shop/statuses/           (list view)
- *   - edit()   → /admin/shop/statuses/edit/      (create/edit form)
+ *   - add()    → /admin/shop/statuses/add/
+ *   - edit()   → /admin/shop/statuses/edit/?id=N
  *   - action() → /admin/shop/statuses/action/    (AJAX operations)
  */
 class StatusesController extends AdminController
@@ -42,11 +43,10 @@ class StatusesController extends AdminController
     }
 
     /**
-     * Edit or create a status.
+     * Create a status (add) or edit one (edit).
      */
-    public function edit(): void
+    public function add(): void
     {
-        $statusId = (int) $this->osmium->getStashedParam(key: 'id', default: 0);
         $this->osmium->clearStashedQuerystring();
 
         $isPost = $this->isPost();
@@ -55,14 +55,35 @@ class StatusesController extends AdminController
             if ($error) $this->data['admin']['error'] = $error;
         }
 
-        $status = $this->loadStatusForEdit($statusId);
+        $this->prepareFormData(statusId: 0, status: null);
+        $this->setView('statuses/add.phtml');
+    }
 
+    public function edit(): void
+    {
+        $stashedId = (int) $this->osmium->getStashedParam(key: 'id', default: 0);
+        $this->osmium->clearStashedQuerystring();
+
+        $isPost = $this->isPost();
+        $statusId = $isPost ? Input::post()->int(key: 'id') : $stashedId; // The form posts to the clean address, so its id is in the body
+        $noTarget = !$statusId;
+        if ($noTarget) $this->redirect('shop/statuses/');
+
+        if ($isPost) {
+            $error = $this->handleFormSubmit();
+            if ($error) $this->data['admin']['error'] = $error;
+        }
+
+        $status = $this->loadStatusForEdit($statusId);
+        $this->prepareFormData(statusId: $statusId, status: $status);
+        $this->setView('statuses/edit.phtml');
+    }
+
+    private function prepareFormData(int $statusId, ?array $status): void
+    {
         $this->data['admin']['status'] = $status;
         $this->data['admin']['statusId'] = $statusId;
-        $this->data['admin']['isNew'] = !$statusId;
         $this->data['admin']['showSavedMessage'] = $this->consumeSavedFlag();
-
-        $this->setView('statuses/edit.phtml');
     }
 
     /**
@@ -134,10 +155,8 @@ class StatusesController extends AdminController
     /**
      * @return array<string, mixed>|null
      */
-    private function loadStatusForEdit(int $statusId): ?array
+    private function loadStatusForEdit(int $statusId): array
     {
-        if (!$statusId) return null;
-
         $status = $this->admin->model->status->getById($statusId);
 
         if (!$status) $this->redirect('shop/statuses/');

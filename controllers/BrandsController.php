@@ -15,7 +15,8 @@ require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
  *
  * Routes:
  *   - index()  → /admin/shop/brands/           (list view)
- *   - edit()   → /admin/shop/brands/edit/      (create/edit form)
+ *   - add()    → /admin/shop/brands/add/
+ *   - edit()   → /admin/shop/brands/edit/?id=N
  *   - action() → /admin/shop/brands/action/    (AJAX operations)
  */
 class BrandsController extends AdminController
@@ -46,11 +47,10 @@ class BrandsController extends AdminController
     }
 
     /**
-     * Edit or create a brand.
+     * Create a brand (add) or edit one (edit).
      */
-    public function edit(): void
+    public function add(): void
     {
-        $brandId = (int) $this->osmium->getStashedParam(key: 'id', default: 0);
         $this->osmium->clearStashedQuerystring();
 
         $isPost = $this->isPost();
@@ -59,18 +59,39 @@ class BrandsController extends AdminController
             if ($error) $this->data['admin']['error'] = $error;
         }
 
-        $brand = $this->loadBrandForEdit($brandId);
+        $this->prepareFormData(brandId: 0, brand: null);
+        $this->setView('brands/add.phtml');
+    }
 
+    public function edit(): void
+    {
+        $stashedId = (int) $this->osmium->getStashedParam(key: 'id', default: 0);
+        $this->osmium->clearStashedQuerystring();
+
+        $isPost = $this->isPost();
+        $brandId = $isPost ? Input::post()->int(key: 'id') : $stashedId; // The form posts to the clean address, so its id is in the body
+        $noTarget = !$brandId;
+        if ($noTarget) $this->redirect('shop/brands/');
+
+        if ($isPost) {
+            $error = $this->handleFormSubmit();
+            if ($error) $this->data['admin']['error'] = $error;
+        }
+
+        $brand = $this->loadBrandForEdit($brandId);
+        $this->prepareFormData(brandId: $brandId, brand: $brand);
+        $this->setView('brands/edit.phtml');
+    }
+
+    private function prepareFormData(int $brandId, ?array $brand): void
+    {
         $this->data['admin']['brand'] = $brand ?? $this->getEmptyBrand();
         $this->data['admin']['brandId'] = $brandId;
-        $this->data['admin']['isNew'] = !$brandId;
         $this->data['admin']['showSavedMessage'] = $this->consumeSavedFlag();
         $this->data['admin']['error'] = $this->data['admin']['error'] ?? null;
         $this->data['admin']['pageTitle'] = $brandId
             ? \htmlspecialchars($brand['name'] ?? '')
             : 'Create Brand';
-
-        $this->setView('brands/edit.phtml');
     }
 
     /**
@@ -155,10 +176,8 @@ class BrandsController extends AdminController
     /**
      * @return array<string, mixed>|null
      */
-    private function loadBrandForEdit(int $brandId): ?array
+    private function loadBrandForEdit(int $brandId): array
     {
-        if (!$brandId) return null;
-
         $brand = $this->admin->model->brand->getById($brandId);
 
         if (!$brand) $this->redirect('shop/brands/');

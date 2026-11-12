@@ -181,7 +181,8 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $redirect = null;
 
         try {
-            $this->controller($data)->edit();
+            $isCreate = empty($fields['id']);
+            $isCreate ? $this->controller($data)->add() : $this->controller($data)->edit();
         } catch (\RuntimeException $e) {
             $redirect = $e->getMessage();
         }
@@ -507,9 +508,8 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $data = $this->signInAs('admin');
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
-        $this->controller($data)->edit();
+        $this->controller($data)->add();
 
-        $this->assertTrue($data['admin']['isNew']);
         $this->assertSame('sitewide', $data['admin']['discount']['type']);
         $this->assertSame('percent', $data['admin']['discount']['value_type']);
         $this->assertSame(0, $data['admin']['discount']['active']); // New discounts start switched off
@@ -532,7 +532,6 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
 
         $this->controller($data)->edit();
 
-        $this->assertFalse($data['admin']['isNew']);
         $this->assertSame($id, $data['admin']['discountId']);
         $this->assertTrue($data['admin']['discountForm']['isProductType']);
         $this->assertSame([$product], $data['admin']['selectedProductIds']);
@@ -546,12 +545,26 @@ class DiscountsControllerTest extends ShopDatabaseTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
         $data = $this->signInAs('admin');
-        $this->controller($data)->edit();
+        $this->controller($data)->add();
         $this->assertTrue($data['admin']['showSavedMessage']);
 
         $data = $this->signInAs('admin');
-        $this->controller($data)->edit();
+        $this->controller($data)->add();
         $this->assertFalse($data['admin']['showSavedMessage']);
+    }
+
+    public function test_refreshing_an_edit_page_that_lost_its_id_goes_back_to_the_list(): void
+    {
+        $this->stashedId = 0;
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $data = $this->signInAs('admin');
+
+        try {
+            $this->controller($data)->edit();
+            $this->fail('expected a redirect');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('/admin/shop/discounts/', $e->getMessage());
+        }
     }
 
     public function test_asking_for_a_discount_that_does_not_exist_goes_back_to_the_list(): void

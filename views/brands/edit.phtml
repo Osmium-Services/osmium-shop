@@ -28,9 +28,7 @@
 <div class="row justify-content-center"><div class="col-lg-6">
 <form method="POST" action="<?= $adminUrl('shop/brands/edit/') ?>" id="brand-form" enctype="multipart/form-data">
     <input type="hidden" name="token" value="<?= $template['formToken'] ?>">
-    <?php if (!$admin['isNew']): ?>
-        <input type="hidden" name="id" value="<?= $admin['brand']['id'] ?>">
-    <?php endif; ?>
+    <input type="hidden" name="id" value="<?= $admin['brand']['id'] ?>">
 
     <div class="card mb-4">
         <div class="card-header">
@@ -92,18 +90,16 @@
         <div class="card-footer d-flex justify-content-end gap-2">
             <a href="<?= $adminUrl('shop/brands/') ?>" class="btn btn-outline-secondary">Cancel</a>
             <button type="submit" class="btn btn-primary">
-                <i class="bx bx-save me-1"></i> <?= $admin['isNew'] ? 'Create Brand' : 'Save Changes' ?>
+                <i class="bx bx-save me-1"></i> Save Changes
             </button>
         </div>
     </div>
 </form>
 </div></div>
 
-<?php if (!$admin['isNew']): ?>
-    <script nonce="<?= $cspNonce ?>">
-        initPresenceTracking(adminBasePath + 'shop/brands/action/', <?= $admin['brandId'] ?>, {
-            formSelector: '#brand-form'
-        });
-    </script>
-<?php endif; ?>
+<script nonce="<?= $cspNonce ?>">
+    initPresenceTracking(adminBasePath + 'shop/brands/action/', <?= $admin['brandId'] ?>, {
+        formSelector: '#brand-form'
+    });
+</script>
 <script src="/assets/services/osmium-shop/brand-logo.js<?= $adminAssetVersion('/assets/services/osmium-shop/brand-logo.js') ?>"></script>

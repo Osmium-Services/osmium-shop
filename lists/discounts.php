@@ -14,7 +14,7 @@ require_once 'app/core/admin/services/ChangedByCell.php';
 return [
     'page' => [
         'title' => 'Shop Discounts',
-        'buttons' => [['label' => 'Create Discount', 'href' => 'shop/discounts/edit/']],
+        'buttons' => [['label' => 'Create Discount', 'href' => 'shop/discounts/add/']],
     ],
     'recent' => [
         'id' => 'discounts-recent',

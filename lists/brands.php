@@ -15,7 +15,7 @@ require_once 'app/core/admin/services/ChangedByCell.php';
 return [
     'page' => [
         'title' => 'Shop Brands',
-        'buttons' => [['label' => 'Create Brand', 'href' => 'shop/brands/edit/']],
+        'buttons' => [['label' => 'Create Brand', 'href' => 'shop/brands/add/']],
     ],
     'recent' => [
         'id' => 'brands-recent',

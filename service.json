@@ -149,6 +149,12 @@
         "method": "index",
         "title": "Statuses"
       },
+      "admin/shop/statuses/add": {
+        "controller": "controllers/StatusesController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
+        "method": "add",
+        "title": "Create Status"
+      },
       "admin/shop/statuses/edit*": {
         "controller": "controllers/StatusesController.php",
         "class": "Osmium\\Modules\\Admin\\Controllers\\StatusesController",
@@ -165,6 +171,12 @@
         "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
         "method": "index",
         "title": "Brands"
+      },
+      "admin/shop/brands/add": {
+        "controller": "controllers/BrandsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\BrandsController",
+        "method": "add",
+        "title": "Create Brand"
       },
       "admin/shop/brands/edit*": {
         "controller": "controllers/BrandsController.php",
@@ -209,6 +221,12 @@
         "class": "Osmium\\Modules\\Admin\\Controllers\\DiscountsController",
         "method": "index",
         "title": "Discounts"
+      },
+      "admin/shop/discounts/add": {
+        "controller": "controllers/DiscountsController.php",
+        "class": "Osmium\\Modules\\Admin\\Controllers\\DiscountsController",
+        "method": "add",
+        "title": "Create Discount"
       },
       "admin/shop/discounts/edit*": {
         "controller": "controllers/DiscountsController.php",

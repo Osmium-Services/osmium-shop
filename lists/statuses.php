@@ -20,7 +20,7 @@ require_once 'app/core/admin/services/ChangedByCell.php';
 return [
     'page' => [
         'title' => 'Shop Statuses',
-        'buttons' => [['label' => 'Create Status', 'href' => 'shop/statuses/edit/']],
+        'buttons' => [['label' => 'Create Status', 'href' => 'shop/statuses/add/']],
     ],
     'recent' => [
         'id' => 'statuses-recent',
