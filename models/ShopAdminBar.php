@@ -42,19 +42,19 @@ class ShopAdminBar
 
         $isProduct = \preg_match('/^product:(\d+)$/', $context, $match) === 1;
         if ($isProduct) {
-            return [['label' => 'Edit product', 'icon' => 'bx-edit-alt', 'path' => 'shop/products/edit/?id=' . (int)$match[1], 'primary' => true]];
+            return [['label' => 'Edit product', 'icon' => 'bx-store', 'path' => 'shop/products/edit/?id=' . (int)$match[1], 'primary' => true]];
         }
 
         $isShopIndex = $context === 'shop-index:all';
         if ($isShopIndex) {
-            // The landing page lists things, like the blog index, so it gets the blog index's icon
-            return [['label' => 'Edit categories', 'icon' => 'bx-news', 'path' => 'shop/categories/', 'primary' => true]];
+            // Product, category and landing links all use the shop's own icon (its admin menu group's)
+            return [['label' => 'Edit categories', 'icon' => 'bx-store', 'path' => 'shop/categories/', 'primary' => true]];
         }
 
         $isCategory = \preg_match('/^category:(\d+)$/', $context, $match) === 1;
         if ($isCategory) {
             // The category editor opens this category's form on load (?edit=ID)
-            return [['label' => 'Edit category', 'icon' => 'bx-edit-alt', 'path' => 'shop/categories/?edit=' . (int)$match[1], 'primary' => true]];
+            return [['label' => 'Edit category', 'icon' => 'bx-store', 'path' => 'shop/categories/?edit=' . (int)$match[1], 'primary' => true]];
         }
 
         return null;

@@ -42,7 +42,7 @@ final class ShopAdminBarTest extends TestCase
         $links = ShopAdminBar::links(['context' => 'shop-index:all']);
 
         $this->assertSame('shop/categories/', $links[0]['path']);
-        $this->assertSame('bx-news', $links[0]['icon']);
+        $this->assertSame('bx-store', $links[0]['icon']);
         $this->assertTrue($links[0]['primary']);
     }
 
@@ -67,7 +67,7 @@ final class ShopAdminBarTest extends TestCase
         $this->assertSame('shop/products/edit/?id=42', $links[0]['path']);
         $this->assertSame('Edit product', $links[0]['label']);
         $this->assertTrue($links[0]['primary']);
-        $this->assertSame('bx-edit-alt', $links[0]['icon']);
+        $this->assertSame('bx-store', $links[0]['icon']);
     }
 
     public function test_the_category_link_opens_that_categorys_edit_form(): void
