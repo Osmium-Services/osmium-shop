@@ -25,6 +25,27 @@ final class ShopAdminBarTest extends TestCase
         $this->assertSame('category:7', $context);
     }
 
+    public function test_the_shop_landing_page_is_announced(): void
+    {
+        $context = ShopAdminBar::context(['data' => ['shop' => ['listTotal' => 120, 'categoryTree' => []]]]);
+
+        $this->assertSame('shop-index:all', $context);
+    }
+
+    public function test_a_page_with_only_the_category_tree_is_not_the_shop_landing_page(): void
+    {
+        $this->assertNull(ShopAdminBar::context(['data' => ['shop' => ['categoryTree' => []]]]));
+    }
+
+    public function test_the_shop_landing_page_links_to_the_category_editor(): void
+    {
+        $links = ShopAdminBar::links(['context' => 'shop-index:all']);
+
+        $this->assertSame('shop/categories/', $links[0]['path']);
+        $this->assertSame('bx-news', $links[0]['icon']);
+        $this->assertTrue($links[0]['primary']);
+    }
+
     public function test_a_product_wins_over_a_category_on_the_same_page(): void
     {
         $context = ShopAdminBar::context(['data' => ['product' => ['id' => 3], 'category' => ['ID' => 9]]]);
