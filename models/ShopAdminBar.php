@@ -51,10 +51,10 @@ class ShopAdminBar
             return [['label' => 'Edit categories', 'icon' => 'bx-news', 'path' => 'shop/categories/', 'primary' => true]];
         }
 
-        $isCategory = \preg_match('/^category:\d+$/', $context) === 1;
+        $isCategory = \preg_match('/^category:(\d+)$/', $context, $match) === 1;
         if ($isCategory) {
-            // The category editor is one tree for every category, so there is no per-category page to open
-            return [['label' => 'Edit categories', 'icon' => 'bx-edit-alt', 'path' => 'shop/categories/', 'primary' => true]];
+            // The category editor opens this category's form on load (?edit=ID)
+            return [['label' => 'Edit category', 'icon' => 'bx-edit-alt', 'path' => 'shop/categories/?edit=' . (int)$match[1], 'primary' => true]];
         }
 
         return null;

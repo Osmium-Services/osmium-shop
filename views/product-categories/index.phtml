@@ -210,7 +210,8 @@
 window.categoriesConfig = {
     categoryUrls: <?= \json_encode($admin['categoryUrls']) ?>,
     isLockedByOther: <?= $admin['lockedByOther'] ? 'true' : 'false' ?>,
-    hasOwnBackup: <?= $admin['hasOwnBackup'] ? 'true' : 'false' ?>
+    hasOwnBackup: <?= $admin['hasOwnBackup'] ? 'true' : 'false' ?>,
+    editCategoryId: <?= (int)($admin['editCategoryId'] ?? 0) ?> // Open this category's edit form on load (?edit=ID)
 };
 </script>
 <script src="/assets/admin/js/list-view.js<?= $adminAssetVersion('/assets/admin/js/list-view.js') ?>"></script>

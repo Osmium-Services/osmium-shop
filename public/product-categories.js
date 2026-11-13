@@ -146,6 +146,15 @@ const CategoryManager = {
         this.renderSocialImage = this.setupImageZone('categorySocialImageZone', 'categorySocialImage', 'social_image');
     },
 
+    // /shop/categories/?edit=ID (the staff bar's link) opens that category's edit form once the tree has loaded
+    openRequestedCategory() {
+        const id = window.categoriesConfig.editCategoryId;
+        if (!id) return;
+
+        window.categoriesConfig.editCategoryId = 0; // Once: a reload of the tree must not reopen it
+        this.showEditModal(id);
+    },
+
     async loadCategories() {
         try {
             const response = await fetch(window.adminBasePath + 'shop/categories/action/', {
@@ -161,6 +170,7 @@ const CategoryManager = {
             if (data.success) {
                 this.categories = data.categories;
                 this.render();
+                this.openRequestedCategory();
             } else {
                 adminAlert('Error loading categories: ' + data.error);
             }

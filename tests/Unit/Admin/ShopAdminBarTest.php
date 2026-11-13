@@ -70,11 +70,12 @@ final class ShopAdminBarTest extends TestCase
         $this->assertSame('bx-edit-alt', $links[0]['icon']);
     }
 
-    public function test_the_category_link_opens_the_category_editor(): void
+    public function test_the_category_link_opens_that_categorys_edit_form(): void
     {
         $links = ShopAdminBar::links(['context' => 'category:7']);
 
-        $this->assertSame('shop/categories/', $links[0]['path']);
+        $this->assertSame('shop/categories/?edit=7', $links[0]['path']);
+        $this->assertSame('Edit category', $links[0]['label']);
         $this->assertTrue($links[0]['primary']);
     }
 

@@ -47,7 +47,10 @@ class ProductCategoriesController extends AdminController
         $categoryUrls = $this->buildCategoryUrlMap();
         $lockStatus = $this->getLockStatus();
         $lists = $this->loadListDefinitions('product-categories', __DIR__ . '/../lists');
+        $editCategoryId = (int)$this->osmium->getStashedParam(key: 'edit', default: 0); // ?edit=ID from the staff bar
+        $this->osmium->clearStashedQuerystring();
 
+        $this->data['admin']['editCategoryId'] = $editCategoryId;
         $this->data['admin']['lists'] = $lists;
         $this->data['admin']['recentCategories'] = $this->loadRecentCategories();
         $this->data['admin']['categoryTree'] = $categories;
