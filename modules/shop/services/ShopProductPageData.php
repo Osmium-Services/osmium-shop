@@ -93,12 +93,13 @@ class ShopProductPageData
 
     /**
      * Meta description taken from the start of the product description:
-     * markup removed, whitespace collapsed, cut to 160 characters.
+     * markup removed, entities such as &nbsp; decoded (the template escapes the result),
+     * whitespace collapsed, cut to 160 characters.
      */
     public static function metaDescription(?string $descriptionHtml): string
     {
-        $plainText = \strip_tags((string) $descriptionHtml);
-        $plainText = \preg_replace(pattern: '/\s+/', replacement: ' ', subject: \trim($plainText));
+        $plainText = \html_entity_decode(\strip_tags((string) $descriptionHtml), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $plainText = \preg_replace(pattern: '/[\s\x{00A0}]+/u', replacement: ' ', subject: \trim($plainText));
 
         return \mb_substr(string: $plainText, start: 0, length: self::META_DESCRIPTION_LENGTH);
     }

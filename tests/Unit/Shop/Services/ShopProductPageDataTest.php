@@ -98,6 +98,14 @@ final class ShopProductPageDataTest extends TestCase
 
     // ── metaDescription() ────────────────────────────────────────────────────
 
+    public function test_meta_description_decodes_entities_so_the_template_escapes_them_once(): void
+    {
+        $this->assertSame(
+            'A 400W (twin 200W) kit & more',
+            ShopProductPageData::metaDescription('<p>A 400W&nbsp;(twin 200W)&nbsp;kit &amp; more</p>'),
+        );
+    }
+
     public function test_meta_description_is_plain_text_with_collapsed_whitespace(): void
     {
         $this->assertSame(
