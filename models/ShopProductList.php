@@ -45,7 +45,7 @@ class ShopProductList
      * @param array<string, mixed> $row a live product (see product-list-for-hook.sql)
      * @param array<int, array{parent: ?int, label: string, sort: int}> $categories
      * @param callable(string): bool $exists whether a file is there
-     * @return array{id: int, brandId: int, brandName: string, name: string, title: string, reference: string, customOffer: string, createdAt: ?string, priceExcTax: float, available: bool, statusLabel: string, hasOptions: bool, image: ?string, imagePartial: string, category: ?array{id: int, name: string, path: string[], order: int[]}, categories: array<int, array{id: int, name: string, path: string[], order: int[]}>, categorySorts: array<int, int>}
+     * @return array{id: int, brandId: int, brandName: string, name: string, title: string, reference: string, customOffer: string, createdAt: ?string, priceExcTax: float, available: bool, statusLabel: string, hasOptions: bool, image: ?string, pageUrl: string, imagePartial: string, category: ?array{id: int, name: string, path: string[], order: int[]}, categories: array<int, array{id: int, name: string, path: string[], order: int[]}>, categorySorts: array<int, int>}
      */
     public static function shape(array $row, array $categories, string $imagesUrl, string $imagesRoot, callable $exists): array
     {
@@ -68,6 +68,7 @@ class ShopProductList
             'statusLabel' => (string) ($row['status_label'] ?? ''),
             'hasOptions' => (bool) $row['has_options'],
             'image' => $hasImage ? $imagesUrl . $file : null,
+            'pageUrl' => (string) ($row['page_url'] ?? ''),
             'imagePartial' => \substr($file, 0, -4), // The medium image without its extension or the images folder, for a caller that picks AVIF, WebP or jpg
             'category' => ShopProductFiles::category($row['category_id'] === null ? null : (int) $row['category_id'], $categories),
             'categories' => self::allCategories((string) ($row['category_ids'] ?? ''), $categories),

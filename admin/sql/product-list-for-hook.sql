@@ -34,7 +34,15 @@ SELECT
         FROM {PREFIX}products_productcategories AS PPC
         INNER JOIN {PREFIX}productcategories AS PC ON PC.id = PPC.category_id AND PC.deleted_at IS NULL
         WHERE PPC.product_id = P.id AND PPC.deleted_at IS NULL
-    ) AS category_sorts
+    ) AS category_sorts,
+    (
+        SELECT PG.url
+        FROM {PREFIX}products_pages AS PP
+        INNER JOIN {PREFIX}pages AS PG ON PG.id = PP.page_id AND PG.deleted_at IS NULL
+        WHERE PP.product_id = P.id AND PP.is_qr = 0 AND PP.deleted_at IS NULL
+        ORDER BY PP.page_id
+        LIMIT 1
+    ) AS page_url
 FROM {PREFIX}products AS P
 INNER JOIN {PREFIX}productbrands AS PB ON PB.id = P.brand_id AND PB.deleted_at IS NULL
 LEFT JOIN {PREFIX}productstatus AS PS ON PS.id = P.status_id AND PS.deleted_at IS NULL
