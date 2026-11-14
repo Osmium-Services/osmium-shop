@@ -94,6 +94,9 @@
     "shop.product.files": [
       "Osmium\\Modules\\Admin\\Services\\ShopProductFiles::files"
     ],
+    "shop.products.list": [
+      "Osmium\\Modules\\Admin\\Services\\ShopProductList::list"
+    ],
     "adminbar.context": [
       "Osmium\\Modules\\Admin\\Services\\ShopAdminBar::context"
     ],

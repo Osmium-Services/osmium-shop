@@ -82,6 +82,12 @@ class Product extends AdminModel
         return $this->database->prepare(sql: $this->loadSqlFile('product-files-list.sql'), bindings: [])->resultset();
     }
 
+    /** @return array<int, array<string, mixed>> Live products with price, status and the category each is listed under first, for the shop.products.list hook */
+    public function listForHook(): array
+    {
+        return $this->database->prepare(sql: $this->loadSqlFile('product-list-for-hook.sql'), bindings: [])->resultset();
+    }
+
     /** @return array<int, array<string, mixed>> Every live category (id, parent_id, label, sort) */
     public function listCategoriesForFiles(): array
     {
