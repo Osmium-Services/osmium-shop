@@ -45,7 +45,7 @@ class ShopProductList
      * @param array<string, mixed> $row a live product (see product-list-for-hook.sql)
      * @param array<int, array{parent: ?int, label: string, sort: int}> $categories
      * @param callable(string): bool $exists whether a file is there
-     * @return array{id: int, brandId: int, brandName: string, name: string, title: string, reference: string, priceExcTax: float, available: bool, statusLabel: string, hasOptions: bool, image: ?string, category: ?array{id: int, name: string, path: string[], order: int[]}, categories: array<int, array{id: int, name: string, path: string[], order: int[]}>}
+     * @return array{id: int, brandId: int, brandName: string, name: string, title: string, reference: string, customOffer: string, createdAt: ?string, priceExcTax: float, available: bool, statusLabel: string, hasOptions: bool, image: ?string, imagePartial: string, category: ?array{id: int, name: string, path: string[], order: int[]}, categories: array<int, array{id: int, name: string, path: string[], order: int[]}>, categorySorts: array<int, int>}
      */
     public static function shape(array $row, array $categories, string $imagesUrl, string $imagesRoot, callable $exists): array
     {
@@ -61,14 +61,34 @@ class ShopProductList
             'name' => (string) $row['model_name'],
             'title' => \trim($row['brand_name'] . ' ' . $row['model_name']),
             'reference' => (string) ($row['reference'] ?? ''),
+            'customOffer' => (string) ($row['custom_offer'] ?? ''),
+            'createdAt' => $row['created_at'] ?? null,
             'priceExcTax' => (float) $row['price_exc_tax'],
             'available' => (bool) $row['available'],
             'statusLabel' => (string) ($row['status_label'] ?? ''),
             'hasOptions' => (bool) $row['has_options'],
             'image' => $hasImage ? $imagesUrl . $file : null,
+            'imagePartial' => \substr($file, 0, -4), // The medium image without its extension or the images folder, for a caller that picks AVIF, WebP or jpg
             'category' => ShopProductFiles::category($row['category_id'] === null ? null : (int) $row['category_id'], $categories),
             'categories' => self::allCategories((string) ($row['category_ids'] ?? ''), $categories),
+            'categorySorts' => self::categorySorts((string) ($row['category_sorts'] ?? '')),
         ];
+    }
+
+    /**
+     * The product's own sort number in each category it is listed under, as the shop's admin orders them.
+     *
+     * @return array<int, int> category id => sort
+     */
+    private static function categorySorts(string $pairs): array
+    {
+        $sorts = [];
+        foreach (\array_filter(\explode(',', $pairs), 'strlen') as $pair) {
+            [$id, $sort] = \array_pad(\explode(':', $pair, 2), 2, '9999');
+            $sorts[(int) $id] = (int) $sort;
+        }
+
+        return $sorts;
     }
 
     /**
