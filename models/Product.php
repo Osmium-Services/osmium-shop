@@ -88,6 +88,12 @@ class Product extends AdminModel
         return $this->database->prepare(sql: $this->loadSqlFile('product-list-for-hook.sql'), bindings: [])->resultset();
     }
 
+    /** @return array<int, array<string, mixed>> Option types and values of every live product, for the shop.product.options hook */
+    public function listOptionsForHook(): array
+    {
+        return $this->database->prepare(sql: $this->loadSqlFile('product-options-for-hook.sql'), bindings: [])->resultset();
+    }
+
     /** @return array<int, array<string, mixed>> Every live category (id, parent_id, label, sort) */
     public function listCategoriesForFiles(): array
     {
