@@ -10,8 +10,10 @@ use Osmium\Core\Library\ServiceHooks;
 use Osmium\Core\Library\ServiceLoader;
 use Osmium\Core\Models\ServiceModel;
 use Osmium\Modules\Admin\Services\ConfigJson;
+use Osmium\Modules\Shop\Services\ShopListControls;
 
 require_once __DIR__ . '/../models/ShopSettingsBase.php';
+require_once __DIR__ . '/../modules/shop/services/ShopListControls.php';
 
 /**
  * Shop settings page (/admin/settings/shop/): prices, tax, display options and the customer notification matrix.
@@ -81,6 +83,10 @@ class ShopSettingsController extends ShopSettingsBase
         $configContent = ConfigJson::withValue($configContent, 'categoryShowCounts', $catShowCounts);
         $configContent = ConfigJson::withValue($configContent, 'categoryShowSummaryText', $catShowSummary);
         $configContent = ConfigJson::withValue($configContent, 'categoryShowCallToAction', $catShowCta);
+
+        $currentListLimit = ShopListControls::configuredLimit($this->config['shop']['categoryListLimit'] ?? null);
+        $postedListLimit = Input::post()->int(key: 'category_list_limit', default: $currentListLimit);
+        $configContent = ConfigJson::withValue($configContent, 'categoryListLimit', ShopListControls::configuredLimit($postedListLimit), section: 'shop');
 
         $prodShowSummary = Input::post()->has(key: 'product_show_summary');
         $prodShowPriceExc = Input::post()->has(key: 'product_show_price_exc_tax');

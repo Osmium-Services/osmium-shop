@@ -14,7 +14,7 @@ $this->data['shop']['categoryTree'] = $this->shop->model->productCategory->tree(
 
 // ?show=&sort=&stock[]=&page= are stashed in the session, since the querystring is stripped before a controller runs
 $controls = ShopListControls::resolve(
-    limit: $this->osmium->getStashedParam(key: 'show', default: ShopListControls::DEFAULT_LIMIT),
+    limit: $this->osmium->getStashedParam(key: 'show', default: ShopListControls::configuredLimit($shopConfig->categoryListLimit ?? null)),
     sort: $this->osmium->getStashedParam(key: 'sort', default: ShopListControls::DEFAULT_SORT),
     stock: $this->osmium->getStashedParam(key: 'stock', default: []),
     page: $this->osmium->getStashedParam(key: 'page', default: 1),

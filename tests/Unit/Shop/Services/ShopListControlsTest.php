@@ -25,6 +25,14 @@ final class ShopListControlsTest extends TestCase
         $this->assertSame(1, $controls['page']);
     }
 
+    public function test_configured_limit_accepts_only_the_offered_options(): void
+    {
+        $this->assertSame(100, ShopListControls::configuredLimit(100));
+        $this->assertSame(25, ShopListControls::configuredLimit('25'));
+        $this->assertSame(10, ShopListControls::configuredLimit(30));
+        $this->assertSame(10, ShopListControls::configuredLimit(null));
+    }
+
     public function test_valid_values_are_kept(): void
     {
         $controls = ShopListControls::resolve(limit: '25', sort: 'price-asc', stock: ['in', 'out'], page: '3');

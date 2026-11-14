@@ -10,6 +10,7 @@
         "categoryShowCounts": false,
         "categoryShowSummaryText": true,
         "categoryShowCallToAction": true,
+        "categoryListLimit": 10,
         "productShowSummary": true,
         "productShowPriceExcTax": true,
         "productShowDeliveryMessage": true,

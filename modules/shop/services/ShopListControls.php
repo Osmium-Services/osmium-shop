@@ -26,6 +26,17 @@ class ShopListControls
     ];
 
     /**
+     * The "Show" default from the shop settings (Category Pages > Products per page): one of LIMIT_OPTIONS, else DEFAULT_LIMIT.
+     */
+    public static function configuredLimit(mixed $configured): int
+    {
+        $limit = (int) $configured;
+        $isOption = \in_array($limit, self::LIMIT_OPTIONS, true);
+
+        return $isOption ? $limit : self::DEFAULT_LIMIT;
+    }
+
+    /**
      * @return array{limit: int, sort: string, sortColumn: string, stock: array<int, string>, page: int}
      */
     public static function resolve(mixed $limit, mixed $sort, mixed $stock, mixed $page): array
