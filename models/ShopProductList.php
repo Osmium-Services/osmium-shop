@@ -45,7 +45,7 @@ class ShopProductList
      * @param array<string, mixed> $row a live product (see product-list-for-hook.sql)
      * @param array<int, array{parent: ?int, label: string, sort: int}> $categories
      * @param callable(string): bool $exists whether a file is there
-     * @return array{id: int, brandId: int, brandName: string, name: string, title: string, reference: string, priceExcTax: float, available: bool, statusLabel: string, hasOptions: bool, image: ?string, category: ?array{id: int, name: string, path: string[], order: int[]}}
+     * @return array{id: int, brandId: int, brandName: string, name: string, title: string, reference: string, priceExcTax: float, available: bool, statusLabel: string, hasOptions: bool, image: ?string, category: ?array{id: int, name: string, path: string[], order: int[]}, categories: array<int, array{id: int, name: string, path: string[], order: int[]}>}
      */
     public static function shape(array $row, array $categories, string $imagesUrl, string $imagesRoot, callable $exists): array
     {
@@ -67,6 +67,24 @@ class ShopProductList
             'hasOptions' => (bool) $row['has_options'],
             'image' => $hasImage ? $imagesUrl . $file : null,
             'category' => ShopProductFiles::category($row['category_id'] === null ? null : (int) $row['category_id'], $categories),
+            'categories' => self::allCategories((string) ($row['category_ids'] ?? ''), $categories),
         ];
+    }
+
+    /**
+     * Every category a product is listed under, first-listed first.
+     *
+     * @param array<int, array{parent: ?int, label: string, sort: int}> $map
+     * @return array<int, array{id: int, name: string, path: string[], order: int[]}>
+     */
+    private static function allCategories(string $ids, array $map): array
+    {
+        $found = [];
+        foreach (\array_filter(\explode(',', $ids), 'strlen') as $id) {
+            $category = ShopProductFiles::category((int) $id, $map);
+            if ($category !== null) $found[] = $category;
+        }
+
+        return $found;
     }
 }

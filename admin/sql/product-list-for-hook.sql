@@ -1,5 +1,5 @@
--- Live products for the shop.products.list hook: names, reference, ex-tax price, status, whether it has options, and the one
--- category each is listed under first. Discontinued (status 3) are left out. No customer data.
+-- Live products for the shop.products.list hook: names, reference, ex-tax price, status, whether it has options, and every
+-- category it is listed under (the first one also as category_id). Discontinued (status 3) are left out. No customer data.
 SELECT
     P.id,
     P.brand_id,
@@ -20,7 +20,13 @@ SELECT
         WHERE PPC.product_id = P.id AND PPC.deleted_at IS NULL
         ORDER BY COALESCE(PPC.sort, 9999), PPC.category_id
         LIMIT 1
-    ) AS category_id
+    ) AS category_id,
+    (
+        SELECT GROUP_CONCAT(PPC.category_id ORDER BY COALESCE(PPC.sort, 9999), PPC.category_id)
+        FROM {PREFIX}products_productcategories AS PPC
+        INNER JOIN {PREFIX}productcategories AS PC ON PC.id = PPC.category_id AND PC.deleted_at IS NULL
+        WHERE PPC.product_id = P.id AND PPC.deleted_at IS NULL
+    ) AS category_ids
 FROM {PREFIX}products AS P
 INNER JOIN {PREFIX}productbrands AS PB ON PB.id = P.brand_id AND PB.deleted_at IS NULL
 LEFT JOIN {PREFIX}productstatus AS PS ON PS.id = P.status_id AND PS.deleted_at IS NULL

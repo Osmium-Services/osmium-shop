@@ -97,6 +97,9 @@
     "shop.products.list": [
       "Osmium\\Modules\\Admin\\Services\\ShopProductList::list"
     ],
+    "shop.categories": [
+      "Osmium\\Modules\\Admin\\Services\\ShopCategoryLookup::categories"
+    ],
     "adminbar.context": [
       "Osmium\\Modules\\Admin\\Services\\ShopAdminBar::context"
     ],
