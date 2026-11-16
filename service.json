@@ -24,6 +24,9 @@
     "shop": "modules/shop",
     "thank-you": "modules/thank-you"
   },
+  "csp": {
+    "frame-src": ["https://www.youtube.com"]
+  },
   "configFiles": {
     "shop": "config-defaults/shop.json.php",
     "checkout": "config-defaults/checkout.json.php"
