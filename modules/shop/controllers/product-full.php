@@ -257,5 +257,8 @@ $serviceData = $hooks->collect(
 );
 $this->data['product'] = ShopProductPageData::withServiceData(product: $this->data['product'], results: $serviceData);
 
+// Any installed bot protection supplies its widget for the review form; the page never names one
+$this->data['template']['reviewFormProtection'] = \implode('', $hooks->collect(event: 'form.widget', payload: ['form' => 'reviews']));
+
 $this->data['site']['socialImage'] = $this->osmium->config->site->FQDN
     . $this->osmium->imagePath($product->imagePath('social', '', '.jpg')); // Social image for Open Graph
