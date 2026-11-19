@@ -131,7 +131,7 @@ function clearKitProduct() {
         if (!panel) {
             panel = document.createElement('div');
             panel.className = 'list-group shadow product-picker-results';
-            panel.style.cssText = 'position:fixed;z-index:2000;max-height:320px;overflow-y:auto;';
+            panel.style.cssText = 'position:fixed;z-index:2000;max-height:320px;overflow-y:auto;background-color:var(--bs-dropdown-bg, var(--bs-paper-bg, #fff));border-radius:6px;'; // Solid, so the page does not show through
             document.body.append(panel);
         }
         activeInput = input;
