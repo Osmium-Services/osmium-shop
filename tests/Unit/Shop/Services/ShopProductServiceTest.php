@@ -431,4 +431,39 @@ class ShopProductServiceTest extends TestCase
         $this->assertSame('2026-11-01', $types[0]['linkedProductRestockDate']);
         $this->assertSame([3, 4], $types[0]['dependsOnValueIds']);
     }
+
+    public function testParseIdListKeepsOrderAndDropsJunk(): void
+    {
+        $this->assertSame([12, 5, 48], ShopProductService::parseIdList(' 12, 5 ,x,0,12,,48 '));
+        $this->assertSame([], ShopProductService::parseIdList(null));
+        $this->assertSame([], ShopProductService::parseIdList(''));
+    }
+
+    public function testIdListOrNullStoresCleanedListOrNull(): void
+    {
+        $this->assertSame('12,5,48', ShopProductService::idListOrNull('12, 5,abc,48,12'));
+        $this->assertNull(ShopProductService::idListOrNull(' , abc,0'));
+        $this->assertNull(ShopProductService::idListOrNull(null));
+    }
+
+    public function testAlternativesToStoreKeepsStoredSoftDeletedProducts(): void
+    {
+        $this->assertSame('8,3,5', ShopProductService::alternativesToStore(posted: '8,3', stored: '5,8,9', deletedIds: [5, 12]));
+    }
+
+    public function testAlternativesToStoreDropsStoredProductsThatAreNotDeleted(): void
+    {
+        $this->assertSame('8', ShopProductService::alternativesToStore(posted: '8', stored: '8,9', deletedIds: [5]));
+    }
+
+    public function testAlternativesToStoreDoesNotRepeatADeletedProductThatIsAlsoPosted(): void
+    {
+        $this->assertSame('5,8', ShopProductService::alternativesToStore(posted: '5,8', stored: '5', deletedIds: [5]));
+    }
+
+    public function testAlternativesToStoreIsNullWhenNothingIsLeft(): void
+    {
+        $this->assertNull(ShopProductService::alternativesToStore(posted: '', stored: '9', deletedIds: []));
+        $this->assertNull(ShopProductService::alternativesToStore(posted: null, stored: null, deletedIds: [5]));
+    }
 }

@@ -20,5 +20,6 @@ UPDATE { PREFIX }products SET
     option_label = :option_label,
     option_default = :option_default,
     kit_id = :kit_id,
+    alternatives = :alternatives,
     updated_at = NOW()
 WHERE id = :id

@@ -198,6 +198,13 @@ class Product extends AdminModel
     }
 
     /** @return array<string, mixed>|null */
+    public function getAlternatives(int $id): string
+    {
+        $row = $this->fetchOne('product-get-alternatives.sql', [':id' => $id]);
+
+        return (string)($row['alternatives'] ?? '');
+    }
+
     public function getPrices(int $id): ?array
     {
         return $this->fetchOne('product-get-prices.sql', [':id' => $id]);
@@ -252,6 +259,7 @@ class Product extends AdminModel
             ':option_label' => $data['option_label'],
             ':option_default' => $data['option_default'],
             ':kit_id' => $data['kit_id'],
+            ':alternatives' => $data['alternatives'] ?? null,
         ]);
     }
 
@@ -371,6 +379,7 @@ class Product extends AdminModel
     public function hardDelete(int $id): void
     {
         $this->run('product-hard-delete.sql', [':id' => $id]);
+        $this->run('product-remove-from-alternatives.sql', [':removed_id' => $id, ':match_id' => $id]); // No product may keep listing it as an alternative
     }
 
     /** Full row for a single product (all columns). */

@@ -10,12 +10,14 @@ use Osmium\Modules\Shop\Services\ShopProductFaq;
 use Osmium\Modules\Shop\Services\ShopKitAvailability;
 use Osmium\Modules\Shop\Services\ShopProductService;
 use Osmium\Modules\Shop\Services\ShopProductDiscounts;
+use Osmium\Modules\Shop\Services\ShopProductCard;
 
 require_once __DIR__ . '/../services/ShopProductPageData.php';
 require_once __DIR__ . '/../services/ShopProductFaq.php';
 require_once __DIR__ . '/../services/ShopProductService.php';
 require_once __DIR__ . '/../services/ShopProductDiscounts.php';
 require_once __DIR__ . '/../services/ShopKitAvailability.php';
+require_once __DIR__ . '/../services/ShopProductCard.php';
 
 $product = $this->shop->model->product;
 $productOption = $this->shop->model->productOption;
@@ -244,6 +246,29 @@ $this->data['product']['descriptionImage3'] = $product->descrImage3;
 $hasMetaDescription = !empty($this->data['template']['metaDescription']);
 if (!$hasMetaDescription) {
     $this->data['template']['metaDescription'] = ShopProductPageData::metaDescription($product->descr);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alternatives: the products listed in the product's alternatives column, as listing cards in the listed order
+// ─────────────────────────────────────────────────────────────────────────────
+
+$alternativeIDs = \array_values(\array_diff(ShopProductService::parseIdList($product->alternatives), [(int)$product->id]));
+$alternativeRows = $this->shop->model->product->loadMultipleByIDs($alternativeIDs); // Hidden, deleted and unpublished products come back missing
+$alternativeDiscounts = ShopProductDiscounts::forProducts($this->osmium, $alternativeRows, (float)$shopConfig->taxRatePercent, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium)->currencySign());
+
+$this->data['product']['alternativeProducts'] = [];
+foreach ($alternativeIDs as $alternativeID) {
+    $row = $alternativeRows[$alternativeID] ?? null;
+    if (!$row || !empty($row['deleted_at'])) continue; // A soft-deleted product stays listed in the column, so restoring it brings it back
+
+    $card = ShopProductCard::fromRow(productData: $row, productId: $alternativeID, taxRatePercent: (float)$shopConfig->taxRatePercent);
+    $imageBasePath = ShopProductCard::imageBasePath(brandPath: $card['brandPath'], modelPath: $card['modelPath']);
+
+    $this->data['product']['alternativeProducts'][$alternativeID] = $card + [
+        'activeDiscount' => $alternativeDiscounts[$alternativeID] ?? null,
+        'image' => $this->osmium->imagePath($imageBasePath),
+        'image2x' => $this->osmium->imagePath($imageBasePath . '@2x'),
+    ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

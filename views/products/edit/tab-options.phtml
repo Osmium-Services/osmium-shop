@@ -47,6 +47,53 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Related Product -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-link me-2"></i>Related Product</h5>
+                </div>
+                <div class="card-body">
+                    <label for="kit_product_input" class="form-label fw-semibold">See Also</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="kit_product_input" autocomplete="off"
+                               placeholder="Search products..." value="<?= \htmlspecialchars($edit['kitDisplayValue']) ?>">
+                        <button type="button" class="btn btn-outline-secondary" data-call="clearKitProduct" title="Clear">
+                            <i class="bx bx-x"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" id="kit_id" name="kit_id" value="<?= $admin['kitId'] ?: '' ?>">
+                    <datalist id="kit_product_list">
+                        <?php foreach ($edit['otherProducts'] as $p): ?>
+                            <option data-id="<?= $p['id'] ?>" value="<?= \htmlspecialchars(($p['brand_name'] ?? '') . ' ' . ($p['model_name'] ?? '')) ?>">
+                        <?php endforeach; ?>
+                    </datalist>
+                    <div class="form-text">Link to a related product (e.g. a kit) that will appear as "See also" on the product page.</div>
+                </div>
+            </div>
+
+            <!-- Alternatives -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-transfer-alt me-2"></i>Alternatives</h5>
+                </div>
+                <div class="card-body">
+                    <label for="alternatives_input" class="form-label fw-semibold">Alternative products</label>
+                    <input type="text" class="form-control" id="alternatives_input" autocomplete="off"
+                           placeholder="Search products to add...">
+                    <input type="hidden" id="alternatives" name="alternatives"
+                           value="<?= \htmlspecialchars(\implode(',', \array_column($edit['alternativeChoices'], 'id'))) ?>">
+                    <div id="alternatives_list" class="d-flex flex-wrap gap-2 mt-2">
+                        <?php foreach ($edit['alternativeChoices'] as $choice): ?>
+                            <span class="badge bg-label-primary d-inline-flex align-items-center" data-id="<?= $choice['id'] ?>">
+                                <?= \htmlspecialchars($choice['label']) ?>
+                                <button type="button" class="btn-close ms-2" data-alternative-remove aria-label="Remove"></button>
+                            </span>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="form-text mt-3">Shown as an "Alternative Products" carousel on the product page, in this order. Leave empty to hide it.</div>
+                </div>
+            </div>
         </div>
     </div>
 </div><!-- End Options Tab -->

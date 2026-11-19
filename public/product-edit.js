@@ -49,29 +49,172 @@ document.getElementById('status_id').addEventListener('change', function() {
     restockWrapper.style.display = this.selectedOptions[0].dataset.restocking === '1' ? '' : 'none';
 });
 
-// Update hidden kit_id when datalist selection changes
-document.getElementById('kit_product_input').addEventListener('input', function() {
-    const input = this.value;
-    const datalist = document.getElementById('kit_product_list');
-    const options = datalist.querySelectorAll('option');
-
-    for (const option of options) {
-        if (option.value === input) {
-            document.getElementById('kit_id').value = option.dataset.id;
-            return;
-        }
-    }
-    // If no match found in datalist, clear the kit_id (user typed something that doesn't match)
-    if (input.trim() === '') {
-        document.getElementById('kit_id').value = '';
-    }
-});
-
 // Clear kit product selection
 function clearKitProduct() {
     document.getElementById('kit_product_input').value = '';
     document.getElementById('kit_id').value = '';
 }
+
+// Product pickers (See also, Alternatives): a search box with its own result list instead of the browser's datalist,
+// which behaves differently per browser and inside hidden tabs. Everything is delegated on document, so it works whatever
+// order the tabs and scripts load in. The #kit_product_list options are only the source of the product names and IDs.
+(function() {
+    const MAX_RESULTS = 10;
+    const normalise = text => text.replace(/\s+/g, ' ').trim().toLowerCase();
+    let panel = null;
+    let activeInput = null;
+    let activeIndex = 0;
+
+    const pickers = {
+        kit_product_input: {
+            exclude: () => [],
+            pick(product) {
+                document.getElementById('kit_id').value = product.id;
+                document.getElementById('kit_product_input').value = product.label;
+            },
+        },
+        alternatives_input: {
+            exclude: () => Array.from(document.querySelectorAll('#alternatives_list [data-id]')).map(el => el.dataset.id),
+            pick(product) {
+                const input = document.getElementById('alternatives_input');
+                input.value = '';
+                addAlternative(product);
+            },
+        },
+    };
+
+    function products() {
+        return Array.from(document.querySelectorAll('#kit_product_list option')).map(o => ({id: o.dataset.id, label: o.value}));
+    }
+
+    function addAlternative(product) {
+        const list = document.getElementById('alternatives_list');
+        if (!list || list.querySelector('[data-id="' + product.id + '"]')) return; // already listed
+
+        const chip = document.createElement('span');
+        chip.className = 'badge bg-label-primary d-inline-flex align-items-center';
+        chip.dataset.id = product.id;
+        chip.append(product.label);
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'btn-close ms-2';
+        remove.setAttribute('data-alternative-remove', '');
+        remove.setAttribute('aria-label', 'Remove');
+        chip.append(remove);
+        list.append(chip);
+        syncAlternatives();
+    }
+
+    function syncAlternatives() {
+        const hidden = document.getElementById('alternatives');
+        if (!hidden) return;
+        hidden.value = Array.from(document.querySelectorAll('#alternatives_list [data-id]')).map(el => el.dataset.id).join(',');
+    }
+
+    function matches(input) {
+        const query = normalise(input.value);
+        const excluded = pickers[input.id].exclude();
+        const found = products().filter(p => !excluded.includes(p.id) && (query === '' || normalise(p.label).includes(query)));
+        return found.slice(0, MAX_RESULTS);
+    }
+
+    function closePanel() {
+        if (panel) panel.remove();
+        panel = null;
+        activeInput = null;
+    }
+
+    function openPanel(input) {
+        const found = matches(input);
+        if (!found.length) return closePanel();
+
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.className = 'list-group shadow product-picker-results';
+            panel.style.cssText = 'position:fixed;z-index:2000;max-height:320px;overflow-y:auto;';
+            document.body.append(panel);
+        }
+        activeInput = input;
+        activeIndex = 0;
+
+        const box = input.getBoundingClientRect();
+        panel.style.left = box.left + 'px';
+        panel.style.top = (box.bottom + 2) + 'px';
+        panel.style.width = box.width + 'px';
+
+        panel.replaceChildren(...found.map((product, index) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'list-group-item list-group-item-action' + (index === 0 ? ' active' : '');
+            item.dataset.id = product.id;
+            item.textContent = product.label;
+            return item;
+        }));
+    }
+
+    function highlight(index) {
+        const items = panel ? Array.from(panel.children) : [];
+        if (!items.length) return;
+        activeIndex = (index + items.length) % items.length;
+        items.forEach((item, i) => item.classList.toggle('active', i === activeIndex));
+        items[activeIndex].scrollIntoView({block: 'nearest'});
+    }
+
+    function choose(input, id) {
+        const product = products().find(p => p.id === id);
+        if (!product) return;
+        pickers[input.id].pick(product);
+        closePanel();
+    }
+
+    const isPicker = el => el && el.id && Object.prototype.hasOwnProperty.call(pickers, el.id);
+
+    document.addEventListener('input', e => {
+        if (!isPicker(e.target)) return;
+        if (e.target.id === 'kit_product_input' && e.target.value.trim() === '') document.getElementById('kit_id').value = ''; // Emptied by hand: no kit
+        openPanel(e.target);
+    });
+
+    document.addEventListener('focusin', e => {
+        if (isPicker(e.target)) openPanel(e.target);
+    });
+
+    document.addEventListener('keydown', e => {
+        if (!isPicker(e.target)) return;
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Enter must never save the whole product form
+            const items = panel ? Array.from(panel.children) : [];
+            if (items.length) choose(e.target, items[activeIndex].dataset.id);
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!panel) openPanel(e.target);
+            highlight(activeIndex + (e.key === 'ArrowDown' ? 1 : -1));
+        } else if (e.key === 'Escape' && panel) {
+            e.stopImmediatePropagation(); // Escape elsewhere leaves the page, here it only closes the list
+            closePanel();
+        }
+    }, true);
+
+    document.addEventListener('mousedown', e => {
+        const item = e.target.closest('.product-picker-results [data-id]');
+        if (item && activeInput) {
+            e.preventDefault(); // Keep focus in the search box
+            choose(activeInput, item.dataset.id);
+            return;
+        }
+        if (panel && !isPicker(e.target)) closePanel();
+    });
+
+    document.addEventListener('click', e => {
+        const remove = e.target.closest('[data-alternative-remove]');
+        if (!remove) return;
+        remove.closest('[data-id]').remove();
+        syncAlternatives();
+    });
+
+    window.addEventListener('resize', closePanel);
+    window.addEventListener('scroll', closePanel, true);
+})();
 
 // Press Escape to go back to products list
 document.addEventListener('keydown', function(e) {

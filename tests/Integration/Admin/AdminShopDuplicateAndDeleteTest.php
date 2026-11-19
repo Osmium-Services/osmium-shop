@@ -229,6 +229,26 @@ class AdminShopDuplicateAndDeleteTest extends ShopDatabaseTestCase
         $this->assertSame(1, $this->pagesService->routeRegenerations);
     }
 
+    public function test_completely_deleting_removes_the_product_from_every_alternatives_list(): void
+    {
+        $brandId = $this->createBrand("Zq Brand {$this->tag}");
+        $gone = $this->createTestProduct(['brand_id' => $brandId, 'model_name' => "Gone {$this->tag}"]);
+        $middle = $this->createTestProduct(['brand_id' => $brandId, 'model_name' => "Middle {$this->tag}"]);
+        $only = $this->createTestProduct(['brand_id' => $brandId, 'model_name' => "Only {$this->tag}"]);
+        $similar = $this->createTestProduct(['brand_id' => $brandId, 'model_name' => "Similar {$this->tag}"]);
+        $table = $this->table('products');
+        foreach ([$middle => "7,{$gone},9", $only => (string) $gone, $similar => "{$gone}0,1{$gone}"] as $productId => $list) {
+            $this->db->prepare(sql: "UPDATE {$table} SET alternatives = :list WHERE id = :id", bindings: [':list' => $list, ':id' => $productId])->execute();
+        }
+
+        $this->shop->deleteCompletely($gone, $this->slugger(...), $this->slugger(...));
+
+        $stored = fn(int $productId): ?string => $this->one("SELECT alternatives FROM {$table} WHERE id = :id", [':id' => $productId])['alternatives'];
+        $this->assertSame('7,9', $stored($middle));
+        $this->assertNull($stored($only));
+        $this->assertSame("{$gone}0,1{$gone}", $stored($similar)); // Only the exact ID goes, not a longer one that contains it
+    }
+
     public function test_completely_deleting_a_product_whose_name_has_no_usable_slug_keeps_every_image_folder(): void
     {
         $brandId = $this->createBrand("Zq Brand {$this->tag}");

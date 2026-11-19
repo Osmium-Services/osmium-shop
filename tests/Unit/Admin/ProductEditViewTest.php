@@ -122,6 +122,23 @@ class ProductEditViewTest extends TestCase
         $this->assertSame('Warranty', $gallery['warranty']['label']);
     }
 
+    public function testAlternativeChoicesKeepStoredOrderAndSkipSelfAndMissing(): void
+    {
+        $admin = $this->admin([
+            'product' => ['id' => 5, 'alternatives' => '8,5,99,6'] + $this->admin()['product'],
+            'allProducts' => [
+                ['id' => 5, 'brand_name' => 'Self', 'model_name' => 'One'],
+                ['id' => 6, 'brand_name' => 'Acme', 'model_name' => 'Six'],
+                ['id' => 8, 'brand_name' => 'Acme', 'model_name' => 'Eight'],
+            ],
+        ]);
+
+        $this->assertSame([
+            ['id' => 8, 'label' => 'Acme Eight'],
+            ['id' => 6, 'label' => 'Acme Six'],
+        ], ProductEditView::build($admin, $this->imagesRoot)['alternativeChoices']);
+    }
+
     public function testSmallDisplayValues(): void
     {
         $edit = ProductEditView::build($this->admin(), $this->imagesRoot);

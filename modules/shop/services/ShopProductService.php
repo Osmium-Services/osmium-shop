@@ -117,6 +117,42 @@ class ShopProductService
     }
 
     /**
+     * Product IDs from a comma-separated list: whitespace trimmed, non-numeric and zero entries and repeats dropped.
+     *
+     * @return int[]
+     */
+    public static function parseIdList(?string $list): array
+    {
+        $ids = \array_map(callback: 'intval', array: \explode(separator: ',', string: (string)$list));
+
+        return \array_values(\array_unique(\array_filter($ids)));
+    }
+
+    /**
+     * The cleaned comma-separated form of an ID list for storing, or null when no valid ID is left.
+     */
+    public static function idListOrNull(?string $list): ?string
+    {
+        $ids = self::parseIdList($list);
+
+        return $ids ? \implode(separator: ',', array: $ids) : null;
+    }
+
+    /**
+     * The alternatives list to store when a product is saved: the posted IDs, then any stored ID that belongs to a
+     * soft-deleted product. The picker cannot show a deleted product, so without this a save would drop it and
+     * restoring it would not bring it back.
+     *
+     * @param int[] $deletedIds IDs of soft-deleted products
+     */
+    public static function alternativesToStore(?string $posted, ?string $stored, array $deletedIds): ?string
+    {
+        $keptDeleted = \array_intersect(self::parseIdList($stored), $deletedIds);
+
+        return self::idListOrNull(\implode(separator: ',', array: [...self::parseIdList($posted), ...$keptDeleted]));
+    }
+
+    /**
      * Load related kit product data.
      *
      * @param int|null $kitId Kit product ID (null if no kit)

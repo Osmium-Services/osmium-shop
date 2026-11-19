@@ -57,30 +57,6 @@
                 </div>
             </div>
 
-            <!-- Related Product -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bx bx-link me-2"></i>Related Product</h5>
-                </div>
-                <div class="card-body">
-                    <label for="kit_product_input" class="form-label fw-semibold">See Also</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="kit_product_input" list="kit_product_list"
-                               placeholder="Search products..." value="<?= \htmlspecialchars($edit['kitDisplayValue']) ?>">
-                        <button type="button" class="btn btn-outline-secondary" data-call="clearKitProduct" title="Clear">
-                            <i class="bx bx-x"></i>
-                        </button>
-                    </div>
-                    <input type="hidden" id="kit_id" name="kit_id" value="<?= $admin['kitId'] ?: '' ?>">
-                    <datalist id="kit_product_list">
-                        <?php foreach ($edit['otherProducts'] as $p): ?>
-                            <option data-id="<?= $p['id'] ?>" value="<?= \htmlspecialchars(($p['brand_name'] ?? '') . ' ' . ($p['model_name'] ?? '')) ?>">
-                        <?php endforeach; ?>
-                    </datalist>
-                    <div class="form-text">Link to a related product (e.g. a kit) that will appear as "See also" on the product page.</div>
-                </div>
-            </div>
-
             <!-- Status -->
             <div class="card mb-4">
                 <div class="card-header">

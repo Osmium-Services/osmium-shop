@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Admin\Services;
 
+use Osmium\Modules\Shop\Services\ShopProductService;
+
+require_once __DIR__ . '/../modules/shop/services/ShopProductService.php';
+
 /**
  * Prepares the display values the product edit page needs (image choices,
  * category dropdown state, PDF types, "other products" lists...) so the
@@ -49,6 +53,7 @@ class ProductEditView
             'pdfTypes' => self::PDF_TYPES,
             'kitDisplayValue' => self::productLabel($admin['currentKitProduct'] ?? null),
             'otherProducts' => self::excluding($admin['allProducts'] ?? [], $currentId),
+            'alternativeChoices' => self::alternativeChoices($admin['allProducts'] ?? [], (string) ($product['alternatives'] ?? ''), $currentId),
             'otherProductsWithOptions' => self::excluding($admin['productsWithOptions'] ?? [], $currentId),
             'otherProductsWithTechspec' => self::excluding($admin['productsWithTechspec'] ?? [], $currentId),
             'otherProductsWithFaq' => self::excluding($admin['productsWithFaq'] ?? [], $currentId),
@@ -180,6 +185,27 @@ class ProductEditView
         if (!$product) return '';
 
         return ($product['brand_name'] ?? '') . ' ' . ($product['model_name'] ?? '');
+    }
+
+    /**
+     * The products a product lists as alternatives, in the stored order, as [id, label] pairs for the picker.
+     * An ID that no longer matches a product is left out, so saving the form drops it.
+     *
+     * @param array<int, array<string, mixed>> $allProducts
+     * @return array<int, array{id: int, label: string}>
+     */
+    private static function alternativeChoices(array $allProducts, string $stored, int $currentId): array
+    {
+        $byId = [];
+        foreach ($allProducts as $p) $byId[(int) $p['id']] = $p;
+
+        $choices = [];
+        foreach (ShopProductService::parseIdList($stored) as $id) {
+            if ($id === $currentId || !isset($byId[$id])) continue;
+            $choices[] = ['id' => $id, 'label' => self::productLabel($byId[$id])];
+        }
+
+        return $choices;
     }
 
     /**

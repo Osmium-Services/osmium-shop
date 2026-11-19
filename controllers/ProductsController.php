@@ -22,6 +22,7 @@ use Osmium\Core\Library\ServiceLoader;
 use Osmium\Core\Library\ServiceHooks;
 use Osmium\Core\Models\ServiceModel;
 use Osmium\Modules\Shop\Services\ShopProductFaq;
+use Osmium\Modules\Shop\Services\ShopProductService;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 require_once __DIR__ . '/../models/ProductEditView.php';
@@ -29,6 +30,7 @@ require_once __DIR__ . '/../models/ProductFormData.php';
 require_once __DIR__ . '/../models/ProductListView.php';
 require_once __DIR__ . '/../models/ProductPriceCsv.php';
 require_once __DIR__ . '/../modules/shop/services/ShopProductFaq.php';
+require_once __DIR__ . '/../modules/shop/services/ShopProductService.php';
 
 /**
  * Products controller - manages product catalog (CRUD, import/export).
@@ -492,6 +494,18 @@ class ProductsController extends AdminController
         }
     }
 
+    private function alternativesToStore(int $productId): ?string
+    {
+        $product = $this->admin->model->product;
+        $deletedIds = \array_map(fn(array $row): int => (int)$row['id'], $product->getDeleted());
+
+        return ShopProductService::alternativesToStore(
+            posted: Input::post()->string(key: 'alternatives'),
+            stored: $product->getAlternatives($productId),
+            deletedIds: $deletedIds,
+        );
+    }
+
     private function updateProductRecord(int $productId): void
     {
         $techspec = Input::post()->string(key: 'techspec');
@@ -518,6 +532,7 @@ class ProductsController extends AdminController
             'option_label' => Input::post()->string(key: 'option_label'),
             'option_default' => Input::post()->string(key: 'option_default'),
             'kit_id' => Input::post()->nullableInt(key: 'kit_id'),
+            'alternatives' => $this->alternativesToStore($productId),
         ]);
     }
 

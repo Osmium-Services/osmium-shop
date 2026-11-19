@@ -193,6 +193,52 @@ class ProductPageControllerTest extends ShopDatabaseTestCase
         $this->assertNotEmpty($product['addedDate']);
     }
 
+    public function test_alternatives_come_as_cards_in_the_listed_order(): void
+    {
+        $first = $this->product(['model_name' => "First {$this->tag}", 'price_exc_tax' => 50]);
+        $second = $this->product(['model_name' => "Second {$this->tag}"]);
+        $id = $this->product();
+        $this->setColumn($id, 'alternatives', "{$second},{$first}");
+
+        $alternatives = $this->page($id)['product']['alternativeProducts'];
+
+        $this->assertSame([$second, $first], \array_keys($alternatives));
+        $this->assertSame("{$this->brand} First {$this->tag}", $alternatives[$first]['title']);
+        $this->assertSame('60.00', $alternatives[$first]['priceIncTax']);
+        $this->assertSame("zq-{$this->tag}-{$first}", $alternatives[$first]['stub']);
+        $this->assertNotSame('', $alternatives[$first]['image']);
+    }
+
+    public function test_alternatives_leave_out_the_product_itself_missing_ids_and_products_with_no_live_page(): void
+    {
+        $listed = $this->product();
+        $noPage = $this->createTestProduct(['brand_id' => $this->brandId, 'status_id' => $this->statusId(true)]);
+        $id = $this->product();
+        $this->setColumn($id, 'alternatives', "{$id},999999999,{$noPage},{$listed}");
+
+        $this->assertSame([$listed], \array_keys($this->page($id)['product']['alternativeProducts']));
+    }
+
+    public function test_a_soft_deleted_alternative_is_hidden_and_comes_back_when_restored(): void
+    {
+        $alternative = $this->product();
+        $id = $this->product();
+        $this->setColumn($id, 'alternatives', (string) $alternative);
+
+        $this->setColumn($alternative, 'deleted_at', \date('Y-m-d H:i:s'));
+        $this->assertSame([], $this->page($id)['product']['alternativeProducts']);
+
+        $this->setColumn($alternative, 'deleted_at', null);
+        $this->assertSame([$alternative], \array_keys($this->page($id)['product']['alternativeProducts']));
+    }
+
+    public function test_a_product_with_no_alternatives_gets_an_empty_list(): void
+    {
+        $id = $this->product();
+
+        $this->assertSame([], $this->page($id)['product']['alternativeProducts']);
+    }
+
     public function test_the_page_knows_the_products_category(): void
     {
         $id = $this->product();
