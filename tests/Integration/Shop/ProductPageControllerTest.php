@@ -232,6 +232,19 @@ class ProductPageControllerTest extends ShopDatabaseTestCase
         $this->assertSame([$alternative], \array_keys($this->page($id)['product']['alternativeProducts']));
     }
 
+    public function test_a_discontinued_alternative_is_hidden_and_comes_back_when_reinstated(): void
+    {
+        $alternative = $this->product();
+        $id = $this->product();
+        $this->setColumn($id, 'alternatives', (string) $alternative);
+
+        $this->setColumn($alternative, 'status_id', 3);
+        $this->assertSame([], $this->page($id)['product']['alternativeProducts']);
+
+        $this->setColumn($alternative, 'status_id', $this->statusId(true));
+        $this->assertSame([$alternative], \array_keys($this->page($id)['product']['alternativeProducts']));
+    }
+
     public function test_a_product_with_no_alternatives_gets_an_empty_list(): void
     {
         $id = $this->product();

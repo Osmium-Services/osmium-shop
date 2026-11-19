@@ -144,12 +144,14 @@ class ShopProductService
      * restoring it would not bring it back.
      *
      * @param int[] $deletedIds IDs of soft-deleted products
+     * @param int $productId The product being saved, which is dropped from its own list
      */
-    public static function alternativesToStore(?string $posted, ?string $stored, array $deletedIds): ?string
+    public static function alternativesToStore(?string $posted, ?string $stored, array $deletedIds, int $productId): ?string
     {
         $keptDeleted = \array_intersect(self::parseIdList($stored), $deletedIds);
+        $ids = \array_diff([...self::parseIdList($posted), ...$keptDeleted], [$productId]); // A product is never its own alternative
 
-        return self::idListOrNull(\implode(separator: ',', array: [...self::parseIdList($posted), ...$keptDeleted]));
+        return self::idListOrNull(\implode(separator: ',', array: $ids));
     }
 
     /**

@@ -1,4 +1,4 @@
-SELECT p.id, b.name as brand_name, p.model_name
+SELECT p.id, p.status_id, b.name as brand_name, p.model_name
 FROM { PREFIX }products p
 LEFT JOIN { PREFIX }productbrands b ON p.brand_id = b.id
 WHERE p.deleted_at IS NULL

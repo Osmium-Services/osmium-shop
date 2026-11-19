@@ -448,22 +448,28 @@ class ShopProductServiceTest extends TestCase
 
     public function testAlternativesToStoreKeepsStoredSoftDeletedProducts(): void
     {
-        $this->assertSame('8,3,5', ShopProductService::alternativesToStore(posted: '8,3', stored: '5,8,9', deletedIds: [5, 12]));
+        $this->assertSame('8,3,5', ShopProductService::alternativesToStore(posted: '8,3', stored: '5,8,9', deletedIds: [5, 12], productId: 1));
     }
 
     public function testAlternativesToStoreDropsStoredProductsThatAreNotDeleted(): void
     {
-        $this->assertSame('8', ShopProductService::alternativesToStore(posted: '8', stored: '8,9', deletedIds: [5]));
+        $this->assertSame('8', ShopProductService::alternativesToStore(posted: '8', stored: '8,9', deletedIds: [5], productId: 1));
     }
 
     public function testAlternativesToStoreDoesNotRepeatADeletedProductThatIsAlsoPosted(): void
     {
-        $this->assertSame('5,8', ShopProductService::alternativesToStore(posted: '5,8', stored: '5', deletedIds: [5]));
+        $this->assertSame('5,8', ShopProductService::alternativesToStore(posted: '5,8', stored: '5', deletedIds: [5], productId: 1));
     }
 
     public function testAlternativesToStoreIsNullWhenNothingIsLeft(): void
     {
-        $this->assertNull(ShopProductService::alternativesToStore(posted: '', stored: '9', deletedIds: []));
-        $this->assertNull(ShopProductService::alternativesToStore(posted: null, stored: null, deletedIds: [5]));
+        $this->assertNull(ShopProductService::alternativesToStore(posted: '', stored: '9', deletedIds: [], productId: 1));
+        $this->assertNull(ShopProductService::alternativesToStore(posted: null, stored: null, deletedIds: [5], productId: 1));
+    }
+
+    public function testAlternativesToStoreNeverKeepsTheProductItself(): void
+    {
+        $this->assertSame('8,3', ShopProductService::alternativesToStore(posted: '8,42,3', stored: '42', deletedIds: [42], productId: 42));
+        $this->assertNull(ShopProductService::alternativesToStore(posted: '42', stored: null, deletedIds: [], productId: 42));
     }
 }

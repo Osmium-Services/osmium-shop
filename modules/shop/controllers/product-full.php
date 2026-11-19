@@ -259,7 +259,7 @@ $alternativeDiscounts = ShopProductDiscounts::forProducts($this->osmium, $altern
 $this->data['product']['alternativeProducts'] = [];
 foreach ($alternativeIDs as $alternativeID) {
     $row = $alternativeRows[$alternativeID] ?? null;
-    if (!$row || !empty($row['deleted_at'])) continue; // A soft-deleted product stays listed in the column, so restoring it brings it back
+    if (!$row || !empty($row['deleted_at']) || (int)$row['status_id'] === 3) continue; // Soft-deleted and discontinued products stay listed in the column, so restoring or reinstating them brings them back
 
     $card = ShopProductCard::fromRow(productData: $row, productId: $alternativeID, taxRatePercent: (float)$shopConfig->taxRatePercent);
     $imageBasePath = ShopProductCard::imageBasePath(brandPath: $card['brandPath'], modelPath: $card['modelPath']);

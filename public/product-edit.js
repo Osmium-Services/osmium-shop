@@ -83,7 +83,9 @@ function clearKitProduct() {
     };
 
     function products() {
-        return Array.from(document.querySelectorAll('#kit_product_list option')).map(o => ({id: o.dataset.id, label: o.value}));
+        return Array.from(document.querySelectorAll('#kit_product_list option'))
+            .filter(o => !o.dataset.discontinued) // Nobody should be pointed at a product that cannot be bought
+            .map(o => ({id: o.dataset.id, label: o.value}));
     }
 
     function addAlternative(product) {

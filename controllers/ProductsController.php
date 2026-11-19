@@ -503,6 +503,7 @@ class ProductsController extends AdminController
             posted: Input::post()->string(key: 'alternatives'),
             stored: $product->getAlternatives($productId),
             deletedIds: $deletedIds,
+            productId: $productId,
         );
     }
 

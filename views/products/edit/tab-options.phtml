@@ -65,7 +65,7 @@
                     <input type="hidden" id="kit_id" name="kit_id" value="<?= $admin['kitId'] ?: '' ?>">
                     <datalist id="kit_product_list">
                         <?php foreach ($edit['otherProducts'] as $p): ?>
-                            <option data-id="<?= $p['id'] ?>" value="<?= \htmlspecialchars(($p['brand_name'] ?? '') . ' ' . ($p['model_name'] ?? '')) ?>">
+                            <option data-id="<?= $p['id'] ?>"<?= (int) ($p['status_id'] ?? 0) === 3 ? ' data-discontinued="1"' : '' ?> value="<?= \htmlspecialchars(($p['brand_name'] ?? '') . ' ' . ($p['model_name'] ?? '')) ?>">
                         <?php endforeach; ?>
                     </datalist>
                     <div class="form-text">Link to a related product (e.g. a kit) that will appear as "See also" on the product page.</div>
