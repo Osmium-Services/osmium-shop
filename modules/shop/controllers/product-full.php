@@ -285,5 +285,8 @@ $this->data['product'] = ShopProductPageData::withServiceData(product: $this->da
 // Any installed bot protection supplies its widget for the review form; the page never names one
 $this->data['template']['reviewFormProtection'] = \implode('', $hooks->collect(event: 'form.widget', payload: ['form' => 'reviews']));
 
+// The same for the restock notification form
+$this->data['template']['restockFormProtection'] = \implode('', $hooks->collect(event: 'form.widget', payload: ['form' => 'restock']));
+
 $this->data['site']['socialImage'] = $this->osmium->config->site->FQDN
     . $this->osmium->imagePath($product->imagePath('social', '', '.jpg')); // Social image for Open Graph
