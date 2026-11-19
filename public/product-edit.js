@@ -59,7 +59,6 @@ function clearKitProduct() {
 // which behaves differently per browser and inside hidden tabs. Everything is delegated on document, so it works whatever
 // order the tabs and scripts load in. The #kit_product_list options are only the source of the product names and IDs.
 (function() {
-    const MAX_RESULTS = 10;
     const normalise = text => text.replace(/\s+/g, ' ').trim().toLowerCase();
     let panel = null;
     let activeInput = null;
@@ -114,14 +113,33 @@ function clearKitProduct() {
     function matches(input) {
         const query = normalise(input.value);
         const excluded = pickers[input.id].exclude();
-        const found = products().filter(p => !excluded.includes(p.id) && (query === '' || normalise(p.label).includes(query)));
-        return found.slice(0, MAX_RESULTS);
+        return products().filter(p => !excluded.includes(p.id) && (query === '' || normalise(p.label).includes(query)));
     }
 
     function closePanel() {
         if (panel) panel.remove();
         panel = null;
         activeInput = null;
+    }
+
+    // Sit under the search box, or above it when there is more room there, and never run off the screen
+    function place() {
+        if (!panel || !activeInput) return;
+
+        const box = activeInput.getBoundingClientRect();
+        const gap = 4;
+        const below = window.innerHeight - box.bottom - gap - 8;
+        const above = box.top - gap - 8;
+        const openUp = below < 200 && above > below;
+        const room = Math.max(120, Math.min(320, openUp ? above : below));
+
+        panel.style.left = box.left + 'px';
+        panel.style.width = box.width + 'px';
+        panel.style.maxHeight = room + 'px';
+        panel.style.top = '';
+        panel.style.bottom = '';
+        if (openUp) panel.style.bottom = (window.innerHeight - box.top + gap) + 'px';
+        else panel.style.top = (box.bottom + gap) + 'px';
     }
 
     function openPanel(input) {
@@ -137,10 +155,7 @@ function clearKitProduct() {
         activeInput = input;
         activeIndex = 0;
 
-        const box = input.getBoundingClientRect();
-        panel.style.left = box.left + 'px';
-        panel.style.top = (box.bottom + 2) + 'px';
-        panel.style.width = box.width + 'px';
+        place();
 
         panel.replaceChildren(...found.map((product, index) => {
             const item = document.createElement('button');
@@ -212,8 +227,10 @@ function clearKitProduct() {
         syncAlternatives();
     });
 
-    window.addEventListener('resize', closePanel);
-    window.addEventListener('scroll', closePanel, true);
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', e => {
+        if (panel && !panel.contains(e.target)) place(); // The page moved: follow the search box. Scrolling the list itself changes nothing
+    }, true);
 })();
 
 // Press Escape to go back to products list
