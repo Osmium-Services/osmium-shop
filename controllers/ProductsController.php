@@ -67,9 +67,10 @@ class ProductsController extends AdminController
     public function index(): void
     {
         $categories = $this->fetchCategoriesForFilter();
-        $selectedCategory = $this->getSelectedCategoryFilter();
-        $selectedBrand = Input::get()->nullableString(key: 'brand');
-        $selectedStatus = Input::get()->nullableString(key: 'status');
+        $stashed = $this->takeStashedFilters();
+        $selectedCategory = Input::get()->nullableString(key: 'category') ?? $stashed['category'];
+        $selectedBrand = Input::get()->nullableString(key: 'brand') ?? $stashed['brand'];
+        $selectedStatus = Input::get()->nullableString(key: 'status') ?? $stashed['status'];
         $totalProductCount = $this->shop->model->product->count();
         $pagesById = Model::pagesById();
 
@@ -226,18 +227,24 @@ class ProductsController extends AdminController
         return $this->admin->model->productCategory->getForFilter();
     }
 
-    private function getSelectedCategoryFilter(): ?string
+    /**
+     * Core moves the query string into the session and redirects, so a filter chosen in the
+     * dropdowns arrives here rather than in $_GET.
+     *
+     * @return array{category: ?string, brand: ?string, status: ?string}
+     */
+    private function takeStashedFilters(): array
     {
-        $selectedCategory = Input::get()->nullableString(key: 'category');
-        $noCategory = !$selectedCategory;
-        $hasQs = isset($_SESSION['qs']);
-        $noCategoryWithQs = $noCategory && $hasQs;
-        if ($noCategoryWithQs) {
-            \parse_str(string: $_SESSION['qs'], result: $qsParams);
-            $selectedCategory = $qsParams['category'] ?? null;
-            unset($_SESSION['qs']);
+        \parse_str(string: (string)($_SESSION['qs'] ?? ''), result: $params);
+        unset($_SESSION['qs']);
+
+        $filters = [];
+        foreach (['category', 'brand', 'status'] as $key) {
+            $value = $params[$key] ?? null;
+            $filters[$key] = \is_string($value) && $value !== '' ? $value : null;
         }
-        return $selectedCategory;
+
+        return $filters;
     }
 
     private function fetchActiveProducts(?string $selectedCategory, ?string $selectedBrand, ?string $selectedStatus, array $pagesById): array
