@@ -53,6 +53,7 @@ $this->data['product']['kitProduct'] = $productService->loadKitProduct(
 
 $this->data['product']['reference'] = $product->reference;
 $this->data['product']['brandName'] = $product->brandName;
+$this->data['product']['brandLogo'] = $product->brandLogo;
 $this->data['product']['barcode'] = $product->barcode;
 $this->data['product']['title'] = $product->title;
 $this->data['product']['isAvailable'] = $product->available;

@@ -6,6 +6,7 @@ SELECT
     PS.descr_long,
     PS.schema_ref,
     PB.name as brand_name,
+    PB.logo AS brand_logo,
     PP.page_id
 FROM
     { TABLE } AS P
