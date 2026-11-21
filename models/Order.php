@@ -85,6 +85,26 @@ class Order extends AdminModel
         return $this->database->resultset();
     }
 
+    /**
+     * One order by its reference with no customer details, or null when there is none.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getAnonymousByRef(string $orderRef): ?array
+    {
+        return $this->fetchOne('order-get-by-ref-anonymous.sql', [':order_ref' => $orderRef]);
+    }
+
+    /**
+     * The lines on an order with no customer details.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getItemsAnonymous(int $orderId): array
+    {
+        return $this->fetchAll('order-items-anonymous.sql', [':order_id' => $orderId]);
+    }
+
     public function getById(int $id): ?array
     {
         return $this->fetchOne('order-get.sql', [':id' => $id]);

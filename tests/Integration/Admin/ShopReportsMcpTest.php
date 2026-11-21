@@ -17,11 +17,11 @@ require_once 'app/services/osmium-shop/models/ShopReportsMcp.php';
  */
 class ShopReportsMcpTest extends DatabaseTestCase
 {
-    public function test_both_tools_are_accepted_by_the_server_and_are_read_only(): void
+    public function test_the_tools_are_accepted_by_the_server_and_are_read_only(): void
     {
         $tools = McpServer::withServiceTools(coreTools: [], descriptors: [ShopReportsMcp::tools([])], writesEnabled: false, context: []);
 
-        $this->assertSame(['orders_summary', 'products_attention'], \array_keys($tools));
+        $this->assertSame(['orders_summary', 'order_get', 'products_attention'], \array_keys($tools));
     }
 
     public function test_the_orders_summary_has_totals_and_the_newest_orders(): void

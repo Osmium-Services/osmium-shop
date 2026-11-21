@@ -119,4 +119,56 @@ class OrdersMcpModelTest extends DatabaseTestCase
         $this->assertStringNotContainsString('Secret', \json_encode($row));
         $this->assertStringNotContainsString('sam.secret', \json_encode($row));
     }
+
+    public function test_an_order_is_found_by_its_exact_reference_with_no_customer_data(): void
+    {
+        $this->order('find', 'paid', '12.50', 0);
+        $prefix = $this->db->tablePrefix();
+        $ref = "{$this->runTag}-find";
+        $this->db->prepare(
+            "UPDATE {$prefix}shop_orders SET billing_address1 = '1 Secret Street', delivery_postcode = 'ZZ9 9ZZ', customer_phone = '07000000000',
+                admin_notes = 'Secret note', ip_address = '203.0.113.9' WHERE order_ref = :ref",
+            [':ref' => $ref],
+        )->execute();
+
+        $row = $this->orders->getAnonymousByRef($ref);
+
+        $this->assertNotNull($row);
+        $this->assertSame($ref, $row['order_ref']);
+        $this->assertSame('12.50', $row['total_inc_tax']);
+        $json = \json_encode($row);
+        foreach (['Secret', 'sam.secret', 'ZZ9', '07000000000', '203.0.113.9'] as $private) {
+            $this->assertStringNotContainsString($private, $json);
+        }
+    }
+
+    public function test_an_unknown_reference_finds_nothing_and_a_test_payment_is_still_found(): void
+    {
+        $this->order('test', 'paid', '3.00', 0, true);
+
+        $this->assertNull($this->orders->getAnonymousByRef("{$this->runTag}-nothing"));
+        $this->assertSame(1, (int) $this->orders->getAnonymousByRef("{$this->runTag}-test")['is_test_payment']);
+    }
+
+    public function test_the_lines_on_an_order_come_back_in_order_without_customer_data(): void
+    {
+        $this->order('lines', 'paid', '30.00', 0);
+        $prefix = $this->db->tablePrefix();
+        $id = (int) $this->orders->getAnonymousByRef("{$this->runTag}-lines")['id'];
+        foreach ([['A1', 'First', 1], ['B2', 'Second', 3]] as [$ref, $title, $qty]) {
+            $this->db->prepare(
+                "INSERT INTO {$prefix}shop_order_items (order_id, product_id, product_ref, product_title, quantity, unit_price_exc_tax, line_total_exc_tax)
+                 VALUES (:id, 1, :ref, :title, :qty, 10.00, :line)",
+                [':id' => $id, ':ref' => $ref, ':title' => $title, ':qty' => $qty, ':line' => 10 * $qty],
+            )->execute();
+        }
+
+        $items = $this->orders->getItemsAnonymous($id);
+
+        $this->assertSame(['First', 'Second'], \array_column($items, 'product_title'));
+        $this->assertSame(
+            ['product_ref', 'product_title', 'product_options', 'quantity', 'unit_price_exc_tax', 'line_total_exc_tax', 'line_tax_amount'],
+            \array_keys($items[0]),
+        );
+    }
 }
