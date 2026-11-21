@@ -15,6 +15,10 @@ use Osmium\Modules\Admin\Models\ProductCategory;
 use Osmium\Modules\Admin\Models\ProductCategoryAssignment;
 use Osmium\Modules\Admin\Models\Status;
 
+// Loaded by path, so they are present however the /mcp request was booted.
+require_once __DIR__ . '/ShopPaths.php';
+require_once __DIR__ . '/ProductImageFiles.php';
+
 /**
  * Core's product tools for the /mcp endpoint: find products by name, list the categories and statuses, rename a category, set a product's
  * availability status, set or clear a restocking product's expected restock date, and add a product to a category or take it out.
@@ -57,6 +61,16 @@ class ProductMcp
                     'required' => ['search'],
                 ],
                 'handler' => self::class . '::find',
+            ],
+            [
+                'name' => 'product_get',
+                'description' => 'One live product for a content audit, by id (from products_find): name, reference, status and availability, restock date, price and RRP, its categories, its page address with the SEO title and description, how long each description block is (characters, never the text), whether the description images, FAQ, tech spec, video and barcode are set, how many features, accessories and alternatives are linked, whether the main image and its generated sizes exist on disk, and created and updated dates. Read only.',
+                'inputSchema' => [
+                    'type' => 'object',
+                    'properties' => ['id' => ['type' => 'integer', 'description' => 'The product id']],
+                    'required' => ['id'],
+                ],
+                'handler' => self::class . '::get',
             ],
             [
                 'name' => 'product_statuses_list',
@@ -298,6 +312,89 @@ class ProductMcp
         $rows = (new Product($call['dataSource'], 'products'))->findForAssistant($pattern, self::FIND_LIMIT + 1);
 
         return self::shapeFound($rows);
+    }
+
+    /**
+     * @param array<string, mixed> $call
+     * @return array<string, mixed>
+     */
+    public static function get(array $call): array
+    {
+        $id = $call['arguments']['id'] ?? null;
+        if (!\is_int($id) || $id < 1) throw new McpToolException('Give the product id, a whole number, from products_find.');
+
+        $products = new Product($call['dataSource'], 'products');
+        $row = $products->getAuditForAssistant($id);
+        if ($row === null) throw new McpToolException('There is no live product with that id.');
+
+        return self::shapeAudit($row, $products->getLiveCategoriesForAssistant($id), $products->getPageSeoForAssistant($id), self::imageFiles($row));
+    }
+
+    /**
+     * Which generated copies of the main image exist, or null when the brand or model cannot make a folder name.
+     *
+     * @param array<string, mixed> $row from product-get-audit.sql
+     * @return array<string, bool>|null
+     */
+    private static function imageFiles(array $row): ?array
+    {
+        try {
+            return ProductImageFiles::derivations(ShopPaths::brand((string) $row['brand_name']), ShopPaths::model((string) $row['model_name']));
+        } catch (\InvalidArgumentException) {
+            return null;
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $row from product-get-audit.sql
+     * @param array<int, array<string, mixed>> $categories from product-categories-live-by-product.sql
+     * @param array<string, mixed>|null $page from product-page-seo.sql
+     * @param array<string, bool>|null $images the main image's generated sizes
+     * @return array<string, mixed>
+     */
+    public static function shapeAudit(array $row, array $categories, ?array $page, ?array $images): array
+    {
+        $price = (float) $row['price_exc_tax'];
+
+        return [
+            'id' => (int) $row['id'],
+            'name' => self::name($row),
+            'reference' => (string) $row['reference'],
+            'status' => $row['status_name'],
+            'available' => (bool) $row['available'],
+            'restocking' => (bool) $row['restocking'],
+            'restock_at' => $row['restock_at'],
+            'price_exc_tax' => $price,
+            'price_is_zero' => $price <= 0.0,
+            'rrp_exc_tax' => (float) $row['rrp_exc_tax'],
+            'categories' => \array_map(static fn(array $c): array => ['id' => (int) $c['id'], 'label' => (string) $c['label']], $categories),
+            'page' => $page === null ? null : [
+                'url' => (string) $page['url'],
+                'seo_title' => $page['title'],
+                'seo_description' => $page['description'],
+                'robots' => $page['robots'],
+            ],
+            'content' => [
+                'description_lengths' => [(int) $row['descr_length'], (int) $row['descr2_length'], (int) $row['descr3_length']],
+                'description_images_set' => [(bool) $row['descr_image_set'], (bool) $row['descr2_image_set'], (bool) $row['descr3_image_set']],
+                'faq_length' => (int) $row['faq_length'],
+                'techspec_length' => (int) $row['techspec_length'],
+                'video_set' => (bool) $row['video_set'],
+                'barcode_set' => (bool) $row['barcode_set'],
+                'features_linked' => self::idCount($row['features']),
+                'accessories_linked' => self::idCount($row['accessories']),
+                'alternatives_linked' => self::idCount($row['alternatives']),
+            ],
+            'main_image' => $images,
+            'created_at' => $row['created_at'],
+            'updated_at' => $row['updated_at'],
+        ];
+    }
+
+    /** How many ids a comma list holds. */
+    private static function idCount(mixed $list): int
+    {
+        return \count(\array_filter(\array_map('trim', \explode(',', (string) $list)), static fn(string $id): bool => $id !== ''));
     }
 
     /**

@@ -66,6 +66,24 @@ class Product extends AdminModel
         return $this->fetchOne('product-get-for-assistant.sql', [':id' => $id]);
     }
 
+    /** @return array<string, mixed>|null a live product's content-audit row, or null for an unknown or binned id */
+    public function getAuditForAssistant(int $id): ?array
+    {
+        return $this->fetchOne('product-get-audit.sql', [':id' => $id]);
+    }
+
+    /** @return array<int, array<string, mixed>> the live categories a product sits in */
+    public function getLiveCategoriesForAssistant(int $id): array
+    {
+        return $this->fetchAll('product-categories-live-by-product.sql', [':product_id' => $id]);
+    }
+
+    /** @return array<string, mixed>|null the product's own page address and SEO fields */
+    public function getPageSeoForAssistant(int $id): ?array
+    {
+        return $this->fetchOne('product-page-seo.sql', [':product_id' => $id]);
+    }
+
     /**
      * Changes only the expected restock date (null clears it); the rest of the product is left alone, unlike the
      * admin form, which saves every field at once.

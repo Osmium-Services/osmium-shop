@@ -81,7 +81,7 @@ final class ProductMcpTest extends TestCase
         $tools = [];
         foreach (ProductMcp::tools([]) as $tool) $tools[$tool['name']] = $tool['write'] ?? false;
 
-        $this->assertSame(['product_categories_list' => false, 'products_find' => false, 'product_statuses_list' => false, 'product_status_set' => true, 'product_category_remove' => true, 'product_category_rename' => true, 'product_restock_date_set' => true, 'product_category_add' => true], $tools);
+        $this->assertSame(['product_categories_list' => false, 'products_find' => false, 'product_get' => false, 'product_statuses_list' => false, 'product_status_set' => true, 'product_category_remove' => true, 'product_category_rename' => true, 'product_restock_date_set' => true, 'product_category_add' => true], $tools);
     }
 
     public function test_a_new_category_label_cannot_be_blank_too_long_or_a_siblings(): void
