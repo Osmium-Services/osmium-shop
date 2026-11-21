@@ -21,7 +21,7 @@ class ShopReportsMcpTest extends DatabaseTestCase
     {
         $tools = McpServer::withServiceTools(coreTools: [], descriptors: [ShopReportsMcp::tools([])], writesEnabled: false, context: []);
 
-        $this->assertSame(['orders_summary', 'order_get', 'products_attention'], \array_keys($tools));
+        $this->assertSame(['orders_summary', 'order_get', 'shop_config_summary', 'products_attention'], \array_keys($tools));
     }
 
     public function test_the_orders_summary_has_totals_and_the_newest_orders(): void
