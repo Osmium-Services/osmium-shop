@@ -40,6 +40,7 @@ class ShopProduct extends ShopModel
     public private(set) int $available = 0;
     public private(set) string $brandName = '';
     public private(set) ?string $brandLogo = null;
+    public private(set) ?string $brandPageUrl = null; // The address of the brand's own page (no slashes), null when it has none
     public private(set) string $statusShort = '';
     public private(set) string $statusName = '';
     public private(set) string $productStub = '';
@@ -100,6 +101,7 @@ class ShopProduct extends ShopModel
         $this->available = $productData['product_available'] ?? 0;
         $this->brandName = $productData['brand_name'] ?? '';
         $this->brandLogo = ($productData['brand_logo'] ?? '') !== '' ? '/assets/images/shop/brands/' . $productData['brand_logo'] : null; // Admin stores the file name only; null when the brand has no logo
+        $this->brandPageUrl = ($productData['brand_page_url'] ?? '') !== '' ? $productData['brand_page_url'] : null;
         $this->statusShort = $productData['descr_short'] ?? '';
         $this->statusName = $productData['descr_long'] ?? '';
         $this->productStub = $productData['url'] ?? '';
