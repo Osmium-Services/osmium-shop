@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.52.0",
+  "version": "0.53.0",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -65,6 +65,9 @@
     ],
     "pages.owners": [
       "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::owners"
+    ],
+    "sitemap.groups": [
+      "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::sitemapGroups"
     ],
     "pages.reserved_ids": [
       "Osmium\\Modules\\Admin\\Services\\ShopPageLinks::reservedIds"

@@ -35,6 +35,21 @@ class ShopPageLinks
     }
 
     /**
+     * The shop's product pages, for the `sitemap.groups` hook: one child sitemap of its own, up to 50,000 products.
+     *
+     * @param array{osmium?: object, dataSource?: object} $payload
+     * @return array{key: string, label: string, pageIds: array<int, int>}
+     */
+    public static function sitemapGroups(array $payload): array
+    {
+        return [
+            'key' => 'products',
+            'label' => 'Shop products',
+            'pageIds' => \array_keys(self::owners($payload)),
+        ];
+    }
+
+    /**
      * @param array{osmium?: object, dataSource?: object} $payload
      * @return array{ids: array<int, int>}
      */
