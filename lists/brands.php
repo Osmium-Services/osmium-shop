@@ -47,7 +47,7 @@ return [
         'columns' => [
             ['key' => 'logo_url', 'label' => 'Logo', 'type' => 'image', 'altKey' => 'name', 'sortable' => false, 'hideBelow' => 'md'],
             ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'strong' => true, 'fill' => true],
-            ['key' => 'page_url', 'label' => 'Page URL', 'type' => 'link', 'href' => '/{page_url}/', 'nowrap' => true],
+            ['key' => 'brand_page_url', 'label' => 'Page', 'type' => 'link', 'href' => '/{brand_page_url}/', 'nowrap' => true],
             ['key' => 'info_host', 'label' => 'External Info', 'type' => 'link', 'href' => '{info_external}', 'external' => true, 'nowrap' => true, 'hideBelow' => 'md'],
             ['key' => 'product_count', 'label' => 'Products', 'type' => 'count-pill', 'href' => 'shop/products/?brand={id}'],
         ],

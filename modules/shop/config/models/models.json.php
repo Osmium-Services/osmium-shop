@@ -12,6 +12,10 @@
         "Osmium\\Modules\\Shop\\Models\\ShopProductCategoryPage",
         "productcategories_pages"
     ],
+    "brand": [
+        "Osmium\\Modules\\Shop\\Models\\ShopBrand",
+        "productbrands"
+    ],
     "productOption": [
         "Osmium\\Modules\\Shop\\Models\\ShopProductOption",
         "productoptions"

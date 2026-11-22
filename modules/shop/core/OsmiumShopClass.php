@@ -13,6 +13,7 @@ class OsmiumShop
     public OsmiumShopModel $model;
     public ?int $categoryID = null;
     public ?int $productID = null;
+    public ?array $brand = null; // The brand whose own page this is, else null
     public ?int $osmiumPageID = null;
 
     public function __construct(private Osmium $osmium)
@@ -22,6 +23,7 @@ class OsmiumShop
         $this->loadModel(\dirname(__DIR__) . '/config/models/models.json.php');
         $this->setOsmiumPageID($this->osmium->model->page->id);
         $this->setCategoryID();
+        $this->setBrand();
         $this->setProductID();
     }
 
@@ -98,6 +100,13 @@ class OsmiumShop
             $this->model->productCategoryPage->categoryIDByPageID(
                 $this->osmiumPageID
             );
+
+        return $this;
+    }
+
+    private function setBrand()
+    {
+        $this->brand = $this->model->brand->byPageID($this->osmiumPageID);
 
         return $this;
     }

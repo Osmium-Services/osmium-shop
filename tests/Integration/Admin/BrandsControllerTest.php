@@ -203,7 +203,6 @@ class BrandsControllerTest extends ShopDatabaseTestCase
     {
         return $overrides + [
             'name' => "{$this->runTag} Victron",
-            'page_url' => 'victron',
             'info_external' => 'https://example.test/victron',
         ];
     }
@@ -268,7 +267,7 @@ class BrandsControllerTest extends ShopDatabaseTestCase
 
         $row = $this->stored($id);
         $this->assertSame("{$this->runTag} Victron", $row['name']);
-        $this->assertSame('victron', $row['page_url']);
+        $this->assertNull($row['page_url'], 'the form no longer carries a page url');
         $this->assertSame('https://example.test/victron', $row['info_external']);
         $this->assertTrue($_SESSION['brand_saved']);
         $this->assertSame(["Created brand: {$this->runTag} Victron"], $this->changelogFor($id));
@@ -276,7 +275,7 @@ class BrandsControllerTest extends ShopDatabaseTestCase
 
     public function test_the_optional_fields_are_stored_as_nothing_when_left_blank(): void
     {
-        $id = $this->createdId($this->submit($this->form(['page_url' => '', 'info_external' => ''])));
+        $id = $this->createdId($this->submit($this->form(['info_external' => ''])));
 
         $row = $this->stored($id);
         $this->assertNull($row['page_url']);
@@ -298,7 +297,7 @@ class BrandsControllerTest extends ShopDatabaseTestCase
     {
         $before = $this->brandCount();
 
-        foreach (['name' => 51, 'page_url' => 101, 'info_external' => 256] as $field => $length) {
+        foreach (['name' => 51, 'info_external' => 256] as $field => $length) {
             $result = $this->submit($this->form([$field => \str_repeat('x', $length)]));
 
             $this->assertNull($result['redirect'], $field);
@@ -306,7 +305,7 @@ class BrandsControllerTest extends ShopDatabaseTestCase
         }
         $this->assertSame($before, $this->brandCount());
 
-        $edge = $this->submit($this->form(['name' => \str_repeat('x', 50), 'page_url' => \str_repeat('y', 100), 'info_external' => 'https://example.test/' . \str_repeat('z', 234)]));
+        $edge = $this->submit($this->form(['name' => \str_repeat('x', 50), 'info_external' => 'https://example.test/' . \str_repeat('z', 234)]));
         $this->assertNotNull($edge['redirect'], 'the longest values that fit are accepted');
     }
 
@@ -332,13 +331,25 @@ class BrandsControllerTest extends ShopDatabaseTestCase
     {
         $id = $this->createdId($this->submit($this->form()));
 
-        $result = $this->submit($this->form(['id' => (string) $id, 'name' => "{$this->runTag} Renamed", 'page_url' => '']));
+        $result = $this->submit($this->form(['id' => (string) $id, 'name' => "{$this->runTag} Renamed"]));
 
         $this->assertSame("/admin/shop/brands/edit/?id={$id}", $result['redirect']);
         $row = $this->stored($id);
         $this->assertSame("{$this->runTag} Renamed", $row['name']);
-        $this->assertNull($row['page_url']);
         $this->assertContains("Updated brand: {$this->runTag} Renamed", $this->changelogFor($id));
+    }
+
+    public function test_editing_a_brand_keeps_an_old_page_url_it_was_given_before_the_field_left_the_form(): void
+    {
+        $id = $this->createdId($this->submit($this->form()));
+        $this->db->prepare(
+            sql: 'UPDATE ' . $this->db->tablePrefix() . 'productbrands SET page_url = :url WHERE id = :id',
+            bindings: [':url' => 'brands/old', ':id' => $id],
+        )->execute();
+
+        $this->submit($this->form(['id' => (string) $id, 'name' => "{$this->runTag} Kept"]));
+
+        $this->assertSame('brands/old', $this->stored($id)['page_url']);
     }
 
     public function test_a_refused_edit_leaves_the_stored_brand_alone(): void

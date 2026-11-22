@@ -7,6 +7,8 @@ namespace Osmium\Modules\Admin\Controllers;
 use Osmium\Core\Library\Input;
 use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Core\Library\ImageUpload;
+use Osmium\Core\Library\Strings;
+use Osmium\Modules\Admin\Services\ShopBrandPages;
 
 require_once \Osmium\Core\Library\AdminPaths::path('core/AdminController.php');
 
@@ -88,7 +90,9 @@ class BrandsController extends AdminController
         $this->data['admin']['brand'] = $brand ?? $this->getEmptyBrand();
         $this->data['admin']['brandId'] = $brandId;
         $this->data['admin']['showSavedMessage'] = $this->consumeSavedFlag();
-        $this->data['admin']['error'] = $this->data['admin']['error'] ?? null;
+        $this->data['admin']['error'] = $this->data['admin']['error'] ?? $this->consumePageError();
+        $this->data['admin']['brandPagePrefix'] = ShopBrandPages::prefix($this->osmium->config->shop ?? null);
+        $this->data['admin']['brandPageUrl'] = $this->brandPageUrl($brand);
         $this->data['admin']['pageTitle'] = $brandId
             ? \htmlspecialchars($brand['name'] ?? '')
             : 'Create Brand';
@@ -167,7 +171,7 @@ class BrandsController extends AdminController
         return [
             'id' => 0,
             'name' => '',
-            'page_url' => '',
+            'page_url' => null,
             'info_external' => '',
             'logo' => null,
         ];
@@ -199,6 +203,68 @@ class BrandsController extends AdminController
         return true;
     }
 
+    private function consumePageError(): ?string
+    {
+        $error = $_SESSION['brand_page_error'] ?? null;
+        unset($_SESSION['brand_page_error']);
+
+        return $error;
+    }
+
+    /** The address of the brand's own page, or null when it has none */
+    private function brandPageUrl(?array $brand): ?string
+    {
+        $pageId = (int) ($brand['page_id'] ?? 0);
+        if (!$pageId) return null;
+
+        $page = $this->admin->model->page->getById($pageId);
+
+        return $page['url'] ?? null;
+    }
+
+    private function brandPages(): ShopBrandPages
+    {
+        return new ShopBrandPages($this->admin->model->brand, $this->admin->pages, new Strings());
+    }
+
+    /**
+     * The "Create a page for this brand" tick: makes the page after the brand is saved. A refusal (such as the
+     * address already being used) does not undo the save; the form shows it on the next screen.
+     */
+    private function createPageIfAsked(int $brandId): void
+    {
+        $asked = Input::post()->string(key: 'create_page') === '1';
+        if (!$asked) return;
+
+        $brand = $this->admin->model->brand->getById($brandId);
+        $prefix = ShopBrandPages::prefix($this->osmium->config->shop ?? null);
+
+        try {
+            $pageId = $this->brandPages()->create($brand, $prefix);
+        } catch (\Exception $e) {
+            $_SESSION['brand_page_error'] = 'The brand is saved, but its page was not created: ' . $e->getMessage();
+
+            return;
+        }
+
+        $this->admin->model->changelog->log(
+            description: "Created the page for brand: {$brand['name']}",
+            recordType: self::RECORD_TYPE,
+            recordId: $brandId,
+        );
+    }
+
+    /** A brand put in the bin takes its page with it; restoring the brand brings the page back */
+    private function syncPageWithBrand(int $brandId, bool $binned): void
+    {
+        $pageId = (int) ($this->admin->model->brand->getById($brandId)['page_id'] ?? 0);
+        if (!$pageId) return;
+
+        if ($binned) $this->admin->model->page->softDelete($pageId, \date('Y-m-d H:i:s'));
+        if (!$binned) $this->admin->model->page->restore($pageId);
+        $this->admin->pages->regenerateRoutesFile();
+    }
+
     private function handleFormSubmit(): ?string
     {
         $csrfValid = $this->admin->auth->validateCsrf();
@@ -207,14 +273,14 @@ class BrandsController extends AdminController
         $input = Input::post();
         $brandId = $input->nullableInt(key: 'id');
         $name = $input->string(key: 'name');
-        $pageUrl = $input->nullableString(key: 'page_url');
+        $pageUrl = $brandId ? ($this->admin->model->brand->getById($brandId)['page_url'] ?? null) : null; // No longer on the form: an old value is kept as it was
         $infoExternal = $input->nullableString(key: 'info_external');
 
         $nameEmpty = empty($name);
         if ($nameEmpty) return 'Brand name is required';
 
-        $tooLong = \mb_strlen($name) > 50 || \mb_strlen((string) $pageUrl) > 100 || \mb_strlen((string) $infoExternal) > 255; // The columns' sizes; the form's maxlength is only a courtesy
-        if ($tooLong) return 'The name can be up to 50 characters, the page URL up to 100 and the external info up to 255';
+        $tooLong = \mb_strlen($name) > 50 || \mb_strlen((string) $infoExternal) > 255; // The columns' sizes; the form's maxlength is only a courtesy
+        if ($tooLong) return 'The name can be up to 50 characters and the external info up to 255';
 
         $isWebLink = $this->isWebLink($infoExternal);
         if (!$isWebLink) return 'The external info link must be a web address starting with http:// or https://';
@@ -274,6 +340,8 @@ class BrandsController extends AdminController
             recordId: $brandId,
         );
 
+        $this->createPageIfAsked($brandId);
+
         $_SESSION['brand_saved'] = true;
         $this->redirect("shop/brands/edit/?id={$brandId}");
     }
@@ -292,6 +360,8 @@ class BrandsController extends AdminController
             recordType: self::RECORD_TYPE,
             recordId: $newBrandId,
         );
+
+        $this->createPageIfAsked($newBrandId);
 
         $_SESSION['brand_saved'] = true;
         $this->redirect("shop/brands/edit/?id={$newBrandId}");
@@ -353,6 +423,7 @@ class BrandsController extends AdminController
     {
         $this->ensureNoActiveProducts($id);
         $this->admin->model->brand->softDelete($id);
+        $this->syncPageWithBrand($id, binned: true);
         return ['success' => true, 'action' => 'delete', 'id' => $id];
     }
 
@@ -362,6 +433,7 @@ class BrandsController extends AdminController
     private function restore(int $id): array
     {
         $this->admin->model->brand->restore($id);
+        $this->syncPageWithBrand($id, binned: false);
         return ['success' => true, 'action' => 'restore', 'id' => $id];
     }
 

@@ -52,6 +52,18 @@ class Brand extends AdminModel
         ]);
     }
 
+    /** Link the brand to its own page (a pages row), or clear the link */
+    public function setPageId(int $id, ?int $pageId): void
+    {
+        $this->run('brand-set-page.sql', [':id' => $id, ':page_id' => $pageId]);
+    }
+
+    /** @return array<int, array{id: int, name: string, page_id: int, deleted_at: ?string}> every brand that has a page, binned ones too */
+    public function withPages(): array
+    {
+        return $this->fetchAll('brand-pages.sql');
+    }
+
     public function softDelete(int $id): void
     {
         $this->run('brand-soft-delete.sql', [':id' => $id]);

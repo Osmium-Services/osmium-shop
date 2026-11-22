@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Osmium\Modules\Admin\Services;
 
+use Osmium\Modules\Admin\Models\Brand;
 use Osmium\Modules\Admin\Models\Product;
 
 /**
  * Tells core about the shop's pages: a live product's page is owned by the shop (pages.owners), every product page id stays
- * reserved (pages.reserved_ids), and a product's or category's page cannot be deleted (pages.delete_blockers).
+ * reserved (pages.reserved_ids), and a product's, category's or brand's page cannot be deleted (pages.delete_blockers).
+ * Product pages and brand pages each get their own child sitemap (sitemap.groups).
  */
 class ShopPageLinks
 {
@@ -31,21 +33,40 @@ class ShopPageLinks
             ];
         }
 
+        foreach ((new Brand(self::dataSource($payload), 'productbrands'))->withPages() as $row) {
+            if ($row['deleted_at'] !== null) continue;
+
+            $owners[(int) $row['page_id']] = [
+                'label' => 'Shop brand "' . $row['name'] . '"',
+                'editUrl' => 'shop/brands/edit/?id=' . (int) $row['id'],
+                'canBeParent' => false,
+            ];
+        }
+
         return $owners;
     }
 
     /**
-     * The shop's product pages, for the `sitemap.groups` hook: one child sitemap of its own, up to 50,000 products.
+     * The shop's product pages and brand pages, for the `sitemap.groups` hook: a child sitemap of its own for each.
      *
      * @param array{osmium?: object, dataSource?: object} $payload
-     * @return array{key: string, label: string, pageIds: array<int, int>}
+     * @return array<int, array{key: string, label: string, pageIds: array<int, int>}>
      */
     public static function sitemapGroups(array $payload): array
     {
+        $brandPageIds = [];
+        foreach ((new Brand(self::dataSource($payload), 'productbrands'))->withPages() as $row) {
+            if ($row['deleted_at'] === null) $brandPageIds[] = (int) $row['page_id'];
+        }
+
+        $productPageIds = [];
+        foreach ((new Product(self::dataSource($payload), 'products'))->getPageOwners() as $row) {
+            $productPageIds[] = (int) $row['page_id'];
+        }
+
         return [
-            'key' => 'products',
-            'label' => 'Shop products',
-            'pageIds' => \array_keys(self::owners($payload)),
+            ['key' => 'products', 'label' => 'Shop products', 'pageIds' => $productPageIds],
+            ['key' => 'brands', 'label' => 'Shop brands', 'pageIds' => $brandPageIds],
         ];
     }
 
@@ -57,7 +78,9 @@ class ShopPageLinks
     {
         $product = new Product(self::dataSource($payload), 'products');
 
-        return ['ids' => \array_map('intval', \array_column($product->getPageLinks(), 'page_id'))];
+        $brandPageIds = \array_column((new Brand(self::dataSource($payload), 'productbrands'))->withPages(), 'page_id'); // Binned brands keep their page id
+
+        return ['ids' => \array_map('intval', \array_merge(\array_column($product->getPageLinks(), 'page_id'), $brandPageIds))];
     }
 
     private static function dataSource(array $payload): object
@@ -79,6 +102,19 @@ class ShopPageLinks
 
         $linkedCategory = $product->findCategoryOfPage($pageId);
         if ($linkedCategory) return "Page is the page for category \"{$linkedCategory['label']}\"";
+
+        $linkedBrand = self::brandOfPage((new Brand($payload['dataSource'], 'productbrands'))->withPages(), $pageId);
+        if ($linkedBrand) return "Page is the page for brand \"{$linkedBrand['name']}\"";
+
+        return null;
+    }
+
+    /** @param array<int, array{name: string, page_id: int}> $brandsWithPages */
+    private static function brandOfPage(array $brandsWithPages, int $pageId): ?array
+    {
+        foreach ($brandsWithPages as $brand) {
+            if ((int) $brand['page_id'] === $pageId) return $brand;
+        }
 
         return null;
     }

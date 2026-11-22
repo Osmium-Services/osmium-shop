@@ -256,6 +256,43 @@ class ShopProduct extends ShopModel
     }
 
     /**
+     * Every live product of one brand as a comma-separated id list (the same shape as rangeByCategory()).
+     */
+    public function rangeByBrand(
+        int $brandID,
+        string $sortColumn = 'product_model',
+        array $stock = []
+    ): array|false {
+        $query = $this->loadSqlFile('product-range-by-brand.sql', [
+            '{SORT_COLUMN}' => $sortColumn,
+            '{STOCK_FILTER}' => self::stockFilterClause($stock),
+        ]);
+        $this->database->query($query);
+        $this->database->bind(':brandID', $brandID);
+
+        return $this->database->single();
+    }
+
+    /**
+     * The category each product is listed under when a page groups products: the first category it is assigned to.
+     *
+     * @param int[] $productIDs
+     * @return array<int, array{id: int, label: string}> product id => its category; a product in no category is absent
+     */
+    public function firstCategories(array $productIDs): array
+    {
+        $this->database->query($this->loadSqlFile('product-first-categories.sql'));
+        $this->database->bind(':productIDs', \implode(',', \array_map('intval', $productIDs)));
+
+        $firstByProduct = [];
+        foreach ($this->database->resultset() as $row) {
+            $firstByProduct[(int) $row['product_id']] ??= ['id' => (int) $row['category_id'], 'label' => (string) $row['label']];
+        }
+
+        return $firstByProduct;
+    }
+
+    /**
      * Like rangeByCategory() but across several categories, e.g. a category and everything beneath it
      * (see ShopProductCategory::idsBeneath()). A product assigned to more than one of them is listed once.
      *

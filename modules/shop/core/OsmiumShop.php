@@ -39,6 +39,18 @@ if ($hasCategoryId) {
     return;
 }
 
+$isBrandPage = $this->shop->brand !== null;
+if ($isBrandPage) {
+    $this->data['shop']['brandID'] = $this->shop->brand['id'];
+
+    require $this->findModuleFile('shop', 'controllers/brand.php'); // The site's own copy first, else the service's
+
+    $this->data['template']['pageContent'] =
+        $this->data['site']['modulePath'] . '/shop/views/brand.phtml';
+
+    return;
+}
+
 $hasProductId = $this->shop->productID;
 if ($hasProductId) {
     $this->data['shop']['productID'] = $this->shop->productID;
