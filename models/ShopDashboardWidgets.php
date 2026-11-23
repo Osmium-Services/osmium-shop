@@ -55,7 +55,7 @@ class ShopDashboardWidgets
             'data' => [
                 'active_count' => (int) ($stats['active_count'] ?? 0),
                 'converted_24h' => (int) ($stats['converted_24h'] ?? 0),
-                'active_value' => $baskets->activeValue(),
+                'active_value' => $baskets->activeValue(self::BASKET_ABANDONED_HOURS),
                 'converted_value' => $baskets->convertedValue24h(),
             ],
         ];

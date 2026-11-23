@@ -40,7 +40,7 @@ class BasketsController extends AdminController
         $convertedBaskets = $baskets->listConverted();
 
         $stats = $baskets->stats($abandonedHours);
-        $activeValue = $baskets->activeValue();
+        $activeValue = $baskets->activeValue($abandonedHours);
 
         $activeBaskets = \array_map([$this, 'formatBasket'], $activeBaskets);
         $abandonedBaskets = \array_map([$this, 'formatBasket'], $abandonedBaskets);

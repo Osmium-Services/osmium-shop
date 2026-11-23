@@ -243,14 +243,14 @@ class BasketsControllerTest extends DatabaseTestCase
 
         $after = $this->index()['admin']['stats'];
 
-        $this->assertSame($before['active_count'] + 3, $after['active_count'], 'active includes abandoned');
+        $this->assertSame($before['active_count'] + 2, $after['active_count'], 'active excludes abandoned');
         $this->assertSame($before['abandoned_now'] + 1, $after['abandoned_now']);
         $this->assertSame($before['converted_24h'] + 1, $after['converted_24h'], 'only the sale inside 24 hours');
         $this->assertSame(2, $after['abandoned_hours']);
 
         $beforeValue = (float) \str_replace(['£', ','], '', $before['active_value_formatted']);
         $afterValue = (float) \str_replace(['£', ','], '', $after['active_value_formatted']);
-        $this->assertEqualsWithDelta($beforeValue + 25.5 + 400, $afterValue, 0.01, 'all active baskets, abandoned too');
+        $this->assertEqualsWithDelta($beforeValue + 25.5, $afterValue, 0.01, 'active baskets only, abandoned excluded');
         $this->assertMatchesRegularExpression('/^£[\d,]+\.\d{2}$/', $after['active_value_formatted']);
     }
 

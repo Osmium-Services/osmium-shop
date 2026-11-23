@@ -32,9 +32,9 @@ class Basket extends AdminModel
         return $this->fetchOne('basket-stats.sql', [':hours' => $abandonedHours]);
     }
 
-    public function activeValue(): float
+    public function activeValue(int $abandonedHours): float
     {
-        $row = $this->fetchOne('basket-active-value.sql');
+        $row = $this->fetchOne('basket-active-value.sql', [':hours' => $abandonedHours]);
 
         return (float)($row['total_value'] ?? 0);
     }
