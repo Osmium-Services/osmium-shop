@@ -7,13 +7,13 @@ namespace Tests\Integration\Checkout;
 use Osmium\Modules\Checkout\Models\CheckoutDiscount;
 use Osmium\Modules\Checkout\Services\ShopDiscountService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * A coupon with a minimum spend only applies when the basket reaches it, measured inc VAT, before the discount
  * and before delivery. Below it the coupon is held back and the totals say why.
  */
-class CouponMinimumSpendTest extends DatabaseTestCase
+class CouponMinimumSpendTest extends ShopDatabaseTestCase
 {
     private function coupon(string $code, ?float $minSpend, float $value = 10.0): int
     {

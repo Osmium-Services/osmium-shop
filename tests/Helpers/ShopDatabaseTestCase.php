@@ -12,6 +12,16 @@ use Tests\Integration\DatabaseTestCase;
  */
 abstract class ShopDatabaseTestCase extends DatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // A dev database holds real discounts that would change prices and coupon results; the test's transaction
+        // rolls this back, so they are only set aside while it runs
+        $prefix = $this->db->tablePrefix();
+        $this->db->prepare(sql: "UPDATE {$prefix}discounts SET active = 0")->execute();
+    }
+
     /**
      * The id of a product status that is (or is not) available, reusing an existing one.
      * productstatus.id is a tinyint and rolled-back inserts still use up auto-increment

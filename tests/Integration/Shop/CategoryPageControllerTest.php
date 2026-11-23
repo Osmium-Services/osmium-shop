@@ -42,7 +42,7 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
         (new Autoload('app/config'))->register();
 
         $this->tag = 'zq' . \substr(\md5(\uniqid()), 0, 8);
-        $this->shopConfig = ['categoryShowCounts' => true, 'categoryShowSummaryText' => true, 'categoryShowCallToAction' => false, 'taxRatePercent' => 20];
+        $this->shopConfig = ['categoryShowCounts' => true, 'categoryShowSummaryText' => true, 'categoryShowCallToAction' => false, 'taxRatePercent' => 20, 'currency' => 'GBP', 'currencySign' => '£', 'taxName' => 'VAT', 'country' => 'GB'];
         $this->savedPagesById = (new \ReflectionProperty(Model::class, 'pagesById'))->getValue();
         $this->routedPages = Model::pagesById();
 
@@ -111,6 +111,7 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
                 $this->config = new OsmiumConfig((object) [
                     'site' => (object) ['scheme' => 'https', 'subdomain' => '', 'domain' => 'shop.test'],
                     'shop' => (object) $shop,
+                    'checkout' => (object) ['deliveryCharge' => 5],
                 ]);
             }
 
@@ -118,6 +119,13 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
             {
                 return '/images' . $partialImagePath;
             }
+
+            public function getStashedParam(string $key, mixed $default = null): mixed
+            {
+                return $default; // No redirect handler in the test
+            }
+
+            public function clearStashedQuerystring(): void {}
         };
 
         $shop = new \OsmiumShop($osmium);
@@ -163,7 +171,7 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
         $data = $this->page($id);
         $this->assertSame([true, true, false], [$data['category']['showCounts'], $data['category']['showSummaryText'], $data['category']['showCTA']]);
 
-        $this->shopConfig = ['categoryShowCounts' => false, 'categoryShowSummaryText' => false, 'categoryShowCallToAction' => true, 'taxRatePercent' => 20];
+        $this->shopConfig = ['categoryShowCounts' => false, 'categoryShowSummaryText' => false, 'categoryShowCallToAction' => true, 'taxRatePercent' => 20, 'currency' => 'GBP', 'currencySign' => '£', 'taxName' => 'VAT', 'country' => 'GB'];
         $data = $this->page($id);
         $this->assertSame([false, false, true], [$data['category']['showCounts'], $data['category']['showSummaryText'], $data['category']['showCTA']]);
     }
@@ -348,7 +356,7 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
         $this->assertSame(0, $data['category']['productCount']);
         $this->assertSame('', $data['category']['summary']);
         $this->assertSame([], $data['subcategories']);
-        $this->assertArrayNotHasKey('products', $data['category']);
+        $this->assertSame([], $data['category']['products']);
     }
 
     public function test_a_category_with_only_subcategories_says_so_and_loads_no_products(): void
@@ -361,6 +369,6 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
         $data = $this->page($parent);
 
         $this->assertSame('1 subcategory', $data['category']['summary']);
-        $this->assertArrayNotHasKey('products', $data['category']);
+        $this->assertSame([], $data['category']['products']);
     }
 }

@@ -114,7 +114,7 @@ final class ShopSearchServiceFlowTest extends TestCase
         $this->assertSame('120.00', $result['price']); // 100.00 ex VAT at 1.2
         $this->assertTrue($result['available']);
         $this->assertNull($result['status']);
-        $this->assertSame('/shop/victron-energy/mppt-100_30/thumb/victron-energy-mppt-100_30', $result['image']);
+        $this->assertSame('/shop/victron-energy/mppt-100-30/thumb/victron-energy-mppt-100-30', $result['image']);
     }
 
     public function test_an_unavailable_product_carries_its_status_text(): void

@@ -270,7 +270,7 @@ class SearchActionControllerTest extends ShopDatabaseTestCase
 
         $image = $this->search($this->word)['success']['results'][0]['image'];
 
-        $this->assertSame("/images/shop/{$this->word}-brand/dot-1_5-panel/thumb/{$this->word}-brand-dot-1_5-panel.webp", $image);
+        $this->assertSame("/images/shop/{$this->word}-brand/dot-1-5-panel/thumb/{$this->word}-brand-dot-1-5-panel.webp", $image);
     }
 
     public function test_two_characters_are_enough_to_search_but_one_is_not(): void

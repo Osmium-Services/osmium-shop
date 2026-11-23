@@ -224,7 +224,7 @@ class CheckoutActionTest extends ShopDatabaseTestCase
     {
         \session_id('');
 
-        $response = $this->act(['action' => 'create_order'], site: ['subdomain' => 'staging']);
+        $response = $this->act(['action' => 'create_order'], site: ['environment' => 'staging']);
 
         $this->assertStringContainsString('No session_id()', $response['body']['diagnostic']);
     }
@@ -246,7 +246,7 @@ class CheckoutActionTest extends ShopDatabaseTestCase
 
     public function test_a_staging_site_reports_token_lengths_but_not_the_tokens(): void
     {
-        $response = $this->act(['action' => 'create_order'], withToken: false, site: ['subdomain' => 'staging']);
+        $response = $this->act(['action' => 'create_order'], withToken: false, site: ['environment' => 'staging']);
 
         $this->assertStringContainsString('submittedTokenLen=0', $response['body']['diagnostic']);
         $this->assertStringNotContainsString(self::TOKEN, $response['body']['diagnostic']);
@@ -257,9 +257,9 @@ class CheckoutActionTest extends ShopDatabaseTestCase
         $_SERVER['HTTP_COOKIE'] = 'PHPSESSID=cookiesecret99; theme=dark';
 
         try {
-            $bad = $this->act(['action' => 'create_order'], withToken: false, site: ['subdomain' => 'staging']);
+            $bad = $this->act(['action' => 'create_order'], withToken: false, site: ['environment' => 'staging']);
             \session_id('');
-            $none = $this->act(['action' => 'create_order'], site: ['subdomain' => 'staging']);
+            $none = $this->act(['action' => 'create_order'], site: ['environment' => 'staging']);
         } finally {
             unset($_SERVER['HTTP_COOKIE']);
         }
@@ -381,7 +381,7 @@ class CheckoutActionTest extends ShopDatabaseTestCase
         $this->fillBasket();
 
         $live = $this->createOrder();
-        $staging = $this->act(['action' => 'create_order'] + $this->customer(), site: ['subdomain' => 'staging']);
+        $staging = $this->act(['action' => 'create_order'] + $this->customer(), site: ['environment' => 'staging']);
 
         $this->assertStringNotContainsString('unreachable', \json_encode($live['body']));
         $this->assertSame('Card network unreachable', $staging['body']['diagnostic']);

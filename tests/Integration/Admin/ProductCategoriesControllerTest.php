@@ -154,6 +154,13 @@ class ProductCategoriesControllerTest extends ShopDatabaseTestCase
                 $this->strings = new Strings();
                 $this->config = new \Osmium\Core\OsmiumConfig((object) ['site' => (object) ['scheme' => 'http', 'subdomain' => '', 'domain' => 'x.test', 'hostName' => 'x.test', 'trustProxyHeaders' => false, 'imagesPath' => '/img']]);
             }
+
+            public function getStashedParam(string $key, mixed $default = null): mixed
+            {
+                return $default; // No redirect handler in the test
+            }
+
+            public function clearStashedQuerystring(): void {}
         };
 
         return new ProductCategoriesController($osmium, $this->admin, $data);

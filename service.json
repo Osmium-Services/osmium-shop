@@ -1,7 +1,7 @@
 {
   "id": "osmium-shop",
   "name": "Osmium Shop",
-  "version": "0.54.1",
+  "version": "0.54.2",
   "description": "The shop: catalogue, baskets, checkout, orders, discounts and the admin screens that run them",
   "category": "shop",
   "author": {
@@ -9,7 +9,7 @@
   },
   "license": "proprietary",
   "requires": {
-    "osmium": ">=2.2.0",
+    "osmium": ">=2.4.0",
     "php": ">=8.1",
     "services": []
   },

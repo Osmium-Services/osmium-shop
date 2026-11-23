@@ -366,6 +366,7 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
     private function addForm(array $overrides = []): array
     {
         return $overrides + [
+            'token' => 'good-token',
             'brand_id' => (string) $this->brand("{$this->runTag} Brand"),
             'model_name' => "{$this->runTag} Widget",
             'status_id' => (string) $this->statusId(true),

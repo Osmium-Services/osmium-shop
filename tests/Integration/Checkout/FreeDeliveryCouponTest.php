@@ -7,13 +7,13 @@ namespace Tests\Integration\Checkout;
 use Osmium\Modules\Checkout\Models\CheckoutDiscount;
 use Osmium\Modules\Checkout\Services\ShopDiscountService;
 use Osmium\Modules\Checkout\Services\ShopTotalsService;
-use Tests\Integration\DatabaseTestCase;
+use Tests\Helpers\ShopDatabaseTestCase;
 
 /**
  * The free delivery switch waives the delivery charge on top of whatever the discount takes off. A coupon still
  * respects its minimum spend.
  */
-class FreeDeliveryCouponTest extends DatabaseTestCase
+class FreeDeliveryCouponTest extends ShopDatabaseTestCase
 {
     private function discount(array $fields): int
     {
