@@ -140,7 +140,7 @@ class OrdersController extends AdminController
     {
         [$order, $items] = $this->loadOrderForDocument();
 
-        $pdfService = new ShopOrderPdfService($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium));
+        $pdfService = new ShopOrderPdfService($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium), $this->osmium->company());
         $pdf = $pdfService->buildDespatchNote($order, $items);
 
         $this->streamPdf($pdf, 'DespatchNote-' . $order['order_ref'] . '.pdf');
@@ -154,7 +154,7 @@ class OrdersController extends AdminController
         [$order, $items] = $this->loadOrderForDocument();
         $items = \array_map([$this, 'formatItem'], $items);
 
-        $pdfService = new ShopOrderPdfService($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium));
+        $pdfService = new ShopOrderPdfService($this->osmium->config, \Osmium\Core\Library\StoreFinance::forOsmium($this->osmium), $this->osmium->company());
         $pdf = $pdfService->buildInvoice($order, $items, (string)$this->osmium->config->site->name);
 
         $this->streamPdf($pdf, 'Invoice-' . $order['order_ref'] . '.pdf');

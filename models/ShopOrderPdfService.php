@@ -21,7 +21,8 @@ class ShopOrderPdfService
     private const MARGIN = 15;
     private const CONTENT_WIDTH = self::PAGE_WIDTH - (2 * self::MARGIN);
 
-    public function __construct(private object $config, private StoreFinance $finance)
+    /** @param array<string, mixed>|null $company the company details (Osmium::company()); config's company section when null */
+    public function __construct(private object $config, private StoreFinance $finance, private ?array $company = null)
     {
     }
 
@@ -110,7 +111,7 @@ class ShopOrderPdfService
 
     private function renderCompanyHeader(\TCPDF $pdf, string $siteName): void
     {
-        $company = $this->config->company;
+        $company = $this->company === null ? $this->config->company : (object) $this->company;
 
         $pdf->SetFont('helvetica', 'B', 22);
         $pdf->Cell(90, 10, 'Invoice', 0, 0);

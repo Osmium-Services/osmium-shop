@@ -135,6 +135,19 @@ class ShopOrderPdfServiceTest extends TestCase
         $this->assertStringContainsString('VAT Reg: GB123456789', $text);
     }
 
+    public function test_the_invoice_prefers_the_company_details_handed_in_over_config(): void
+    {
+        $config = (object) ['site' => (object) ['name' => 'Test Shop'], 'company' => (object) ['phone' => 'old', 'vatNumber' => 'GB123456789']];
+        $company = ['phone' => '0200 111 2222', 'email' => 'new@test.example', 'address' => '9 Low Rd, Leeds', 'vatNumber' => 'GB123456789'];
+        $service = new ShopOrderPdfService($config, new StoreFinance('GBP', '£', 'VAT', 20.0, 'GB'), $company);
+
+        $text = $this->textOf($service->buildInvoice($this->order(), [$this->item()], 'Test Shop'));
+
+        $this->assertStringContainsString('Tel: 0200 111 2222', $text);
+        $this->assertStringContainsString('Email: new@test.example', $text);
+        $this->assertStringNotContainsString('old', $text);
+    }
+
     public function test_the_invoice_uses_the_configured_tax_name_throughout(): void
     {
         $text = $this->textOf($this->service(taxName: 'GST')->buildInvoice($this->order(), [$this->item()], 'Test Shop'));
