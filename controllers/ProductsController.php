@@ -77,10 +77,7 @@ class ProductsController extends AdminController
         $products = $this->fetchActiveProducts(selectedCategory: $selectedCategory, selectedBrand: $selectedBrand, selectedStatus: $selectedStatus, pagesById: $pagesById);
         $recentProducts = $this->fetchRecentProducts($pagesById);
         $deletedProducts = $this->fetchDeletedProducts();
-        $activeEditors = $this->admin->presence->list(
-            currentUserId: $this->admin->auth->getCurrentUserId() ?? 0,
-            recordType: 'product',
-        );
+        $activeEditors = $this->activeEditors('product');
 
         $taxRate = $this->data['shop']['taxRate'] ?? 20;
         $formattedProducts = [];
@@ -142,7 +139,7 @@ class ProductsController extends AdminController
         $productNotFound = !$productData;
         if ($productNotFound) $this->redirect('shop/products/');
 
-        $this->admin->presence->registerCurrentUser(recordType: 'product', recordId: $productId);
+        $this->openRecord(recordType: 'product', recordId: $productId);
         $this->prepareEditFormData(productId: $productId, productData: $productData);
         $this->setView('products/edit.phtml');
     }
@@ -163,8 +160,7 @@ class ProductsController extends AdminController
         $productId = (int)($input['id'] ?? 0);
         $action = $input['action'] ?? '';
 
-        $presenceHandled = $this->admin->presence->handleAction(action: $action, input: $input, recordType: 'product');
-        if ($presenceHandled) exit;
+        $this->handlePresence(action: $action, input: $input, recordType: 'product');
 
         $csrfValid = $this->admin->auth->validateCsrfJson($input);
         $csrfFailed = !$csrfValid;

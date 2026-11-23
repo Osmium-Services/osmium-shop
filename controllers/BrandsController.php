@@ -42,7 +42,7 @@ class BrandsController extends AdminController
         $this->data['admin']['recentBrands'] = $this->loadListRows($lists['recent'], $this->admin->model->brand);
         $this->data['admin']['brands'] = $this->loadListRows($lists['active'], $this->admin->model->brand);
         $this->data['admin']['deletedBrands'] = $this->loadListRows($lists['deleted'], $this->admin->model->brand);
-        $this->data['admin']['activeEditors'] = $this->loadActiveEditors();
+        $this->data['admin']['activeEditors'] = $this->activeEditors(self::RECORD_TYPE);
         $this->data['admin']['isAdmin'] = $this->isAdmin();
 
         $this->setView('brands/index.phtml');
@@ -112,12 +112,7 @@ class BrandsController extends AdminController
         $action = $input['action'] ?? '';
         $id = (int) ($input['id'] ?? 0);
 
-        $presenceHandled = $this->admin->presence->handleAction(
-            action: $action,
-            input: $input,
-            recordType: self::RECORD_TYPE,
-        );
-        if ($presenceHandled) exit; // Handle presence tracking
+        $this->handlePresence(action: $action, input: $input, recordType: self::RECORD_TYPE);
 
         $csrfValid = $this->admin->auth->validateCsrfJson($input);
         if (!$csrfValid) {
@@ -148,17 +143,6 @@ class BrandsController extends AdminController
     // Index Helpers
     // =========================================================================
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function loadActiveEditors(): array
-    {
-        return $this->admin->presence->list(
-            currentUserId: $this->getCurrentUserId(),
-            recordType: self::RECORD_TYPE,
-        );
-    }
-
     // =========================================================================
     // Edit Helpers
     // =========================================================================
@@ -186,10 +170,7 @@ class BrandsController extends AdminController
 
         if (!$brand) $this->redirect('shop/brands/');
 
-        $this->admin->presence->registerCurrentUser(
-            recordType: self::RECORD_TYPE,
-            recordId: $brandId,
-        );
+        $this->openRecord(recordType: self::RECORD_TYPE, recordId: $brandId);
 
         return $brand;
     }

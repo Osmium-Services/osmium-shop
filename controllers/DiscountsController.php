@@ -48,7 +48,7 @@ class DiscountsController extends AdminController
         $this->data['admin']['liveSummary'] = DiscountLiveSummary::build($formattedDiscounts);
         $this->data['admin']['recentDiscounts'] = $this->loadListRows($lists['recent'], $this->admin->model->discount);
         $this->data['admin']['deletedDiscounts'] = $this->loadListRows($lists['deleted'], $this->admin->model->discount);
-        $this->data['admin']['activeEditors'] = $this->loadActiveEditors();
+        $this->data['admin']['activeEditors'] = $this->activeEditors(self::RECORD_TYPE);
         $this->data['admin']['isAdmin'] = $this->isAdmin();
         $this->data['admin']['paymentProviderSupportsDiscounts'] = $this->paymentProviderSupportsDiscounts();
         $this->data['admin']['currentPaymentProviderLabel'] = $this->currentPaymentProviderLabel();
@@ -135,12 +135,7 @@ class DiscountsController extends AdminController
         $action = $input['action'] ?? '';
         $id = (int) ($input['id'] ?? 0);
 
-        $presenceHandled = $this->admin->presence->handleAction(
-            action: $action,
-            input: $input,
-            recordType: self::RECORD_TYPE,
-        );
-        if ($presenceHandled) exit;
+        $this->handlePresence(action: $action, input: $input, recordType: self::RECORD_TYPE);
 
         $csrfValid = $this->admin->auth->validateCsrfJson($input);
         $csrfInvalid = !$csrfValid;
@@ -200,14 +195,6 @@ class DiscountsController extends AdminController
     // Index Helpers
     // =========================================================================
 
-    private function loadActiveEditors(): array
-    {
-        return $this->admin->presence->list(
-            currentUserId: $this->getCurrentUserId(),
-            recordType: self::RECORD_TYPE,
-        );
-    }
-
     // =========================================================================
     // Edit Helpers
     // =========================================================================
@@ -237,10 +224,7 @@ class DiscountsController extends AdminController
 
         if (!$discount) $this->redirect('shop/discounts/');
 
-        $this->admin->presence->registerCurrentUser(
-            recordType: self::RECORD_TYPE,
-            recordId: $discountId,
-        );
+        $this->openRecord(recordType: self::RECORD_TYPE, recordId: $discountId);
 
         return $discount;
     }

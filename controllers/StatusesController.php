@@ -36,7 +36,7 @@ class StatusesController extends AdminController
         $this->data['admin']['recentStatuses'] = $this->loadListRows($lists['recent'], $this->admin->model->status);
         $this->data['admin']['statuses'] = $this->loadListRows($lists['active'], $this->admin->model->status);
         $this->data['admin']['deletedStatuses'] = $this->loadListRows($lists['deleted'], $this->admin->model->status);
-        $this->data['admin']['activeEditors'] = $this->loadActiveEditors();
+        $this->data['admin']['activeEditors'] = $this->activeEditors(self::RECORD_TYPE);
         $this->data['admin']['isAdmin'] = $this->isAdmin();
 
         $this->setView('statuses/index.phtml');
@@ -100,12 +100,7 @@ class StatusesController extends AdminController
         $action = $input['action'] ?? '';
         $id = (int) ($input['id'] ?? 0);
 
-        $presenceHandled = $this->admin->presence->handleAction(
-            action: $action,
-            input: $input,
-            recordType: self::RECORD_TYPE,
-        );
-        if ($presenceHandled) exit; // Handle presence tracking
+        $this->handlePresence(action: $action, input: $input, recordType: self::RECORD_TYPE);
 
         $csrfValid = $this->admin->auth->validateCsrfJson($input);
         $csrfInvalid = !$csrfValid;
@@ -137,17 +132,6 @@ class StatusesController extends AdminController
     // Index Helpers
     // =========================================================================
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function loadActiveEditors(): array
-    {
-        return $this->admin->presence->list(
-            currentUserId: $this->getCurrentUserId(),
-            recordType: self::RECORD_TYPE,
-        );
-    }
-
     // =========================================================================
     // Edit Helpers
     // =========================================================================
@@ -161,10 +145,7 @@ class StatusesController extends AdminController
 
         if (!$status) $this->redirect('shop/statuses/');
 
-        $this->admin->presence->registerCurrentUser(
-            recordType: self::RECORD_TYPE,
-            recordId: $statusId,
-        );
+        $this->openRecord(recordType: self::RECORD_TYPE, recordId: $statusId);
 
         return $status;
     }
