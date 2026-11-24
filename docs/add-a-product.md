@@ -20,10 +20,11 @@ The product page has tabs:
 
 - **Details:** brand, model name, **Barcode**, **Reference / SKU**, categories.
 - **Sales:** prices, **RRP**, **Custom Offer Text** such as "Buy 2 Save 10%", **Product Status** and **Packed Weight (kg)** for shipping.
-- **Options:** choices like Size or Colour, plus **See Also** and **Alternative products** shown on the product page.
+- **Options:** choices like Size or Colour, plus **See Also** and **Alternative products** shown on the product page. See the article on adding options.
 - **Images:** drag in a main image and more pictures. JPG, PNG, GIF and WebP work.
 - **Descriptions:** the main description, two more with their own images, and a **Video URL**.
 - **Technical:** the product's specification details.
+- **Page:** the product page's **URL**, **Title**, **Description**, **Parent Page** and **Robots** setting for search engines. Changing the URL adds a redirect from the old address.
 
 Press **Save Changes**. **View on Site** opens the live product page.
 
