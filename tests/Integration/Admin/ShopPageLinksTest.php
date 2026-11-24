@@ -60,7 +60,7 @@ class ShopPageLinksTest extends ShopDatabaseTestCase
 
         $owners = ShopPageLinks::owners(['dataSource' => $this->db]);
 
-        $this->assertSame('Shop product "Owned Widget"', $owners[$page]['label']);
+        $this->assertSame('Shop product', $owners[$page]['label']);
         $this->assertSame('shop/products/edit/?id=' . $product, $owners[$page]['editUrl']);
         $this->assertFalse($owners[$page]['canBeParent']);
     }

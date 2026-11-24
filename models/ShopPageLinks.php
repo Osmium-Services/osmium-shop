@@ -27,7 +27,7 @@ class ShopPageLinks
         $owners = [];
         foreach ($product->getPageOwners() as $row) {
             $owners[(int) $row['page_id']] = [
-                'label' => 'Shop product "' . $row['model_name'] . '"',
+                'label' => 'Shop product',
                 'editUrl' => 'shop/products/edit/?id=' . (int) $row['product_id'],
                 'canBeParent' => false, // A shop has too many product pages to offer each as a parent
             ];
@@ -37,7 +37,7 @@ class ShopPageLinks
             if ($row['deleted_at'] !== null) continue;
 
             $owners[(int) $row['page_id']] = [
-                'label' => 'Shop brand "' . $row['name'] . '"',
+                'label' => 'Shop brand',
                 'editUrl' => 'shop/brands/edit/?id=' . (int) $row['id'],
                 'canBeParent' => false,
             ];
