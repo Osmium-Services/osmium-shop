@@ -94,4 +94,43 @@ class ShopBrandPagesTest extends DatabaseTestCase
 
         $this->assertContains((string) $pageId, \array_map('strval', $withPages));
     }
+
+    public function test_a_rename_moves_the_page_address_and_title_that_were_made_from_the_name(): void
+    {
+        $brand = $this->newBrand('Acme Power');
+        $pageId = $this->brandPages->create($brand, 'brands');
+
+        $before = $this->brandPages->rename($this->page->getById($pageId), $brand['name'], 'Bolt Energy ' . \uniqid());
+
+        $page = $this->page->getById($pageId);
+        $this->assertStringStartsWith('brands/bolt-energy-', $page['url']);
+        $this->assertStringStartsWith('Bolt Energy ', $page['title']);
+        $this->assertStringStartsWith('brands/acme-power-', $before['url']);
+
+        $this->brandPages->restore($pageId, $before);
+        $back = $this->page->getById($pageId);
+        $this->assertSame($before['url'], $back['url']);
+        $this->assertSame($brand['name'], $back['title']);
+    }
+
+    public function test_a_customised_address_and_title_are_left_alone(): void
+    {
+        $brand = $this->newBrand('Custom Co');
+        $pageId = $this->brandPages->create($brand, 'brands');
+        $this->pagesUpdate($pageId, 'brands/my-own-address', 'My own title');
+
+        $result = $this->brandPages->rename($this->page->getById($pageId), $brand['name'], 'Renamed Co');
+
+        $this->assertNull($result);
+        $page = $this->page->getById($pageId);
+        $this->assertSame(['brands/my-own-address', 'My own title'], [$page['url'], $page['title']]);
+    }
+
+    private function pagesUpdate(int $pageId, string $url, string $title): void
+    {
+        $pages = new class ($this->page) extends AdminPages {
+            public function regenerateRoutesFile(): void {}
+        };
+        $pages->update($pageId, ['url' => $url, 'title' => $title, 'description' => 'd', 'robots' => 'index,follow']);
+    }
 }

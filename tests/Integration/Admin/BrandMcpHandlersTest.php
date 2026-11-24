@@ -16,7 +16,7 @@ require_once 'app/services/osmium-shop/models/BrandMcp.php';
 
 /**
  * The brand tools run for real against the tables: the live and bin lists, create (unique live name, checked
- * fields), update (only what is given, rename counted against live products), delete (refused while products use
+ * fields), update (only what is given, a rename refused), delete (refused while products use
  * it) and restore (refused if the name was taken meanwhile), with every refusal leaving the database as it was.
  */
 class BrandMcpHandlersTest extends ShopDatabaseTestCase
@@ -229,8 +229,7 @@ class BrandMcpHandlersTest extends ShopDatabaseTestCase
         $this->assertSame($this->brandName('Before'), $row['name']);
         $this->assertSame('brands/after', $row['page_url']);
         $this->assertSame('https://before.example/', $row['info_external']);
-        $this->assertSame(['name' => $this->brandName('Before'), 'page_url' => 'brands/before', 'info_external' => 'https://before.example/'], $result['was']);
-        $this->assertSame(0, $result['live_products_affected_by_rename']);
+        $this->assertSame(['page_url' => 'brands/before', 'info_external' => 'https://before.example/'], $result['was']);
         $this->assertSame([['description' => "Updated brand: {$this->brandName('Before')}", 'user_name' => 'Tester via MCP']], $this->changes($id));
     }
 
@@ -246,26 +245,14 @@ class BrandMcpHandlersTest extends ShopDatabaseTestCase
         $this->assertNull($result['info_external']);
     }
 
-    public function test_a_rename_says_how_many_live_products_carry_the_new_name(): void
+    public function test_a_rename_is_refused_and_changes_nothing(): void
     {
-        $id = $this->brand('Old');
-        $this->product($id);
-        $this->product($id);
+        $id = $this->brand('Old', 'brands/old', 'https://old.example/');
 
-        $result = BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Old'), 'name' => $this->brandName('New')]));
+        $this->refused(fn() => BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Old'), 'name' => $this->brandName('New'), 'page_url' => 'brands/new'])), 'cannot be renamed here');
 
-        $this->assertSame($this->brandName('New'), $this->row($id)['name']);
-        $this->assertSame(2, $result['live_products_affected_by_rename']);
-        $this->assertSame([['description' => "Updated brand: {$this->brandName('New')}", 'user_name' => 'Tester via MCP']], $this->changes($id));
-    }
-
-    public function test_a_rename_keeps_the_page_link_and_info_link(): void
-    {
-        $id = $this->brand('Keeps', 'brands/keeps', 'https://keeps.example/');
-
-        BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Keeps'), 'name' => $this->brandName('Kept')]));
-
-        $this->assertSame(['brands/keeps', 'https://keeps.example/'], [$this->row($id)['page_url'], $this->row($id)['info_external']]);
+        $this->assertSame([$this->brandName('Old'), 'brands/old'], [$this->row($id)['name'], $this->row($id)['page_url']]);
+        $this->assertSame([], $this->changes($id));
     }
 
     public function test_the_longest_allowed_link_is_accepted_and_odd_hosts_are_not(): void
@@ -278,23 +265,14 @@ class BrandMcpHandlersTest extends ShopDatabaseTestCase
         $this->refused(fn() => BrandMcp::create($this->call(['name' => $this->brandName('Odd'), 'info_external' => 'https://exa_mple.com'])), 'must be a web address');
     }
 
-    public function test_saving_the_same_name_is_not_a_rename_and_never_clashes_with_itself(): void
+    public function test_giving_the_current_name_alongside_a_change_is_fine(): void
     {
-        $id = $this->brand('Same');
-        $this->product($id);
+        $id = $this->brand('Same', 'brands/same');
 
-        $result = BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Same'), 'name' => $this->brandName('Same')]));
+        $result = BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Same'), 'name' => $this->brandName('Same'), 'page_url' => 'brands/same-2']));
 
-        $this->assertSame(0, $result['live_products_affected_by_rename']);
-    }
-
-    public function test_a_rename_to_another_live_brands_name_is_refused(): void
-    {
-        $this->brand('Other');
-        $id = $this->brand('Mine');
-
-        $this->refused(fn() => BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Mine'), 'name' => $this->brandName('Other')])), 'already has this name');
-        $this->assertSame($this->brandName('Mine'), $this->row($id)['name']);
+        $this->assertSame('brands/same-2', $this->row($id)['page_url']);
+        $this->assertSame($this->brandName('Same'), $result['name']);
     }
 
     public function test_an_update_with_nothing_to_change_or_bad_fields_is_refused(): void
@@ -302,8 +280,7 @@ class BrandMcpHandlersTest extends ShopDatabaseTestCase
         $id = $this->brand('Stay', 'brands/stay');
         $update = fn(array $extra) => BrandMcp::update($this->call(['id' => $id, 'expected_name' => $this->brandName('Stay')] + $extra));
 
-        $this->refused(fn() => $update([]), 'Give a name, a page_url, an info_external');
-        $this->refused(fn() => $update(['name' => '']), 'The name cannot be blank.');
+        $this->refused(fn() => $update([]), 'Give a page_url, an info_external, or both');
         $this->refused(fn() => $update(['page_url' => 'Bad Url']), 'A page_url uses');
         $this->refused(fn() => $update(['info_external' => 'nope']), 'must be a web address');
         $this->assertSame('brands/stay', $this->row($id)['page_url']);

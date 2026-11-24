@@ -9,12 +9,12 @@ use Osmium\Modules\Admin\Models\Brand;
 use Osmium\Modules\Admin\Models\Changelog;
 
 /**
- * Core's brand tools for the /mcp endpoint: list brands, create one, change its name or links, and soft delete or
- * restore one. They are handed to the endpoint like a service's tools, so write tools only appear when writes are
- * switched on. A brand's name is part of every product's title, so a rename tells the caller how many live products
- * it reaches. Delete is the bin, never permanent, and is refused while live products use the brand, as in the admin.
- * The trade-discount flag stays in the admin. A name already used by another live brand is refused, which the admin
- * form does not check.
+ * Core's brand tools for the /mcp endpoint: list brands, create one, change its links, and soft delete or restore one.
+ * They are handed to the endpoint like a service's tools, so write tools only appear when writes are switched on.
+ * A brand is never renamed here: a new name also moves its product images and page address, which only the admin does.
+ * Delete is the bin, never permanent, and is refused while live products use the brand, as in the admin.
+ * The trade-discount flag stays in the admin. A name already used by another live brand is refused on create, which
+ * the admin form does not check.
  */
 class BrandMcp
 {
@@ -58,10 +58,10 @@ class BrandMcp
             ],
             [
                 'name' => 'brand_update',
-                'description' => 'Change a brand\'s name, page URL and/or external info link. The brand\'s name is part of every product title, so a rename changes how all its live products read on the site straight away; the reply says how many. Give the id and its exact current name, and at least one thing to change. Undo by changing it back.',
+                'description' => 'Change a brand\'s page URL and/or external info link. A brand cannot be renamed here: a new name also moves its product images and page address, so it is done in the admin. Give the id and its exact current name, and at least one thing to change. Undo by changing it back.',
                 'inputSchema' => [
                     'type' => 'object',
-                    'properties' => $idAndName + ['name' => ['type' => 'string', 'description' => 'The new name, up to ' . self::MAX_NAME_LENGTH . ' characters. Cannot be blank or used by another live brand']] + $fields,
+                    'properties' => $idAndName + $fields,
                     'required' => ['id', 'expected_name'],
                 ],
                 'write' => true,
@@ -148,25 +148,21 @@ class BrandMcp
         $brands = self::model($call);
         $brand = self::requireBrand($brands->getById($id), isDeleted: false, expected: $expected, id: $id);
 
-        $touchesSomething = \array_key_exists('name', $arguments) || \array_key_exists('page_url', $arguments) || \array_key_exists('info_external', $arguments);
-        if (!$touchesSomething) throw new McpToolException('Give a name, a page_url, an info_external, or any of them.');
+        $renames = \array_key_exists('name', $arguments) && \trim((string) $arguments['name']) !== (string) $brand['name'];
+        if ($renames) throw new McpToolException('A brand cannot be renamed here: a new name also moves its product images and page address. Rename it in the admin.');
+
+        $touchesSomething = \array_key_exists('page_url', $arguments) || \array_key_exists('info_external', $arguments);
+        if (!$touchesSomething) throw new McpToolException('Give a page_url, an info_external, or both.');
 
         $error = self::fieldsError($arguments, nameRequired: false);
         if ($error !== null) throw new McpToolException($error);
 
-        $name = \array_key_exists('name', $arguments) ? \trim((string) $arguments['name']) : (string) $brand['name'];
-        if ($name !== (string) $brand['name'] && $brands->nameTaken($name, $id)) {
-            throw new McpToolException('Another live brand already has this name.');
-        }
-
+        $name = (string) $brand['name'];
         $pageUrl = \array_key_exists('page_url', $arguments) ? self::blankToNull($arguments['page_url'], true) : $brand['page_url'];
         $info = \array_key_exists('info_external', $arguments) ? self::blankToNull($arguments['info_external'], false) : $brand['info_external'];
 
-        $renameError = BrandImageRename::run($brands, $id, (string) $brand['name'], $name, fn () => $brands->update($id, $name, $pageUrl, $info));
-        if ($renameError !== null) throw new McpToolException($renameError);
+        $brands->update($id, $name, $pageUrl, $info);
         self::changelog($call)->log(description: "Updated brand: {$name}", recordType: self::RECORD_TYPE, recordId: $id);
-
-        $renamed = $name !== (string) $brand['name'];
 
         return [
             'updated' => true,
@@ -174,8 +170,7 @@ class BrandMcp
             'name' => $name,
             'page_url' => $pageUrl,
             'info_external' => $info,
-            'was' => ['name' => $brand['name'], 'page_url' => $brand['page_url'], 'info_external' => $brand['info_external']],
-            'live_products_affected_by_rename' => $renamed ? $brands->countActiveProducts($id) : 0,
+            'was' => ['page_url' => $brand['page_url'], 'info_external' => $brand['info_external']],
         ];
     }
 

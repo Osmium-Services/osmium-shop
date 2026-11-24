@@ -319,7 +319,7 @@ class BrandsController extends AdminController
             brandId: $brandId,
             oldName: $oldName,
             newName: $name,
-            save: fn () => $brands->update($brandId, $name, $pageUrl, $infoExternal),
+            save: fn () => $this->saveBrandAndPage($brandId, $oldName, $name, $pageUrl, $infoExternal),
         );
         if ($renameError !== null) return $renameError;
         $this->applyLogoChange($brandId, $logoChange);
@@ -334,6 +334,22 @@ class BrandsController extends AdminController
 
         $_SESSION['brand_saved'] = true;
         $this->redirect("shop/brands/edit/?id={$brandId}");
+    }
+
+    /** The brand's own save, with its page following a rename; the page goes back if the save then fails. */
+    private function saveBrandAndPage(int $brandId, string $oldName, string $name, ?string $pageUrl, ?string $infoExternal): void
+    {
+        $brands = $this->admin->model->brand;
+        $pageId = (int) ($brands->getById($brandId)['page_id'] ?? 0);
+        $page = $pageId && $oldName !== $name ? $this->admin->model->page->getById($pageId) : null;
+
+        $before = $page ? $this->brandPages()->rename($page, $oldName, $name) : null;
+        try {
+            $brands->update($brandId, $name, $pageUrl, $infoExternal);
+        } catch (\Throwable $e) {
+            if ($before !== null) $this->brandPages()->restore($pageId, $before);
+            throw $e;
+        }
     }
 
     private function insertBrand(

@@ -51,4 +51,41 @@ class ShopBrandPages
 
         return $pageId;
     }
+
+    /**
+     * Follow a brand's rename: move its page to the new name's address (the pages code adds the redirect from the old
+     * one) and retitle it, but only where the address and title are still the ones made from the old name. Anything
+     * customised is left alone.
+     *
+     * @param array<string, mixed> $page the brand's page row
+     * @return array<string, mixed>|null the page's input as it was, to hand to restore(); null when nothing changed
+     */
+    public function rename(array $page, string $oldName, string $newName): ?array
+    {
+        $url = (string) $page['url'];
+        $folder = \str_contains($url, '/') ? \substr($url, 0, (int) \strrpos($url, '/') + 1) : '';
+        $madeFromName = $url === $folder . $this->strings->stringToPath($oldName);
+        $titleIsName = (string) $page['title'] === $oldName;
+
+        $newUrl = $madeFromName ? $folder . $this->strings->stringToPath($newName) : $url;
+        $newTitle = $titleIsName ? $newName : (string) $page['title'];
+        if ($newUrl === $url && $newTitle === (string) $page['title']) return null;
+
+        $before = [
+            'url' => $url,
+            'parent_page_id' => $page['parent_page_id'] ?? null,
+            'title' => (string) $page['title'],
+            'description' => (string) ($page['description'] ?? ''),
+            'robots' => (string) ($page['robots'] ?? 'index,follow'),
+        ];
+        $this->pages->update((int) $page['id'], ['url' => $newUrl, 'title' => $newTitle] + $before);
+
+        return $before;
+    }
+
+    /** Put a page back as rename() found it. @param array<string, mixed> $before */
+    public function restore(int $pageId, array $before): void
+    {
+        $this->pages->update($pageId, $before);
+    }
 }
