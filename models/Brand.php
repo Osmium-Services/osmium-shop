@@ -44,6 +44,23 @@ class Brand extends AdminModel
         ]);
     }
 
+    /** @return array<int, array<string, mixed>> products of this brand (binned too) whose description images mention the brand folder */
+    public function descrImagesMentioning(int $id, string $brandPath): array
+    {
+        return $this->fetchAll('brand-descr-images.sql', [':id' => $id, ':like' => '%/shop/' . $brandPath . '/%']);
+    }
+
+    /** @param array{descr_image: ?string, descr2_image: ?string, descr3_image: ?string} $values */
+    public function setDescrImages(int $productId, array $values): void
+    {
+        $this->run('brand-set-descr-images.sql', [
+            ':id' => $productId,
+            ':descr_image' => $values['descr_image'],
+            ':descr2_image' => $values['descr2_image'],
+            ':descr3_image' => $values['descr3_image'],
+        ]);
+    }
+
     public function setLogo(int $id, ?string $logo): void
     {
         $this->run('brand-set-logo.sql', [

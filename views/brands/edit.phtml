@@ -105,5 +105,13 @@
     initPresenceTracking(adminBasePath + 'shop/brands/action/', <?= $admin['brandId'] ?>, {
         formSelector: '#brand-form'
     });
+
+    // Renaming a brand also renames its product images, so show it is working and block a second submit
+    document.getElementById('brand-form').addEventListener('submit', function (event) {
+        var button = event.target.querySelector('button[type="submit"]');
+        if (!button) return;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+    });
 </script>
 <script src="/assets/services/osmium-shop/brand-logo.js<?= $adminAssetVersion('/assets/services/osmium-shop/brand-logo.js') ?>"></script>

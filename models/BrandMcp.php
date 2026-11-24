@@ -162,7 +162,8 @@ class BrandMcp
         $pageUrl = \array_key_exists('page_url', $arguments) ? self::blankToNull($arguments['page_url'], true) : $brand['page_url'];
         $info = \array_key_exists('info_external', $arguments) ? self::blankToNull($arguments['info_external'], false) : $brand['info_external'];
 
-        $brands->update($id, $name, $pageUrl, $info);
+        $renameError = BrandImageRename::run($brands, $id, (string) $brand['name'], $name, fn () => $brands->update($id, $name, $pageUrl, $info));
+        if ($renameError !== null) throw new McpToolException($renameError);
         self::changelog($call)->log(description: "Updated brand: {$name}", recordType: self::RECORD_TYPE, recordId: $id);
 
         $renamed = $name !== (string) $brand['name'];

@@ -275,7 +275,7 @@ class BrandsController extends AdminController
         $logoChange = ['upload' => $hasUpload ? $upload : null, 'remove' => $removeLogo];
 
         if ($brandId) {
-            $this->updateBrand(
+            return $this->updateBrand(
                 brandId: $brandId,
                 name: $name,
                 pageUrl: $pageUrl,
@@ -311,8 +311,17 @@ class BrandsController extends AdminController
         ?string $pageUrl,
         ?string $infoExternal,
         array $logoChange,
-    ) {
-        $this->admin->model->brand->update($brandId, $name, $pageUrl, $infoExternal);
+    ): ?string {
+        $brands = $this->admin->model->brand;
+        $oldName = (string) ($brands->getById($brandId)['name'] ?? $name);
+        $renameError = \Osmium\Modules\Admin\Services\BrandImageRename::run(
+            brands: $brands,
+            brandId: $brandId,
+            oldName: $oldName,
+            newName: $name,
+            save: fn () => $brands->update($brandId, $name, $pageUrl, $infoExternal),
+        );
+        if ($renameError !== null) return $renameError;
         $this->applyLogoChange($brandId, $logoChange);
 
         $this->admin->model->changelog->log(
