@@ -1,6 +1,7 @@
 ---
 title: Manage categories and brands
 tags: category, subcategory, brand, logo, shop, catalogue, organise
+page: admin/shop/categories, admin/shop/brands, admin/shop/brands/add, admin/shop/brands/edit*
 ---
 
 ## Categories

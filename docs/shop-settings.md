@@ -1,6 +1,7 @@
 ---
 title: Shop settings
 tags: shop settings, currency, vat, tax, delivery message, order reference, notifications, search, products per page
+page: admin/settings/shop
 ---
 
 Open **Osmium Shop Settings**.

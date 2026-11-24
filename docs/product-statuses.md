@@ -1,6 +1,7 @@
 ---
 title: Create and edit product statuses
 tags: status, availability, in stock, pre-order, discontinued, restocking, schema
+page: admin/shop/statuses, admin/shop/statuses/add, admin/shop/statuses/edit*
 ---
 
 A product's status says whether customers can buy it and what they are told. **Statuses** lets you create your own, such as In stock, Pre-order or Discontinued.

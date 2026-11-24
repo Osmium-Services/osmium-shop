@@ -1,6 +1,7 @@
 ---
 title: Create a discount or coupon code
 tags: discount, coupon, code, sale, offer, free delivery, percentage, minimum spend
+page: admin/shop/discounts, admin/shop/discounts/add, admin/shop/discounts/edit*
 ---
 
 Open **Discounts**. The **Live right now** box at the top shows what customers get today.

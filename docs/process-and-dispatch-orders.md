@@ -1,6 +1,7 @@
 ---
 title: Process and dispatch an order
 tags: orders, dispatch, tracking, carrier, invoice, despatch note, refund, paid, pending
+page: admin/shop/orders, admin/shop/orders/view
 ---
 
 Open **Orders**. The tiles at the top show orders **Awaiting dispatch** (paid, not yet sent), **Paid, last 30 days**, **Pending** (started, never paid) and **Refunded**. You can filter the list by status.

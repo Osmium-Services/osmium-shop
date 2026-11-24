@@ -1,6 +1,7 @@
 ---
 title: Change a product's price and availability
 tags: price, rrp, vat, status, available, out of stock, restock date, price history, offer
+page: admin/shop/products/price-history
 ---
 
 ## Change the price

@@ -1,6 +1,7 @@
 ---
 title: Add a product to your shop
 tags: product, add product, brand, category, price, sku, barcode, images, wizard
+page: admin/shop/products, admin/shop/products/add, admin/shop/products/edit*
 ---
 
 ## Create the product
