@@ -65,6 +65,16 @@ class ShopPageLinksTest extends ShopDatabaseTestCase
         $this->assertFalse($owners[$page]['canBeParent']);
     }
 
+    public function test_a_deleted_products_page_is_not_blocked(): void
+    {
+        $page = $this->page();
+        $product = $this->createTestProduct(['model_name' => 'Binned Widget']);
+        $this->db->insert(tableName: $this->db->tablePrefix() . 'products_pages', data: ['product_id' => $product, 'page_id' => $page]);
+        $this->db->prepare(sql: 'UPDATE ' . $this->db->tablePrefix() . 'products SET deleted_at = NOW() WHERE id = :id', bindings: [':id' => $product])->execute();
+
+        $this->assertNull($this->blocker($page));
+    }
+
     public function test_a_deleted_products_page_is_not_owned(): void
     {
         $page = $this->page();
