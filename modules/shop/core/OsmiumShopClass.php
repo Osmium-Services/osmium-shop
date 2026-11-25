@@ -19,7 +19,6 @@ class OsmiumShop
     public function __construct(private Osmium $osmium)
     {
         $this->initAutoloader();
-        $this->validateConfig();
         $this->loadModel(\dirname(__DIR__) . '/config/models/models.json.php');
         $this->setOsmiumPageID($this->osmium->model->page->id);
         $this->setCategoryID();
@@ -116,27 +115,6 @@ class OsmiumShop
         $this->productID = $this->model->productPage->getProductIDByPageID(
             $this->osmiumPageID
         );
-
-        return $this;
-    }
-
-    private function validateConfig()
-    {
-        $config = $this->osmium->config->shop;
-
-        $boolean  = [ // Currency, tax and country are validated by StoreFinance (StoreFinance::forOsmium())
-            'categoryShowCounts',
-            'categoryShowSummaryText',
-            'categoryShowCallToAction',
-            'productShowSummary',
-            'productShowPriceExcTax',
-            'productShowDeliveryMessage'
-        ];
-
-        foreach ($boolean as $key) {
-            $notBool = !is_bool($config->$key);
-            if ($notBool) throw new \Exception("Invalid Shop {$key} config value");
-        }
 
         return $this;
     }

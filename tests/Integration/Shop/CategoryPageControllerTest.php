@@ -42,7 +42,7 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
         (new Autoload('app/config'))->register();
 
         $this->tag = 'zq' . \substr(\md5(\uniqid()), 0, 8);
-        $this->shopConfig = ['categoryShowCounts' => true, 'categoryShowSummaryText' => true, 'categoryShowCallToAction' => false, 'taxRatePercent' => 20, 'currency' => 'GBP', 'currencySign' => '£', 'taxName' => 'VAT', 'country' => 'GB'];
+        $this->shopConfig = ['taxRatePercent' => 20, 'currency' => 'GBP', 'currencySign' => '£', 'taxName' => 'VAT', 'country' => 'GB'];
         $this->savedPagesById = (new \ReflectionProperty(Model::class, 'pagesById'))->getValue();
         $this->routedPages = Model::pagesById();
 
@@ -162,18 +162,6 @@ class CategoryPageControllerTest extends ShopDatabaseTestCase
         $this->assertSame('Subtitle Solar', $data['category']['subtitle']);
         $this->assertSame('<p>Panels &amp; more</p>', $data['category']['description']);
         $this->assertSame('https://shop.test/images/social/social-Solar.jpg', $data['site']['socialImage']);
-    }
-
-    public function test_the_display_switches_come_from_the_shop_settings(): void
-    {
-        $id = $this->category('Switches');
-
-        $data = $this->page($id);
-        $this->assertSame([true, true, false], [$data['category']['showCounts'], $data['category']['showSummaryText'], $data['category']['showCTA']]);
-
-        $this->shopConfig = ['categoryShowCounts' => false, 'categoryShowSummaryText' => false, 'categoryShowCallToAction' => true, 'taxRatePercent' => 20, 'currency' => 'GBP', 'currencySign' => '£', 'taxName' => 'VAT', 'country' => 'GB'];
-        $data = $this->page($id);
-        $this->assertSame([false, false, true], [$data['category']['showCounts'], $data['category']['showSummaryText'], $data['category']['showCTA']]);
     }
 
     // ---- subcategories ------------------------------------------------------------

@@ -77,8 +77,6 @@ class ShopSettingsControllersTest extends DatabaseTestCase
             'shop' => [
                 'currency' => 'GBP', 'currencySign' => '£', 'taxRatePercent' => '20', 'taxName' => 'VAT', 'country' => 'GB', 'deliveryMessage' => 'Old delivery',
                 'searchEnabled' => false, 'basketAbandonedHours' => 2,
-                'categoryShowCounts' => false, 'categoryShowSummaryText' => true, 'categoryShowCallToAction' => true,
-                'productShowSummary' => true, 'productShowPriceExcTax' => true, 'productShowDeliveryMessage' => true,
                 'customerNotifications' => ['order_paid' => ['email' => true, 'sms' => false], 'order_dispatched' => ['email' => true, 'sms' => true]],
             ],
         ]);
@@ -205,14 +203,12 @@ class ShopSettingsControllersTest extends DatabaseTestCase
         }
     }
 
-    public function test_the_shop_form_saves_prices_and_display_options(): void
+    public function test_the_shop_form_saves_prices_and_options(): void
     {
-        $this->request(ShopSettingsController::class, ['currency' => 'EUR', 'currency_sign' => '€', 'tax_rate' => '19', 'tax_name' => 'MwSt', 'country' => 'de', 'delivery_message' => 'Two days', 'basket_abandoned_hours' => '6', 'search_enabled' => '1', 'category_show_counts' => '1']);
+        $this->request(ShopSettingsController::class, ['currency' => 'EUR', 'currency_sign' => '€', 'tax_rate' => '19', 'tax_name' => 'MwSt', 'country' => 'de', 'delivery_message' => 'Two days', 'basket_abandoned_hours' => '6', 'search_enabled' => '1']);
 
         $shop = $this->readConfig('shop.json.php')['shop'];
-        $this->assertSame(['EUR', '€', '19', 'MwSt', 'DE', 'Two days', 6, true, true], [$shop['currency'], $shop['currencySign'], $shop['taxRatePercent'], $shop['taxName'], $shop['country'], $shop['deliveryMessage'], $shop['basketAbandonedHours'], $shop['searchEnabled'], $shop['categoryShowCounts']]);
-        $this->assertFalse($shop['productShowSummary'], 'an unticked display option is saved as off');
-        $this->assertTrue($shop['categoryShowCounts']);
+        $this->assertSame(['EUR', '€', '19', 'MwSt', 'DE', 'Two days', 6, true], [$shop['currency'], $shop['currencySign'], $shop['taxRatePercent'], $shop['taxName'], $shop['country'], $shop['deliveryMessage'], $shop['basketAbandonedHours'], $shop['searchEnabled']]);
         $this->assertSame('Updated shop settings', $this->lastChangelog());
     }
 

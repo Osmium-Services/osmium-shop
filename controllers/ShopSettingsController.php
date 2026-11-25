@@ -76,25 +76,9 @@ class ShopSettingsController extends ShopSettingsBase
         $configContent = ConfigJson::withValue($configContent, 'basketAbandonedHours', $basketHours);
         $configContent = ConfigJson::withValue($configContent, 'orderRefPrefix', $orderRefPrefix);
 
-        $catShowCounts = Input::post()->has(key: 'category_show_counts');
-        $catShowSummary = Input::post()->has(key: 'category_show_summary_text');
-        $catShowCta = Input::post()->has(key: 'category_show_cta'); // Category display settings
-
-        $configContent = ConfigJson::withValue($configContent, 'categoryShowCounts', $catShowCounts);
-        $configContent = ConfigJson::withValue($configContent, 'categoryShowSummaryText', $catShowSummary);
-        $configContent = ConfigJson::withValue($configContent, 'categoryShowCallToAction', $catShowCta);
-
         $currentListLimit = ShopListControls::configuredLimit($this->config['shop']['categoryListLimit'] ?? null);
         $postedListLimit = Input::post()->int(key: 'category_list_limit', default: $currentListLimit);
         $configContent = ConfigJson::withValue($configContent, 'categoryListLimit', ShopListControls::configuredLimit($postedListLimit), section: 'shop');
-
-        $prodShowSummary = Input::post()->has(key: 'product_show_summary');
-        $prodShowPriceExc = Input::post()->has(key: 'product_show_price_exc_tax');
-        $prodShowDelivery = Input::post()->has(key: 'product_show_delivery_message'); // Product display settings
-
-        $configContent = ConfigJson::withValue($configContent, 'productShowSummary', $prodShowSummary);
-        $configContent = ConfigJson::withValue($configContent, 'productShowPriceExcTax', $prodShowPriceExc);
-        $configContent = ConfigJson::withValue($configContent, 'productShowDeliveryMessage', $prodShowDelivery);
 
         $configContent = ConfigJson::withValue($configContent, 'customerNotifications', $this->postedNotifications());
 

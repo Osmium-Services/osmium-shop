@@ -54,7 +54,7 @@ class ProductPageControllerTest extends ShopDatabaseTestCase
         $this->existingFiles = [];
         $this->shopConfig = [
             'currency' => 'GBP', 'currencySign' => '£', 'taxName' => 'VAT', 'taxRatePercent' => 20, 'country' => 'GB',
-            'productShowSummary' => true, 'productShowPriceExcTax' => false, 'productShowDeliveryMessage' => true,
+            
         ];
         $this->checkoutConfig = ['deliveryCharge' => 5];
 
@@ -288,25 +288,6 @@ class ProductPageControllerTest extends ShopDatabaseTestCase
 
         $this->assertTrue($product['kitAvailable']);
         $this->assertSame(1, $product['isAvailable']);
-    }
-
-    public function test_the_page_switches_come_from_the_shop_settings(): void
-    {
-        $this->shopConfig['productShowSummary'] = false;
-        $this->shopConfig['productShowPriceExcTax'] = true;
-        $this->shopConfig['productShowDeliveryMessage'] = false;
-
-        $product = $this->page($this->product())['shop']['product'];
-
-        $this->assertSame([false, true, false], [$product['showSummary'], $product['showPriceExcTax'], $product['showDeliveryMessage']]);
-
-        $this->shopConfig['productShowSummary'] = true;
-        $this->shopConfig['productShowPriceExcTax'] = false;
-        $this->shopConfig['productShowDeliveryMessage'] = true;
-
-        $product = $this->page($this->product())['shop']['product'];
-
-        $this->assertSame([true, false, true], [$product['showSummary'], $product['showPriceExcTax'], $product['showDeliveryMessage']]);
     }
 
     public function test_prices_are_shown_with_and_without_tax_with_savings_against_the_rrp(): void

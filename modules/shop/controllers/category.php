@@ -20,10 +20,6 @@ $this->data['category']['description'] = $productCategory->description; // categ
 
 $this->data['site']['socialImage'] = $this->data['site']['FQDN'] . $this->osmium->imagePath('/social/' . $productCategory->socialImage);
 
-$this->data['category']['showCounts'] = $shopConfig->categoryShowCounts;
-$this->data['category']['showSummaryText'] = $shopConfig->categoryShowSummaryText;
-$this->data['category']['showCTA'] = $shopConfig->categoryShowCallToAction;
-
 $this->data['subcategories'] = $productCategory->subcategories();
 $this->data['subcategoryCount'] = count($this->data['subcategories']);
 $this->data['subcategoryClass'] = 'lighting'; // subcategories

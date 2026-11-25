@@ -30,9 +30,6 @@ $productService = new ShopProductService(
 
 $this->data['site']['pageProductID'] = $this->shop->productID;
 
-$this->data['shop']['product']['showSummary'] = $shopConfig->productShowSummary;
-$this->data['shop']['product']['showPriceExcTax'] = $shopConfig->productShowPriceExcTax;
-$this->data['shop']['product']['showDeliveryMessage'] = $shopConfig->productShowDeliveryMessage;
 
 $product->loadByID($this->shop->productID);
 
