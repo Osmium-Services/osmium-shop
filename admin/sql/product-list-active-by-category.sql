@@ -2,6 +2,7 @@ SELECT
     P.id,
     P.brand_id,
     P.status_id,
+    P.is_published,
     P.reference,
     P.model_name,
     P.price_exc_tax,
@@ -10,7 +11,8 @@ SELECT
     PB.name as brand_name,
     PS.descr_long as status_name,
     PS.product_available as available,
-    PP.page_id
+    PP.page_id,
+    1 AS has_category
 FROM { PREFIX }products AS P
 INNER JOIN { PREFIX }productbrands AS PB ON PB.id = P.brand_id AND PB.deleted_at IS NULL
 INNER JOIN { PREFIX }productstatus AS PS ON PS.id = P.status_id AND PS.deleted_at IS NULL

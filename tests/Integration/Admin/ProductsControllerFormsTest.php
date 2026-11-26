@@ -862,6 +862,44 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
         $this->assertGreaterThanOrEqual(2, $admin['totalProductCount']);
     }
 
+    public function test_the_list_filtered_by_category_still_tells_a_draft_from_a_published_product(): void
+    {
+        $this->db->insert(tableName: $this->db->tablePrefix() . 'productcategories', data: ['label' => "{$this->runTag} Category", 'page_id' => 1]); // The page is never rendered here, so the home page stands in and no new page id is used up
+        $categoryId = (int) $this->db->lastInsertId();
+        $live = $this->addProduct(['model_name' => "{$this->runTag} Live"]);
+        $draft = $this->addProduct(['model_name' => "{$this->runTag} Draft"]);
+        foreach ([$live, $draft] as $productId) {
+            $this->db->insert(tableName: $this->db->tablePrefix() . 'products_productcategories', data: ['product_id' => $productId, 'category_id' => $categoryId]);
+        }
+        $this->db->prepare(
+            sql: 'UPDATE ' . $this->db->tablePrefix() . 'products SET is_published = 0 WHERE id = :id',
+            bindings: [':id' => $draft],
+        )->execute();
+        \Osmium\Core\Models\Model::pagesById();
+        $property = new \ReflectionProperty(\Osmium\Core\Models\Model::class, 'pagesById');
+        $pages = $property->getValue() ?? [];
+        foreach ([$live, $draft] as $productId) {
+            $page = $this->pageOf($productId);
+            $pages[(int) $page['id']] = $page + ['deleted_at' => null];
+        }
+        $property->setValue(null, $pages);
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_GET = ['category' => (string) $categoryId];
+
+        try {
+            $result = $this->screen('index', isPost: false);
+        } finally {
+            $property->setValue(null, null);
+            $_GET = [];
+        }
+
+        $rows = [];
+        foreach ($result['data']['admin']['products'] as $row) $rows[(int) $row['id']] = $row;
+        $this->assertSame('Published', $rows[$live]['visibilityLabel']);
+        $this->assertSame('Draft', $rows[$draft]['visibilityLabel'], 'a Draft is a Draft with the Category filter on');
+        $this->assertTrue($rows[$live]['isAvailable'], 'a product in the filtered category has a category, so the cart is not red');
+    }
+
     // ---- the import page ----------------------------------------------------------
 
     public function test_only_an_admin_can_open_the_price_import(): void

@@ -14,6 +14,7 @@ WHERE
         EXISTS (
             SELECT 1
             FROM { PREFIX } products_productcategories PPC
+            INNER JOIN { PREFIX } products AS PUB ON PUB.id = PPC.product_id AND PUB.is_published = 1
             WHERE PPC.category_id = PC.id
             AND PPC.deleted_at IS NULL
         )

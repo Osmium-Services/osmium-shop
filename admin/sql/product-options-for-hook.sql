@@ -10,7 +10,7 @@ SELECT
     POV.option_premium,
     POV.option_reference
 FROM {PREFIX}productoptiontypes AS POT
-INNER JOIN {PREFIX}products AS P ON P.id = POT.product_id AND P.deleted_at IS NULL
+INNER JOIN {PREFIX}products AS P ON P.id = POT.product_id AND P.deleted_at IS NULL AND P.is_published = 1
 LEFT JOIN {PREFIX}productoptionvalues AS POV ON POV.option_type_id = POT.id AND POV.deleted_at IS NULL
 WHERE POT.deleted_at IS NULL
 ORDER BY POT.product_id ASC, POT.sort ASC, POT.id ASC, POV.sort ASC, POV.id ASC
