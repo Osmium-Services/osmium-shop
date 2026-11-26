@@ -288,6 +288,7 @@ class ProductsController extends AdminController
             'status' => $row['status_name'],
             'available' => $row['available'],
             'has_category' => $row['has_category'] ?? 0,
+            'is_published' => $row['is_published'],
             'url' => $page['url'],
             'robots' => $page['robots'] ?? 'index,follow',
             'created' => $row['created_at'],

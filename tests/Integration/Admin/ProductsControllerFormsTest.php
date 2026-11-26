@@ -810,6 +810,11 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
     {
         $live = $this->addProduct(['model_name' => "{$this->runTag} Live"]);
         $binned = $this->addProduct(['model_name' => "{$this->runTag} Binned"]);
+        $draft = $this->addProduct(['model_name' => "{$this->runTag} Draft"]);
+        $this->db->prepare(
+            sql: 'UPDATE ' . $this->db->tablePrefix() . 'products SET is_published = 0 WHERE id = :id',
+            bindings: [':id' => $draft],
+        )->execute();
         $this->db->prepare(
             sql: 'UPDATE ' . $this->db->tablePrefix() . 'products SET deleted_at = NOW() WHERE id = :id',
             bindings: [':id' => $binned],
@@ -817,7 +822,7 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
         \Osmium\Core\Models\Model::pagesById(); // The list skips products whose page the generated routes do not know
         $property = new \ReflectionProperty(\Osmium\Core\Models\Model::class, 'pagesById');
         $pages = $property->getValue() ?? [];
-        foreach ([$live, $binned] as $productId) {
+        foreach ([$live, $binned, $draft] as $productId) {
             $page = $this->pageOf($productId);
             $pages[(int) $page['id']] = $page + ['deleted_at' => null];
         }
@@ -836,6 +841,9 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
         $this->assertNotContains($binned, \array_map('intval', $titles));
         $this->assertContains($binned, \array_map('intval', \array_column($admin['deletedProducts'], 'id')));
         $this->assertNotEmpty($admin['recentProducts']);
+        $labels = \array_column($admin['products'], 'visibilityLabel', 'id');
+        $this->assertSame('Published', $labels[$live]);
+        $this->assertSame('Draft', $labels[$draft], 'the list tells a Draft from a Published product');
         $this->assertTrue($admin['isAdmin']);
         $this->assertGreaterThanOrEqual(2, $admin['totalProductCount']);
     }
