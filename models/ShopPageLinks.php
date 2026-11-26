@@ -61,7 +61,7 @@ class ShopPageLinks
 
         $productPageIds = [];
         foreach ((new Product(self::dataSource($payload), 'products'))->getPageOwners() as $row) {
-            $productPageIds[] = (int) $row['page_id'];
+            if ((int) $row['is_published'] === 1) $productPageIds[] = (int) $row['page_id']; // A Draft stays out of the sitemap
         }
 
         return [

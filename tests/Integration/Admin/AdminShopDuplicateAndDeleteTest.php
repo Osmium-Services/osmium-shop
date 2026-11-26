@@ -167,12 +167,24 @@ class AdminShopDuplicateAndDeleteTest extends ShopDatabaseTestCase
         $link = $this->one("SELECT page_id FROM {$this->table('products_pages')} WHERE product_id = :id", [':id' => $newId]);
         $page = $this->pages->getById((int) $link['page_id']);
         $this->assertSame("zq-brand-{$this->tag}-model-{$this->tag}-copy", $page['url']);
-        $this->assertSame("Zq Brand {$this->tag} Model {$this->tag} (Copy)", $page['title']);
+        $this->assertSame("Model {$this->tag} (Copy)", $page['title'], 'the title is the model name, as when adding a product');
+        $this->assertSame(0, (int) $copy['is_published'], 'a duplicate starts as a Draft');
         $this->assertSame($categoryPage, (int) $page['parent_page_id']);
         $this->assertSame($expectedPageId, (int) $page['id'], 'one past the highest page id in the routes file and the database');
         $this->assertNull($page['description']);
         $this->assertSame('index,follow', $page['robots']);
         $this->assertSame(1, $this->pagesService->routeRegenerations);
+    }
+
+    public function test_duplicating_a_house_brand_product_leaves_the_brand_out_of_the_url(): void
+    {
+        $brandId = $this->createBrand("Zq Brand {$this->tag}");
+        $id = $this->createTestProduct(['brand_id' => $brandId, 'model_name' => "Model {$this->tag}"]);
+
+        $newId = $this->shop->duplicate($id, "ZQ BRAND {$this->tag}");
+
+        $link = $this->one("SELECT page_id FROM {$this->table('products_pages')} WHERE product_id = :id", [':id' => $newId]);
+        $this->assertSame("model-{$this->tag}-copy", $this->pages->getById((int) $link['page_id'])['url']);
     }
 
     public function test_duplicating_a_product_with_no_category_gives_a_top_level_page(): void

@@ -18,4 +18,4 @@ To use your own wording for a status, see the article on product statuses.
 
 ## Many products at once
 
-The **Products** list can be filtered by **Category**, **Brand** and **Status**. Use **Duplicate** to copy a product as a starting point for a similar one.
+The **Products** list can be filtered by **Category**, **Brand** and **Status**. Use **Duplicate** to copy a product as a starting point for a similar one. The copy gets its own page and a copy of the images, and starts as a **Draft**, so customers can't see it until you set **Visibility** to **Published** on its Sales tab. A Draft is hidden from lists, search and the sitemap, and its page shows a 404 to everyone except a signed-in admin.

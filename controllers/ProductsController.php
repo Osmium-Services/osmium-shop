@@ -520,6 +520,7 @@ class ProductsController extends AdminController
             'reference' => Input::post()->string(key: 'reference'),
             'barcode' => Input::post()->string(key: 'barcode'),
             'status_id' => Input::post()->int(key: 'status_id'),
+            'is_published' => Input::post()->string(key: 'is_published') === '0' ? 0 : 1, // Only an explicit Draft hides it
             'restock_at' => Input::post()->nullableString(key: 'restock_at'),
             'price_exc_tax' => Input::post()->float(key: 'price_exc_tax'),
             'rrp_exc_tax' => Input::post()->float(key: 'rrp_exc_tax'), // The column is NOT NULL: no RRP is 0
@@ -731,10 +732,13 @@ class ProductsController extends AdminController
 
     private function duplicateProduct(int $productId, string $productName)
     {
-        $newProductId = $this->shopAdmin()->duplicate($productId);
+        $original = $this->admin->model->product->getBrandModel($productId);
+        $newProductId = $this->shopAdmin()->duplicate($productId, (string) $this->osmium->config->company->brandName);
+        $copy = $this->admin->model->product->getBrandModel($newProductId);
+        $imagesCopied = ShopAdminServices::images($this->admin)->copyProductImages($productId, $newProductId, (string) $original['brand_name'], (string) $original['model_name'], (string) $copy['model_name']);
         $this->admin->model->changelog->log(description: "Duplicated product: {$productName} (new ID: {$newProductId})", recordType: 'product', recordId: $newProductId);
         $this->dispatchProductEvent($newProductId);
-        $this->admin->jsonSuccess(['success' => true, 'newProductId' => $newProductId]);
+        $this->admin->jsonSuccess(['success' => true, 'newProductId' => $newProductId] + ($imagesCopied['success'] ? [] : ['warning' => $imagesCopied['error'] ?? 'Images were not copied']));
     }
 
     private function deleteProductCompletely(int $productId, string $productName)

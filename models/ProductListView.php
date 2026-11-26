@@ -33,11 +33,12 @@ class ProductListView
             $seoTitle = 'Block search engines from indexing: '; // SEO badge calculation
         }
 
-        $isAvailable = ($product['available'] ?? 0) == 1 && ($product['has_category'] ?? 0) == 1;
+        $isDraft = ($product['is_published'] ?? 1) == 0;
+        $isAvailable = !$isDraft && ($product['available'] ?? 0) == 1 && ($product['has_category'] ?? 0) == 1;
         $availClass = $isAvailable ? 'success' : 'danger';
         $availTitle = $isAvailable
             ? 'Available to buy'
-            : (($product['has_category'] ?? 0) == 0 ? 'Hidden (no category)' : 'Not available to buy'); // Availability badge
+            : ($isDraft ? 'Draft: hidden from the shop' : (($product['has_category'] ?? 0) == 0 ? 'Hidden (no category)' : 'Not available to buy')); // Availability badge
 
         $priceExcTax = (float)($product['price'] ?? $product['price_exc_tax'] ?? 0);
         $priceIncVat = $priceExcTax * (1 + ($taxRate / 100)); // Price with VAT
@@ -50,7 +51,7 @@ class ProductListView
 
         $brandName = $product['brand_name'] ?? $product['brand'] ?? '';
         $modelName = $product['model_name'] ?? $product['model'] ?? '';
-        $productTitle = \trim($brandName . ' ' . $modelName); // Product title
+        $productTitle = \trim($brandName . ' ' . $modelName) . ($isDraft ? ' (Draft)' : ''); // Product title
 
         return [
             'id' => $product['id'], // Original data

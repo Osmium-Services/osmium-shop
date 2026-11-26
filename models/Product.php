@@ -261,6 +261,7 @@ class Product extends AdminModel
             ':reference' => $data['reference'],
             ':barcode' => $data['barcode'],
             ':status_id' => $data['status_id'],
+            ':is_published' => $data['is_published'] ?? 1,
             ':restock_at' => $data['restock_at'],
             ':price_exc_tax' => $data['price_exc_tax'],
             ':rrp_exc_tax' => $data['rrp_exc_tax'],

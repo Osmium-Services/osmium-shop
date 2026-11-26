@@ -1,6 +1,7 @@
 SELECT
     P.id,
     P.reference,
+    P.is_published,
     P.model_name,
     P.price_exc_tax,
     P.created_at,

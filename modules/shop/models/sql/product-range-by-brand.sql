@@ -10,5 +10,6 @@ FROM
 WHERE
     P.brand_id = :brandID
     AND P.deleted_at IS NULL
+    AND P.is_published = 1
     AND P.status_id != 3
     {STOCK_FILTER};

@@ -57,7 +57,16 @@ if ($hasProductId) {
 
     $this->data['shop']['productQR'] = str_ends_with($this->osmium->validRequest, '/qr/');
 
-    $this->shop->model->product->loadByID($this->shop->productID);
+    $loaded = $this->shop->model->product->loadByID($this->shop->productID);
+
+    $isDraft = \is_array($loaded) && (int) ($loaded['is_published'] ?? 1) === 0;
+    $adminSignedIn = \session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['admin_user_id']) && !empty($_SESSION['admin_login_time']) && empty($_SESSION['admin_locked']);
+    if ($isDraft && !$adminSignedIn) { // A Draft is a 404 to everyone but a signed-in admin, who may preview it
+        $this->osmium->header->set('HTTP/1.1 404 Not Found');
+        $this->data['template']['pageContent'] = $this->data['site']['modulePath'] . '/error/views/index.phtml';
+
+        return;
+    }
 
     require $this->findModuleFile('shop', 'controllers/product-full.php');
 

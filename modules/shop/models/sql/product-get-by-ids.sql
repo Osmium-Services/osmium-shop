@@ -20,5 +20,6 @@ FROM
 WHERE
     P.id IN (:productIDs)
     AND NOT PP.is_qr
+    AND P.is_published = 1
     AND PS.deleted_at IS NULL
     AND PB.deleted_at IS NULL;

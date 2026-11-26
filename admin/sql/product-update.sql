@@ -4,6 +4,7 @@ UPDATE { PREFIX }products SET
     reference = :reference,
     barcode = :barcode,
     status_id = :status_id,
+    is_published = :is_published,
     restock_at = :restock_at,
     price_exc_tax = :price_exc_tax,
     rrp_exc_tax = :rrp_exc_tax,

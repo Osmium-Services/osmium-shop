@@ -180,13 +180,14 @@ class AdminShop
      * @return int New product ID
      * @throws \Exception on failure
      */
-    public function duplicate(int $productId): int
+    public function duplicate(int $productId, string $houseBrandName = ''): int
     {
         $original = $this->duplicateGetOriginal($productId);
         $brandName = $this->duplicateGetBrandName($original['brand_id']); // Get original product
 
         $newModelName = $original['model_name'] . ' (Copy)';
-        $urlStub = $this->duplicateGenerateUrlStub($brandName, $newModelName); // Generate new model name and URL stub
+        $isHouseBrand = $houseBrandName !== '' && \strtolower($brandName) === \strtolower($houseBrandName);
+        $urlStub = $this->duplicateGenerateUrlStub($isHouseBrand ? '' : $brandName, $newModelName); // The house brand is left out of URLs, as when adding a product // Generate new model name and URL stub
 
         $parentPageId = $this->duplicateGetParentPageId($productId); // Get parent page ID from original product's category (for page hierarchy)
 
@@ -227,7 +228,7 @@ class AdminShop
 
     private function duplicateGenerateUrlStub(string $brandName, string $modelName): string
     {
-        $combinedName = $brandName . '-' . $modelName;
+        $combinedName = $brandName === '' ? $modelName : $brandName . '-' . $modelName;
         $replaced = \str_replace(
             search: [' ', '.', '(', ')'],
             replace: ['-', '-', '', ''],
@@ -326,7 +327,7 @@ class AdminShop
     ): void {
         $pagesService = $this->pagesService();
 
-        $pageTitle = $brandName . ' ' . $modelName;
+        $pageTitle = $modelName; // The title is the model name, as when adding a product
 
         $pagesService->createWithId(
             id: $pageId,

@@ -16,6 +16,7 @@ FROM
 WHERE
     PC.deleted_at IS NULL
     AND P.deleted_at IS NULL
+    AND P.is_published = 1
     AND PB.deleted_at IS NULL
     AND PS.deleted_at IS NULL
     AND PS.product_available = 1

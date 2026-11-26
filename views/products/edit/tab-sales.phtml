@@ -72,6 +72,14 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="is_published" class="form-label fw-semibold">Visibility</label>
+                            <select class="form-select" id="is_published" name="is_published">
+                                <option value="1"<?= (int) ($admin['product']['is_published'] ?? 1) === 1 ? ' selected' : '' ?>>Published</option>
+                                <option value="0"<?= (int) ($admin['product']['is_published'] ?? 1) === 0 ? ' selected' : '' ?>>Draft</option>
+                            </select>
+                            <small class="text-muted">A Draft is hidden from the shop. Admins can still preview it.</small>
+                        </div>
                         <div class="col-md-6 mb-3" id="restock_date_wrapper" style="<?= $edit['currentRestocking'] ? '' : 'display: none;' ?>">
                             <label for="restock_at" class="form-label fw-semibold">Expected Restock Date</label>
                             <input type="date" class="form-control" id="restock_at" name="restock_at"

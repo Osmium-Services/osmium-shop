@@ -371,6 +371,67 @@ class AdminShopImages
     }
 
     /**
+     * Copy a product's image folder to a new model name (a duplicate), renaming the files inside to match, and
+     * point the copy's description images at the copied files. Nothing to copy is not an error.
+     *
+     * @return array{success: bool, copied: int, error?: string}
+     */
+    public function copyProductImages(int $oldProductId, int $newProductId, string $brandName, string $oldModelName, string $newModelName): array
+    {
+        $brandPath = $this->generateBrandPath($brandName);
+        $oldModelPath = $this->generateModelPath($oldModelName);
+        $newModelPath = $this->generateModelPath($newModelName);
+
+        $slugEmpty = $brandPath === '' || $oldModelPath === '' || $newModelPath === '';
+        if ($slugEmpty || $oldModelPath === $newModelPath) return ['success' => true, 'copied' => 0];
+
+        $baseDir = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/shop/' . $brandPath;
+        $oldDir = $baseDir . '/' . $oldModelPath;
+        $newDir = $baseDir . '/' . $newModelPath;
+
+        if (!\is_dir($oldDir)) return ['success' => true, 'copied' => 0]; // No images uploaded yet
+        if (\file_exists($newDir)) return ['success' => false, 'copied' => 0, 'error' => "Image folder already exists: {$newModelPath}"];
+
+        ImageUploadLog::write("=== COPY PRODUCT IMAGES === {$brandPath}/{$oldModelPath} -> {$brandPath}/{$newModelPath}");
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(directory: $oldDir, flags: \FilesystemIterator::SKIP_DOTS),
+            mode: \RecursiveIteratorIterator::SELF_FIRST,
+        );
+        $copied = 0;
+        foreach ($iterator as $item) {
+            $target = $newDir . '/' . $iterator->getSubPathname();
+            if ($item->isDir()) {
+                @\mkdir($target, 0755, true);
+                continue;
+            }
+            if (!@\is_dir(\dirname($target))) @\mkdir(\dirname($target), 0755, true);
+            if (!@\copy($item->getPathname(), $target)) {
+                ImageUploadLog::write('ERROR: could not copy ' . $item->getPathname());
+                return ['success' => false, 'copied' => $copied, 'error' => 'Some images could not be copied'];
+            }
+            $copied++;
+        }
+
+        $this->renameFilesRecursively(dir: $newDir, oldBaseName: $brandPath . '-' . $oldModelPath, newBaseName: $brandPath . '-' . $newModelPath);
+
+        $this->repointDescrImages($oldProductId, $newProductId, $brandPath . '/' . $oldModelPath . '/' . $brandPath . '-' . $oldModelPath, $brandPath . '/' . $newModelPath . '/' . $brandPath . '-' . $newModelPath);
+
+        return ['success' => true, 'copied' => $copied];
+    }
+
+    /** The description images are stored as HTML naming the product's own files; the copy's HTML names its own copies. */
+    private function repointDescrImages(int $oldProductId, int $newProductId, string $oldPart, string $newPart): void
+    {
+        $stored = $this->product->getDescrImages($oldProductId) ?? [];
+        foreach (self::DESCR_IMAGE_FIELDS as $field) {
+            $html = (string) ($stored[$field] ?? '');
+            if ($html === '') continue;
+            $this->product->updateDescrImageField($newProductId, $field, \str_replace($oldPart, $newPart, $html));
+        }
+    }
+
+    /**
      * Recursively rename files in a directory that match the old base name.
      */
     private function renameFilesRecursively(

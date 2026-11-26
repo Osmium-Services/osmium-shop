@@ -5,4 +5,5 @@ INNER JOIN {PREFIX}productstatus AS s ON s.id = p.status_id
   AND s.deleted_at IS NULL
 WHERE p.id = :id
   AND p.deleted_at IS NULL
+  AND p.is_published = 1
 LIMIT 1

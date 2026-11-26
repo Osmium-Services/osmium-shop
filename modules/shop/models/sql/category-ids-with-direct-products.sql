@@ -9,4 +9,5 @@ FROM
 WHERE
     PPC.deleted_at IS NULL
     AND P.deleted_at IS NULL
+    AND P.is_published = 1
     AND P.status_id != 3;

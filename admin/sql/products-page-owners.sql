@@ -1,4 +1,4 @@
-SELECT pp.page_id, pp.product_id, p.model_name
+SELECT pp.page_id, pp.product_id, p.model_name, p.is_published
 FROM { PREFIX }products_pages pp
 JOIN { PREFIX }products p ON p.id = pp.product_id
 WHERE p.deleted_at IS NULL

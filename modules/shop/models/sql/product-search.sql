@@ -19,6 +19,7 @@ FROM
     INNER JOIN {PREFIX}products_pages AS PP ON PP.product_id = P.id
 WHERE
     P.deleted_at IS NULL
+    AND P.is_published = 1
     AND PS.deleted_at IS NULL
     AND PB.deleted_at IS NULL
     AND NOT PP.is_qr
