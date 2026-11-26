@@ -245,9 +245,7 @@ class ProductsController extends AdminController
 
     private function fetchActiveProducts(?string $selectedCategory, ?string $selectedBrand, ?string $selectedStatus, array $pagesById): array
     {
-        $productsRaw = $selectedCategory
-            ? $this->admin->model->product->getActiveByCategory((int)$selectedCategory)
-            : $this->admin->model->product->getActive();
+        $productsRaw = $this->admin->model->product->getActive((int)$selectedCategory);
 
         $products = [];
         foreach ($productsRaw as $row) {

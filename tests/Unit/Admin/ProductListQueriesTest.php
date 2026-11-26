@@ -16,7 +16,7 @@ class ProductListQueriesTest extends TestCase
     /** @return array<string, array{string}> */
     public static function queries(): array
     {
-        return ['all products' => ['product-list-active.sql'], 'one category' => ['product-list-active-by-category.sql'], 'recent' => ['product-list-recent.sql']];
+        return ['the one list select' => ['product-list-select.sql']];
     }
 
     /** @dataProvider queries */

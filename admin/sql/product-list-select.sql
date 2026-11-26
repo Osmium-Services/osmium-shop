@@ -1,9 +1,13 @@
+-- The one definition of a Products list row. Filters and ordering come from product-list-filter-*.sql and product-list-order-*.sql.
 SELECT
     P.id,
-    P.reference,
+    P.brand_id,
+    P.status_id,
     P.is_published,
+    P.reference,
     P.model_name,
     P.price_exc_tax,
+    P.rrp_exc_tax,
     P.created_at,
     P.updated_at,
     P.deleted_at,
@@ -21,7 +25,6 @@ LEFT JOIN { PREFIX }products_pages AS PP ON PP.product_id = P.id AND PP.is_qr = 
 LEFT JOIN { PREFIX }products_productcategories AS PPC ON PPC.product_id = P.id AND PPC.deleted_at IS NULL
 LEFT JOIN { PREFIX }changelog AS CL ON CL.id = (SELECT MAX(id) FROM { PREFIX }changelog WHERE record_type = 'product' AND record_id = P.id)
 LEFT JOIN { PREFIX }users AS U ON U.id = CL.user_id
-WHERE (P.created_at >= NOW() - INTERVAL 24 HOUR OR P.updated_at >= NOW() - INTERVAL 24 HOUR OR P.deleted_at >= NOW() - INTERVAL 24 HOUR)
+{FILTER}
 GROUP BY P.id, P.deleted_at, PP.page_id, CL.user_name, U.avatar
-ORDER BY GREATEST(COALESCE(P.updated_at, P.created_at), P.created_at, COALESCE(P.deleted_at, P.created_at)) DESC, P.id DESC
-LIMIT 10
+{ORDER}

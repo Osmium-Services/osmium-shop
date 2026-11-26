@@ -292,22 +292,35 @@ class Product extends AdminModel
         $this->run('products-pages-insert.sql', [':product_id' => $productId, ':page_id' => $pageId]);
     }
 
-    /** @return array<int, array<string, mixed>> */
-    public function getActive(): array
+    /** @return array<int, array<string, mixed>> Live products; a category id (0 = all) is just a condition. */
+    public function getActive(int $categoryId = 0): array
     {
-        return $this->fetchAll('product-list-active.sql');
-    }
-
-    /** @return array<int, array<string, mixed>> */
-    public function getActiveByCategory(int $categoryId): array
-    {
-        return $this->fetchAll('product-list-active-by-category.sql', [':categoryId' => $categoryId]);
+        return $this->fetchList('active', [':categoryAll' => $categoryId > 0 ? 1 : 0, ':categoryId' => $categoryId]);
     }
 
     /** @return array<int, array<string, mixed>> */
     public function getRecent(): array
     {
-        return $this->fetchAll('product-list-recent.sql');
+        return $this->fetchList('recent');
+    }
+
+    /**
+     * Every Products list is the same SELECT (product-list-select.sql) with a filter and an ordering attached.
+     *
+     * @param array<string, mixed> $bindings
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchList(string $list, array $bindings = []): array
+    {
+        $this->database->query($this->loadSqlFile('product-list-select.sql', [
+            '{FILTER}' => $this->loadSqlFile("product-list-filter-$list.sql"),
+            '{ORDER}' => $this->loadSqlFile("product-list-order-$list.sql"),
+        ]));
+        foreach ($bindings as $param => $value) {
+            $this->database->bind(param: $param, value: $value);
+        }
+
+        return $this->database->resultset();
     }
 
     /** @return array<int, array<string, mixed>> */
