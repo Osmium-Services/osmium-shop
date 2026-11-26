@@ -14,5 +14,6 @@ SELECT
 FROM {PREFIX}products AS P
 INNER JOIN {PREFIX}productbrands AS PB ON PB.id = P.brand_id AND PB.deleted_at IS NULL
 WHERE P.deleted_at IS NULL
+  AND P.is_published = 1
   AND P.status_id != 3
 ORDER BY PB.name ASC, P.model_name ASC

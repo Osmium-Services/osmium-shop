@@ -804,6 +804,18 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
         $this->assertSame([$id], ProductSavedListener::$saved);
     }
 
+    public function test_saving_the_edit_form_with_visibility_draft_hides_the_product_and_published_shows_it_again(): void
+    {
+        $id = $this->addProduct(['model_name' => "{$this->runTag} Vis"]);
+        $this->assertSame(1, (int) $this->row($id)['is_published'], 'a new product is Published');
+
+        $this->screen('edit', $this->editForm($id, ['is_published' => '0']));
+        $this->assertSame(0, (int) $this->row($id)['is_published'], 'Draft is saved');
+
+        $this->screen('edit', $this->editForm($id, ['is_published' => '1']));
+        $this->assertSame(1, (int) $this->row($id)['is_published'], 'Published is saved');
+    }
+
     // ---- the list -----------------------------------------------------------------
 
     public function test_the_list_shows_live_binned_and_recent_products(): void
@@ -844,6 +856,8 @@ class ProductsControllerFormsTest extends ShopDatabaseTestCase
         $labels = \array_column($admin['products'], 'visibilityLabel', 'id');
         $this->assertSame('Published', $labels[$live]);
         $this->assertSame('Draft', $labels[$draft], 'the list tells a Draft from a Published product');
+        $recent = \array_column($admin['recentProducts'], 'visibilityLabel', 'id');
+        $this->assertSame('Draft', $recent[$draft] ?? null, 'Recent Changes tells a Draft too');
         $this->assertTrue($admin['isAdmin']);
         $this->assertGreaterThanOrEqual(2, $admin['totalProductCount']);
     }

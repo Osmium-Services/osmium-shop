@@ -13,4 +13,5 @@ LEFT JOIN {PREFIX}productbrands AS PB ON PB.id = P.brand_id
 LEFT JOIN {PREFIX}productstatus AS PS ON PS.id = P.status_id AND PS.deleted_at IS NULL
 WHERE P.id = :id
   AND P.deleted_at IS NULL
+  AND P.is_published = 1
 LIMIT 1

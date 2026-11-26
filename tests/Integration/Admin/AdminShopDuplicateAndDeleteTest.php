@@ -187,6 +187,29 @@ class AdminShopDuplicateAndDeleteTest extends ShopDatabaseTestCase
         $this->assertSame("model-{$this->tag}-copy", $this->pages->getById((int) $link['page_id'])['url']);
     }
 
+    public function test_a_draft_is_left_out_of_what_other_services_read_and_comes_back_when_published(): void
+    {
+        $brandId = $this->createBrand("Zq Brand {$this->tag}");
+        $id = $this->createTestProduct(['brand_id' => $brandId, 'model_name' => "Model {$this->tag}"]);
+        $ids = fn (array $rows): array => \array_map('intval', \array_column($rows, 'id'));
+        $setPublished = fn (int $value) => $this->db->prepare(
+            sql: 'UPDATE ' . $this->table('products') . ' SET is_published = :v WHERE id = :id',
+            bindings: [':v' => $value, ':id' => $id],
+        )->execute();
+
+        $this->assertContains($id, $ids($this->products->listForHook()));
+        $this->assertContains($id, $ids($this->products->listForFiles()));
+        $this->assertNotNull($this->products->getForLookup($id));
+
+        $setPublished(0);
+        $this->assertNotContains($id, $ids($this->products->listForHook()), 'the trade price list');
+        $this->assertNotContains($id, $ids($this->products->listForFiles()), 'the trade downloads list');
+        $this->assertNull($this->products->getForLookup($id), 'the one-product lookup');
+
+        $setPublished(1);
+        $this->assertContains($id, $ids($this->products->listForHook()));
+    }
+
     public function test_duplicating_a_product_with_no_category_gives_a_top_level_page(): void
     {
         $brandId = $this->createBrand("Zq Brand {$this->tag}");
