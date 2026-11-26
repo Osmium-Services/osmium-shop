@@ -35,6 +35,16 @@ $seoColumn = [
     'sortable' => false,
 ];
 
+$visibilityColumn = [
+    'key' => 'visibilityLabel',
+    'label' => 'Visibility',
+    'type' => 'badge',
+    'text' => true,
+    'classKey' => 'visibilityClass',
+    'classPrefix' => 'bg-label-',
+    'hideBelow' => 'md',
+];
+
 $priceColumn = [
     'key' => 'priceIncVat',
     'label' => 'Price',
@@ -65,6 +75,7 @@ return [
         'columns' => [
             ['key' => 'changed_by', 'label' => '', 'type' => 'html', 'sortable' => false, 'render' => fn(array $row, array $context): string => \Osmium\Modules\Admin\Services\ChangedByCell::html($row, (string)($context['avatarUrl'] ?? ''))],
             $cartColumn,
+            $visibilityColumn,
             $seoColumn,
             ['key' => 'productTitle', 'label' => 'Product', 'type' => 'text', 'strong' => true, 'fill' => true],
             $priceColumn,
@@ -139,6 +150,7 @@ return [
                 'sub' => ['key' => 'reference', 'style' => 'code'],
             ],
             $cartColumn,
+            $visibilityColumn,
             $seoColumn,
             $priceColumn,
         ],

@@ -29,6 +29,8 @@
         <?= \htmlspecialchars(($admin['currentBrand']['name'] ?? '') . ' ' . $admin['product']['model_name']) ?>
     </h5>
     <span class="badge bg-label-secondary ms-3"><?= \htmlspecialchars($admin['product']['reference'] ?? '') ?></span>
+    <?php $isDraft = (int) ($admin['product']['is_published'] ?? 1) === 0; ?>
+    <span class="badge bg-label-<?= $isDraft ? 'secondary' : 'success' ?> ms-2"><?= $isDraft ? 'Draft' : 'Published' ?></span>
 </div>
 
 <!-- Tabs -->

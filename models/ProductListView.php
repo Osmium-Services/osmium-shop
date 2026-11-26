@@ -51,7 +51,7 @@ class ProductListView
 
         $brandName = $product['brand_name'] ?? $product['brand'] ?? '';
         $modelName = $product['model_name'] ?? $product['model'] ?? '';
-        $productTitle = \trim($brandName . ' ' . $modelName) . ($isDraft ? ' (Draft)' : ''); // Product title
+        $productTitle = \trim($brandName . ' ' . $modelName); // Product title
 
         return [
             'id' => $product['id'], // Original data
@@ -73,6 +73,8 @@ class ProductListView
             'changed_by_avatar' => $product['changed_by_avatar'] ?? null,
 
             'productTitle' => $productTitle, // Formatted display values
+            'visibilityLabel' => $isDraft ? 'Draft' : 'Published',
+            'visibilityClass' => $isDraft ? 'secondary' : 'success',
             'seoStatus' => $seoStatus,
             'seoClass' => $seoClass,
             'seoLabel' => $seoLabel,
