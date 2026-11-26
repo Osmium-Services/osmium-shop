@@ -12,4 +12,5 @@ FROM
 WHERE
     G.url = :page_url
     AND P.deleted_at IS NULL
+    AND P.is_published = 1
 LIMIT 1
