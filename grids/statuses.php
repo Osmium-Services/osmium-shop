@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Grid (card) layout for the Status Management list, rendered by
  * Osmium\Modules\Admin\Core\ListViewGrid. Columns use the same vocabulary as lists/statuses.php
- * but nothing is shared with it. The actions are a copy of the list's for now.
+ * but nothing is shared with it. The actions are a copy of the list's for now, except Delete, which is the card's red corner button.
  */
 $flag = static fn(string $key, string $label, string $class): array => [
     'key' => $key,
@@ -33,18 +33,18 @@ return [
         $flag('restocking', 'Restocking', 'bg-label-warning'),
         ['key' => 'product_count', 'type' => 'count-pill', 'href' => 'shop/products/?status={id}'],
     ],
+    'cornerAction' => [
+        'label' => 'Delete',
+        'icon' => 'bx-trash',
+        'action' => 'delete',
+        'confirm' => 'Delete this status?',
+        'danger' => true,
+        'locked' => fn(array $row): ?string => (int) $row['product_count'] > 0
+            ? $row['product_count'] . ' product(s) using this status'
+            : null,
+    ],
     'actionsAt' => 'bottom-end',
     'actions' => [
         ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/statuses/edit/?id={id}'],
-        [
-            'label' => 'Delete',
-            'icon' => 'bx-trash',
-            'action' => 'delete',
-            'confirm' => 'Delete this status?',
-            'danger' => true,
-            'locked' => fn(array $row): ?string => (int) $row['product_count'] > 0
-                ? $row['product_count'] . ' product(s) using this status'
-                : null,
-        ],
     ],
 ];

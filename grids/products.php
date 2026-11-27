@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Grid (card) layout for the Product Management list, rendered by
  * Osmium\Modules\Admin\Core\ListViewGrid. Columns use the same vocabulary as lists/products.php
- * but nothing is shared with it. The actions are a copy of the list's for now.
+ * but nothing is shared with it. The actions are a copy of the list's for now, except Delete, which is the card's red corner button.
  */
 return [
     'columns' => 5,
@@ -42,18 +42,18 @@ return [
             'titleKey' => 'seoTitle',
         ],
     ],
+    'cornerAction' => [
+        'label' => 'Delete',
+        'icon' => 'bx-trash',
+        'action' => 'delete',
+        'confirm' => 'Delete this product?',
+        'danger' => true,
+    ],
     'actionsAt' => 'bottom-end',
     'actions' => [
         ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'href' => 'shop/products/edit/?id={id}'],
         ['label' => 'Price History', 'icon' => 'bx-line-chart', 'href' => 'shop/products/price-history/?product_id={id}'],
         ['label' => 'Duplicate', 'icon' => 'bx-copy', 'event' => 'duplicate'],
         ['label' => 'View on site', 'icon' => 'bx-link-external', 'url' => '/{url}/', 'target' => '_blank'],
-        [
-            'label' => 'Delete',
-            'icon' => 'bx-trash',
-            'action' => 'delete',
-            'confirm' => 'Delete this product?',
-            'danger' => true,
-        ],
     ],
 ];
